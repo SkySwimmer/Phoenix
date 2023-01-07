@@ -1,0 +1,4 @@
+The file download method:
+
+Usage of this method is unrecommended, its mostly intended for the PX Player itself but cannot be used during gameplay.
+It will not be documented.

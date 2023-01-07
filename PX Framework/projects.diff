@@ -1,0 +1,81 @@
+Symbols:
+- = not started
++++ = in progress
++ = done
+Use diff syntax highlighting for the best viewing
+
+
+Client:
++++ Phoenix.Client
++ Phoenix.Client.ComponentLib
++ Phoenix.Client.AuthenticationLib
+- Phoenix.Client.DialogueLib
+- Phoenix.Client.EffectLib
++ Phoenix.Client.IntegratedClientLib
++ Phoenix.Client.IntegratedServerBootstrapper
+- Phoenix.Client.InteractionLib
+- Phoenix.Client.InventoryLib
++ Phoenix.Client.NetworkClientLib
++ Phoenix.Client.SceneReplicatorLib
+- Phoenix.Client.SeasonLib
+- Phoenix.Client.StatLib
++ Phoenix.Client.TaskManagerLib
+- Phoenix.Client.TimeLib
+- Phoenix.Client.WeatherLib
+- Phoenix.Client.WorldLib
+
+Common:
++++ Phoenix.Common
++ Phoenix.Common.Certificates
+- Phoenix.Common.Dialogue
+- Phoenix.Common.Effects
++ Phoenix.Common.Events
+- Phoenix.Common.Interactions
+- Phoenix.Common.Inventories
++ Phoenix.Common.IO
++ Phoenix.Common.Logging
++ Phoenix.Common.Networking
+- Phoenix.Common.Seasons
+- Phoenix.Common.Stats
++ Phoenix.Common.Services
++ Phoenix.Common.Tasks
+- Phoenix.Common.Weather
+- Phoenix.Common.Worlds
+- Phoenix.Common.Entities
++ Phoenix.Common.SceneReplication
+
+Debug:
++ Phoenix.Debug.DebugClientLib
++ Phoenix.Debug.DebugGameDefLib
++ Phoenix.Debug.DebugServerLib
++ Phoenix.Debug.DebugServerRunner
+
+Server:
++++ Phoenix.Server
++ Phoenix.Server.AssetManager
++ Phoenix.Server.ComponentLib
++ Phoenix.Server.Components.AuthenticationManager
++ Phoenix.Server.Components.CertificateRefresher
++ Phoenix.Server.Components.ConfigManager
+- Phoenix.Server.Components.DialogueManager
+- Phoenix.Server.Components.EffectManager
+- Phoenix.Server.Components.InteractionManager
+- Phoenix.Server.Components.InventoryManager
++ Phoenix.Server.Components.PlayerManager
+- Phoenix.Server.Components.PlayerSync
++ Phoenix.Server.Components.SceneReplication
+- Phoenix.Server.Components.SeasonManager
+- Phoenix.Server.Components.StatManager
+- Phoenix.Server.Components.TimeManager
+- Phoenix.Server.Components.WeatherManager
+- Phoenix.Server.Components.WorldManager
+- Phoenix.Server.Components.EntityManager
++ Phoenix.Server.Components.ServerlistPublisher
++ Phoenix.Server.Components.TaskManager
++++ Phoenix.Server.Packages.Core
++ Phoenix.Server.IntegratedServerLib
++ Phoenix.Server.NetworkServerLib
++ Phoenix.Server.Bootstrapper
+
+Tests:
++++ Phoenix.Tests.Server

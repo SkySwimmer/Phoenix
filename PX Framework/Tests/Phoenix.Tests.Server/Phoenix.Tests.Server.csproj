@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Utils\ChartZ\ChartZ.Engine\ChartZ.Engine.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.IntegratedServerBootstrapper\Phoenix.Client.IntegratedServerBootstrapper.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.SceneReplication\Phoenix.Common.SceneReplication.csproj" />
+    <ProjectReference Include="..\..\Debug\Phoenix.Debug.DebugServerRunner\Phoenix.Debug.DebugServerRunner.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Components.AuthenticationManager\Phoenix.Server.Components.AuthenticationManager.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Components.CertificateRefresher\Phoenix.Server.Components.CertificateRefresher.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Components.PlayerManager\Phoenix.Server.Components.PlayerManager.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Components.SceneReplication\Phoenix.Server.Components.SceneReplication.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Components.ServerlistPublisher\Phoenix.Server.Components.ServerlistPublisher.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.NetworkServerLib\Phoenix.Server.NetworkServerLib.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Packages.Core\Phoenix.Server.Packages.Core.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server\Phoenix.Server.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <StartupObject />
+  </PropertyGroup>
+
+</Project>

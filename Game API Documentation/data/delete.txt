@@ -1,0 +1,10 @@
+The File Deletion Method:
+
+Type: ANY
+Argument type: URL
+Required capability: master
+URL format: /api/data/delete/<filename>
+
+
+Description:
+Delets files from the game distribution storage.

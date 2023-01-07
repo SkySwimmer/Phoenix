@@ -1,0 +1,7 @@
+Token Refresh Method:
+
+Type: ANY
+Argument type: JWT Authorization
+Required capability: refresh
+
+Notes: this method refreshes the token given via headers.

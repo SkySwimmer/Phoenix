@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.SceneReplication\Phoenix.Common.SceneReplication.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Services\Phoenix.Common.Services.csproj" />
+    <ProjectReference Include="..\Phoenix.Client.ComponentLib\Phoenix.Client.ComponentLib.csproj" />
+    <ProjectReference Include="..\Phoenix.Client\Phoenix.Client.csproj" />
+  </ItemGroup>
+
+</Project>

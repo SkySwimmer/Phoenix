@@ -1,0 +1,26 @@
+Token Generation Method:
+
+Type: POST
+Argument type: JSON
+Required capability: gen
+Response type: JWT token
+
+
+Expected body:
+{
+    "identity": "identity-uuid",
+    "expiry": <expiry timestamp or -1>,
+    "capabilities": [
+        <capability-keys-only-strings>
+    ],
+    "payload": {
+        <This json object is merged into the JWT>
+    }
+}
+
+
+Notes:
+The following capabilities cannot be obtained via this method:
+- master
+- login
+- play

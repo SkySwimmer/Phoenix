@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Client\Phoenix.Client.AuthenticationLib\Phoenix.Client.AuthenticationLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.IntegratedClientLib\Phoenix.Client.IntegratedClientLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.NetworkClientLib\Phoenix.Client.NetworkClientLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.SceneReplicatorLib\Phoenix.Client.SceneReplicatorLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.TaskManagerLib\Phoenix.Client.TaskManagerLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client\Phoenix.Client.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.SceneReplication\Phoenix.Common.SceneReplication.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.IntegratedServerLib\Phoenix.Server.IntegratedServerLib.csproj" />
+    <ProjectReference Include="..\Phoenix.Tests.Server\Phoenix.Tests.Server.csproj" />
+  </ItemGroup>
+
+</Project>

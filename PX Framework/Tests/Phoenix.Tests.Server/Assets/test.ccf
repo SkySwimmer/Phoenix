@@ -1,0 +1,41 @@
+// Entry segment
+// Primary selection for AI tasks or dialogue stuff
+segment entry
+	command intelligentrandom
+	branches test1 test2 test3
+endsegment
+
+// Test 1
+segment test1
+	header aigoal
+	type pathway
+
+	conditions (player_standing == 0 || (player_standing < 25 && player_standing > 0) || (player_standing > -25 && player_standing < 0))
+
+	command dialogue
+	payload "Luka" "Well, hello there."
+endsegment
+
+// Test 2
+segment test2
+	header aigoal
+	type pathway
+
+	conditions player_standing >= 25
+
+	command dialogue
+	payload "Luka" "Well, hello friend, i see you are back."
+endsegment
+
+// Test 3
+segment test3
+	header aigoal
+	type pathway
+
+	conditions player_standing <= -25
+
+	command dialogue
+	payload "Luka" "(Luka looks agitatedly at you) I see you are back."
+endsegment
+
+build entry

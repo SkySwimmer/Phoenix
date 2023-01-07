@@ -1,0 +1,34 @@
+Identity Update Method:
+
+Type: POST
+Argument type: JSON
+Required capability: idupdate
+
+
+Expected body:
+{
+    "identity": "identity-uuid"
+    "displayName": "display-name",
+    "properties": {
+        <"key": "value">
+    }
+}
+
+Property type:
+    "key": {
+        "isReadonly": true/false,
+        "value": "current-value"
+    }
+
+Response format:
+{
+    "identity": "identity-uuid",
+    "lastUpdateTime": unix-timestamp-miliseconds,
+    "properties": {
+        <property-map>
+    }
+}
+
+
+Important notes:
+The update method does not allow definition of new properties, you can only update existing ones.

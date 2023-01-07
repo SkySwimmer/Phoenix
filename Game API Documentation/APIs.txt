@@ -1,0 +1,22 @@
+Phoenix is divided into the following APIs:
+- gamedev: API for creating/updating game definitions
+- tokens: token API
+- identities: the identity API
+- data: the data API
+- servers: the server API
+
+
+GameDev API:
+API for controlling the game definitions, only to be used by the game owner.
+
+Identity API:
+This API controlls identity definitions, from servers to players, all are saved here.
+
+Token API:
+The API for generating/refreshing PX JWTs.
+
+Data API:
+Used for distribution of SMALL game documents. (only supports up to a total of ONE MEGABYTE, no subdirectories)
+
+Server API:
+Used for registration, listing and hosting servers as well as a part of multiplayer authentication.

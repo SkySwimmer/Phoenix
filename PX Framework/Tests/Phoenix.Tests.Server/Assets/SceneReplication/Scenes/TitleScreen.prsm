@@ -1,0 +1,976 @@
+[
+  {
+    "name": "Main Camera",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": -10.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "Directional Light",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 3.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.408217877,
+        "y": -0.234569684,
+        "z": 0.109381631,
+        "w": 0.8754261
+      },
+      "angles": {
+        "x": 50.0,
+        "y": 330.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "GameClientStart",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "LoadCanvas",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 550.5,
+        "y": 344.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "Panel",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": [
+          {
+            "name": "Label",
+            "replicating": false,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": -8.903992,
+                "y": -267.168854,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "angles": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              }
+            },
+            "replication": {},
+            "children": []
+          },
+          {
+            "name": "ServerPanel",
+            "replicating": false,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 404.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "angles": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              }
+            },
+            "replication": {},
+            "children": [
+              {
+                "name": "Panel",
+                "replicating": false,
+                "active": true,
+                "transform": {
+                  "position": {
+                    "x": 0.0,
+                    "y": 124.512131,
+                    "z": 0.0
+                  },
+                  "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                  },
+                  "angles": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                  }
+                },
+                "replication": {},
+                "children": [
+                  {
+                    "name": "Text (TMP)",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "name": "ConnectPanel",
+                "replicating": false,
+                "active": true,
+                "transform": {
+                  "position": {
+                    "x": 0.0,
+                    "y": -11.5110016,
+                    "z": 0.0
+                  },
+                  "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                  },
+                  "angles": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                  }
+                },
+                "replication": {},
+                "children": [
+                  {
+                    "name": "Text (TMP)",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0012539,
+                        "y": 96.607,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": []
+                  },
+                  {
+                    "name": "IPBox",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": 0.00024033,
+                        "y": 74.4,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": [
+                      {
+                        "name": "Text Area",
+                        "replicating": false,
+                        "active": true,
+                        "transform": {
+                          "position": {
+                            "x": 0.0,
+                            "y": -0.5,
+                            "z": 0.0
+                          },
+                          "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                          },
+                          "angles": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                          }
+                        },
+                        "replication": {},
+                        "children": [
+                          {
+                            "name": "Placeholder",
+                            "replicating": false,
+                            "active": true,
+                            "transform": {
+                              "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                              },
+                              "angles": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                              }
+                            },
+                            "replication": {},
+                            "children": []
+                          },
+                          {
+                            "name": "Text",
+                            "replicating": false,
+                            "active": true,
+                            "transform": {
+                              "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                              },
+                              "angles": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                              }
+                            },
+                            "replication": {},
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Text (TMP) (1)",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0012573,
+                        "y": 43.9,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": []
+                  },
+                  {
+                    "name": "PortBox",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0027504,
+                        "y": 21.693,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": [
+                      {
+                        "name": "Text Area",
+                        "replicating": false,
+                        "active": true,
+                        "transform": {
+                          "position": {
+                            "x": 0.0,
+                            "y": -0.5,
+                            "z": 0.0
+                          },
+                          "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                          },
+                          "angles": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                          }
+                        },
+                        "replication": {},
+                        "children": [
+                          {
+                            "name": "Placeholder",
+                            "replicating": false,
+                            "active": true,
+                            "transform": {
+                              "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                              },
+                              "angles": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                              }
+                            },
+                            "replication": {},
+                            "children": []
+                          },
+                          {
+                            "name": "Text",
+                            "replicating": false,
+                            "active": true,
+                            "transform": {
+                              "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                              },
+                              "angles": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                              }
+                            },
+                            "replication": {},
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "name": "SecureModeCheckbox",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0027885,
+                        "y": -10.0,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": [
+                      {
+                        "name": "Background",
+                        "replicating": false,
+                        "active": true,
+                        "transform": {
+                          "position": {
+                            "x": -98.895,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                          },
+                          "angles": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                          }
+                        },
+                        "replication": {},
+                        "children": [
+                          {
+                            "name": "Checkmark",
+                            "replicating": false,
+                            "active": true,
+                            "transform": {
+                              "position": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "rotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0,
+                                "w": 1.0
+                              },
+                              "angles": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "scale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                              }
+                            },
+                            "replication": {},
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "name": "Label",
+                        "replicating": false,
+                        "active": true,
+                        "transform": {
+                          "position": {
+                            "x": 9.0,
+                            "y": -0.5,
+                            "z": 0.0
+                          },
+                          "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                          },
+                          "angles": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                          }
+                        },
+                        "replication": {},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "name": "ErrorLabel",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0043091,
+                        "y": -88.4,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": []
+                  },
+                  {
+                    "name": "ConnectBtn",
+                    "replicating": false,
+                    "active": true,
+                    "transform": {
+                      "position": {
+                        "x": -0.0057,
+                        "y": -109.2426,
+                        "z": 0.0
+                      },
+                      "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                      },
+                      "angles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                      },
+                      "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                      }
+                    },
+                    "replication": {},
+                    "children": [
+                      {
+                        "name": "Text (TMP)",
+                        "replicating": false,
+                        "active": true,
+                        "transform": {
+                          "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "rotation": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0,
+                            "w": 1.0
+                          },
+                          "angles": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "scale": {
+                            "x": 1.0,
+                            "y": 1.0,
+                            "z": 1.0
+                          }
+                        },
+                        "replication": {},
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "EventSystem",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "Button",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 546.0,
+        "y": 338.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "Text (TMP)",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "FadeCanvas",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 550.5,
+        "y": 344.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "FadePanel",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      }
+    ]
+  }
+]

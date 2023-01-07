@@ -1,0 +1,456 @@
+[
+  {
+    "name": "FadeCanvas",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 550.5,
+        "y": 344.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "FadePanel",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Main Camera",
+    "replicating": true,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": -1006.09,
+        "y": 3007.67,
+        "z": -1006.09
+      },
+      "rotation": {
+        "x": 0.269183666,
+        "y": 0.3660799,
+        "z": -0.111499473,
+        "w": 0.8837949
+      },
+      "angles": {
+        "x": 33.8790665,
+        "y": 45.00001,
+        "z": 9.255377E-06
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {
+      "Test": ""
+    },
+    "children": []
+  },
+  {
+    "name": "Directional Light",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 3.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.408217877,
+        "y": -0.234569684,
+        "z": 0.109381631,
+        "w": 0.8754261
+      },
+      "angles": {
+        "x": 50.0,
+        "y": 330.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "TerrainParent",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "Terrain [0,0]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": -4096.0,
+            "y": 0.0,
+            "z": -4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [0,1]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": -4096.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [0,2]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": -4096.0,
+            "y": 0.0,
+            "z": 4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [1,0]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [1,1]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [1,2]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [2,0]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 4096.0,
+            "y": 0.0,
+            "z": -4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [2,1]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 4096.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      },
+      {
+        "name": "Terrain [2,2]",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 4096.0,
+            "y": 0.0,
+            "z": 4096.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "WorldInit",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 223.2309,
+        "y": 476.3808,
+        "z": -519.67
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  }
+]

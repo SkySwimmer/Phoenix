@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Phoenix.Common.Certificates\Phoenix.Common.Certificates.csproj" />
+    <ProjectReference Include="..\Phoenix.Common.IO\Phoenix.Common.IO.csproj" />
+    <ProjectReference Include="..\Phoenix.Common.Logging\Phoenix.Common.Logging.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+</Project>

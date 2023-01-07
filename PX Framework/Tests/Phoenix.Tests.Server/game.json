@@ -1,0 +1,7 @@
+﻿{
+  "title": "Test Project",
+  "gameID": "soty",
+  "version": "1.0.0",
+  "developmentStage": "alpha",
+  "hasOfflineSupport":  true
+}

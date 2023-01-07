@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32510.428
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGL Launcher", "PGL Launcher\PGL Launcher.csproj", "{F42EE780-0DF1-41BC-9E57-53DD87BF24BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F42EE780-0DF1-41BC-9E57-53DD87BF24BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F42EE780-0DF1-41BC-9E57-53DD87BF24BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F42EE780-0DF1-41BC-9E57-53DD87BF24BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F42EE780-0DF1-41BC-9E57-53DD87BF24BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2B551B9A-0A2D-49EE-AC56-3827A0D38B62}
+	EndGlobalSection
+EndGlobal

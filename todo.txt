@@ -1,0 +1,46 @@
+---------------
+Primary focus:
+
+Phoenix:
+- [WEB] Server API: Server listing
+- [WEB] Login API: Play token generation, back-to-back authentication
+- Phoenix Player: Modding support
+- Phoenix Shared Framework: Game information, Scheduler, Networking (channel-based), Modding, Player Character API,
+  User API, 10-factor positioning API (Grid-vec3 + Location-vec3 + Rotation-quat4), Level API (worlds), Cinematic API (CinematIX)
+- Phoenix Server Framework: Component-based servers (dependency API and restarting of components), Authentication (embedded component),
+  Player Sync, Player API, Level API (multiple levels), Anti-Cheat, Level-specific events
+- Phoenix Client Framework: Login API interface, Loading screen API, Grid-based rendering system, Option API, Keybinding API,
+  Movement controller (with server sync), CinematIX renderer
+- Phoenix Modding Framework: Mod container API, Mod component API, Mod asset loading, Mod config API
+- [WEB] GameDev API: Game creation
+
+
+
+---------------
+Later Concepts:
+
+Ocean Games:
+- Game banners and logos
+- Game list (all games, all categories)
+- Game categories
+- Game genres
+- Searching for games (with options for filters)
+- Game purchases
+- Game descriptions
+- Game video player
+- Demo system
+- Forum system and comments
+- Mod browser system
+- Server creation
+- CLI for dedicated servers
+
+Phoenix Web Interface:
+- Creation of games
+- Updating games
+- Identity management
+- Data management
+- Server management
+
+Phoenix ProcGen:
+- Dreamscape: Runtime Procedural Terrain Generation API
+- SoundDrive: Procedural Music Composition API

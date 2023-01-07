@@ -1,0 +1,69 @@
+The File Upload Method:
+
+Type: POST/PUT
+Argument type: URL
+Required capability: master
+URL format: /api/data/upload/<filename>
+
+
+
+
+Description:
+Uploads small files for game data distribution, should only be used for bootstrapping, the player contacts this to retrieve a game descriptor.
+This system only provides you with 1MB of data storage and does not allow for subdirectories.
+
+Note: game descriptors are ignored during the size check.
+Furthermore note that abuse will result in deletion of the game and full ban from all PX services.s
+
+
+The game descriptor file:
+A game descriptor is needed for a Phoenix game to launch outside of debug mode, game descriptors contains important launch information.
+The launcher searches for files named <gameid>.game, eg. soty.game. The Phoenix API servers automatically append important fields for online play.
+
+The format of a game descriptor file is like this:
+   Key: Value
+   Key-Two: Another value
+
+Generic Game Descriptor Fields: (* = required)
+   Game-Title*			-	String		-	Defines the title of the game
+   Game-Version*		-	String		-	Defines the game major version (do not increase this unless you intend to cause asset re-download)
+   Game-Channel*		-	String		-	Defines the asset channel used for asset downloads
+   Asset-Identifier*		-	String		-	Asset identifier string (used for asset downloads, include build name in this to prevent asset overlapping)
+   Mod-Support			-	Boolean		-	Defines if the game supports mod loading (client-sides mod loading, requires to be specified from local game descriptor, does not work from server-sent descriptors)
+   Offline-Support		-	Boolean		-	Defines if the game supports offline play
+
+PX Player Game Descriptor Fields: (* = required)
+   Prestart-Package*		-	String		-	URL or filename for the prestart asset package download (pxpkg file, if the package definition doesnt start with http/https, it downloads from the data service)
+   Assembly-Package*		-	String		-	URL or filename for the game assembly download (pxpkg file, if the package definition doesnt start with http/https, it downloads from the data service)
+   Prestart-Package-File*	-	String		-	File name of the prestarts package (for caching)
+   Assembly-Package-File*	-	String		-	File name of the assembly package (for caching)
+
+CLG Launcher Game Descriptor Fields: (* = required)
+   ToS-File*			-	String		-	URL to the Terms of Service text file
+   ToS-Version*			-       String		-	Version of the Terms of Service (change this field when changing the terms so players will need to read the new terms before playing)
+   Game-Files-Endpoint*		-	String		-	URL pointing to the CLG Launcher Game Files
+   Game-Executable-Win64*	-	String		-	File name of the game to launch on windows
+   Game-Executable-Linux*	-	String		-	File name of the game to launch on linux
+   Game-Executable-OSX*		-	String		-	File name of the game to launch on OSX
+   Game-Arguments-Win64		-	String		-	Arguments to pass to the game on launch (windows)
+   Game-Arguments-Linux		-	String		-	Arguments to pass to the game on launch (linux)
+   Game-Arguments-OSX		-	String		-	Arguments to pass to the game on launch (OSX)
+
+Ocean Games Game Descriptor Fields: (* = required)
+   Game-Server-Dependant*	-	Boolean		-	Defines if the game depends on servers to be playable
+   Game-Multiplayer-Dependant*	- 	Boolean		-	Defines if the game depends on multiplayer servers to be playables
+   Game-File-Servers*		-	String[]	-	Comma-separated list of URLs to ping to check if the game file servers are online (currently unused)
+   Game-Servers*		-	String[]	-	Comma-separated list of URLs or PX server addresses to ping to check if the game multiplayer servers are online (currently unused)
+   Game-Banner			-	String		-	Game banner image URL for the Ocean Games store (currently unused)
+   Game-Description*		-	String		-	Multiline description for the Ocean Games store (currently unused)
+   Game-Genre-List*		-	String[]	-	Comma-separated list of game genres for the Ocean Games search system (currently unused)
+   Game-Thumbnail		-	String		-	Game thumbnail image URL for the Ocean Games store and library (currently unused)
+   Game-Cover*			-	String		-	Game cd/dvd-style cover image URL for the Ocean Games store (currently unused)
+   Game-Videos			-	String[]	- 	Comma-separated list of gameplay video URLs (supports both mp4 files and youtube links) for the Ocean Games store (currently unused)
+   Game-Screenshots		-	String[]	-	Comma-separated list of ingame screenshot URLs for the Ocean Games store (currently unused)
+   Game-Onsale*			-	Boolean		-	Defines if the game is currently in the Ocean Games store (currently unused)
+   Game-Price*			-	Number		-	Amount of OceanCoins needed to purchase the game from the Ocean Games store (currently unused)
+   Game-Shutting-Down*		-	Boolean		-	Defines if the game is shutting down. If you intend to shut down the game, and its a paid server-dependent game,
+								you are to set this to 'True' 5 MONTHS BEFORE SHUTDOWN, and ONE MONTH BEFORE SHUTDOWN for free server-dependant games.
+   Game-Shutdown-Date		- UNIX TIMESTAMP (SECS) -	Defines the UNIX timestamp on which the game is shutting down, if the above is true, this NEEDS to be present.
+   Game-Shutdown		-	Boolean		-	Defines if the game multiplayer features have been shut down.

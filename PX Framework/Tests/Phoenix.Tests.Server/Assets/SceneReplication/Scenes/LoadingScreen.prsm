@@ -1,0 +1,275 @@
+[
+  {
+    "name": "FadeCanvas",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 550.5,
+        "y": 344.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "FadePanel",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "LoadScreen",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -60.1348267
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 0.1675908,
+        "y": 0.1675908,
+        "z": 0.1675908
+      }
+    },
+    "replication": {},
+    "children": [
+      {
+        "name": "Panel",
+        "replicating": false,
+        "active": true,
+        "transform": {
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "angles": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        },
+        "replication": {},
+        "children": [
+          {
+            "name": "WorldBackground",
+            "replicating": false,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "angles": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              }
+            },
+            "replication": {},
+            "children": []
+          },
+          {
+            "name": "Image",
+            "replicating": false,
+            "active": true,
+            "transform": {
+              "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+              },
+              "angles": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              }
+            },
+            "replication": {},
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "EventSystem",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "Camera",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -160.134827
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    "replication": {},
+    "children": []
+  },
+  {
+    "name": "Particle System",
+    "replicating": false,
+    "active": true,
+    "transform": {
+      "position": {
+        "x": 0.0,
+        "y": -1173.0,
+        "z": 567.0
+      },
+      "rotation": {
+        "x": -0.5,
+        "y": -0.5,
+        "z": 0.5,
+        "w": 0.5
+      },
+      "angles": {
+        "x": 0.0,
+        "y": 270.0,
+        "z": 90.0
+      },
+      "scale": {
+        "x": 100.0,
+        "y": 100.0,
+        "z": 100.0
+      }
+    },
+    "replication": {},
+    "children": []
+  }
+]

@@ -1,0 +1,8 @@
+﻿{
+  "assetsFolder": "Assets",
+  "serverClass": "Phoenix.Tests.Server.TestServer",
+  "serverAssembly": "Phoenix.Tests.Server.dll",
+  "manifestFile": "game.json",
+  "debugConfig": "debug.json",
+  "assembliesDirectory": "bin/Debug/net6.0"
+}

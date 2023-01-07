@@ -1,0 +1,14 @@
+Identity Deletion Method:
+
+Type: GET
+Argument type: URL
+Required capability: iddel
+URL format: /api/identities/delete/<id>
+
+
+Response format:
+{
+    "deleted": true,
+    "identity": "identity-uuid",
+    "deletedAt": unix-timestamp-miliseconds
+}

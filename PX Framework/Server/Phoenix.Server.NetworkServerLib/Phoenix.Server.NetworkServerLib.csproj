@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Certificates\Phoenix.Common.Certificates.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\Phoenix.Server.ComponentLib\Phoenix.Server.ComponentLib.csproj" />
+    <ProjectReference Include="..\Phoenix.Server.Components.PlayerManager\Phoenix.Server.Components.PlayerManager.csproj" />
+    <ProjectReference Include="..\Phoenix.Server\Phoenix.Server.csproj" />
+  </ItemGroup>
+
+</Project>

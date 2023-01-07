@@ -1,0 +1,24 @@
+Identity Retrieval Method:
+
+Type: GET
+Argument type: URL
+URL format: /api/identities/pullcurrent
+
+This retrieves the identity document of the current user (from the token provided)
+
+
+
+Property type:
+    "key": {
+        "isReadonly": true/false,
+        "value": "current-value"
+    }
+
+Response format:
+{
+    "identity": "identity-uuid",
+    "lastUpdateTime": unix-timestamp-miliseconds,
+    "properties": {
+        <property-map>
+    }
+}

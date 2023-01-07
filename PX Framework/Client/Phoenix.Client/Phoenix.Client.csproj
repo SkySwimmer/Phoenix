@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Events\Phoenix.Common.Events.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.IO\Phoenix.Common.IO.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Logging\Phoenix.Common.Logging.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Services\Phoenix.Common.Services.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common\Phoenix.Common.csproj" />
+    <ProjectReference Include="..\Phoenix.Client.ComponentLib\Phoenix.Client.ComponentLib.csproj" />
+  </ItemGroup>
+
+</Project>

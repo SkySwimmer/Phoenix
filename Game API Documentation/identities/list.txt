@@ -1,0 +1,24 @@
+Identity Listing Method:
+
+Type: GET
+Argument type: URL
+Required capability: master
+URL format: /api/identities/pull/<id>
+
+
+Identity type:
+{
+    "identity": "identity-uuid",
+    "name": "identity-name",
+    "displayName": "identity-display-name"
+}
+
+Response format:
+[
+    <identities>
+]
+
+
+Important notes:
+This method is NOT to be used outside of development, only the master token can call this.
+We have decided to lock it this way as the process is quite intensive.

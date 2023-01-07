@@ -1,0 +1,32 @@
+{
+  "name": "TestReplicationPrefab",
+  "replicating": true,
+  "active": true,
+  "transform": {
+    "position": {
+      "x": 223.2309,
+      "y": 476.3808,
+      "z": -519.67
+    },
+    "rotation": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0,
+      "w": 1.0
+    },
+    "angles": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "scale": {
+      "x": 1.0,
+      "y": 1.0,
+      "z": 1.0
+    }
+  },
+  "replication": {
+    "Test": "e"
+  },
+  "children": []
+}

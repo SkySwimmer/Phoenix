@@ -1,0 +1,28 @@
+The GameDev Update Method:
+
+Type: POST
+Argument type: JSON
+
+
+
+Expected body:
+{
+    "updateKeys": true/false,       (false by default)
+    "knownCapabilities": [          (empty by default)
+        "capability-list"
+    ],
+    "resetCapabilities": true/false (false by default)
+}
+
+Response format:
+{
+    "newPublicKey": "new-public-key",
+    "capabilities": [],
+    "token": "new-token",
+    "updated": true/false
+}
+
+
+
+Note that 'newPublicKey' is only present if the 'updateKeys' request is true, 'capabilities' 
+is only present if changes were made to capabilities.

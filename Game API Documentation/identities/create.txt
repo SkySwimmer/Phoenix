@@ -1,0 +1,36 @@
+Identity Creation Method:
+
+Type: POST
+Argument type: JSON
+Required capability: idgen
+
+
+Expected body:
+{
+    "name": "readonly-name",
+    "displayName": "display-name",
+    "properties": {
+        <property-map>
+    }
+}
+
+Property type:
+    "key": {
+        "isReadonly": true/false,
+        "value": "current-value"
+    }
+
+Response format:
+{
+    "identity": "identity-uuid",
+    "lastUpdateTime": unix-timestamp-miliseconds,
+    "properties": {
+        <property-map>
+    }
+}
+
+
+
+Important notes:
+You can only define properties at creation, update does not allow creation or updating readonly properties.
+Please plan ahead when putting identities to use.

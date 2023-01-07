@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.IO\Phoenix.Common.IO.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Logging\Phoenix.Common.Logging.csproj" />
+  </ItemGroup>
+
+</Project>

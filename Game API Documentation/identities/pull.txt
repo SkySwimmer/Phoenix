@@ -1,0 +1,22 @@
+Identity Retrieval Method:
+
+Type: GET
+Argument type: URL
+Required capability: idget
+URL format: /api/identities/pull/<id>
+
+
+Property type:
+    "key": {
+        "isReadonly": true/false,
+        "value": "current-value"
+    }
+
+Response format:
+{
+    "identity": "identity-uuid",
+    "lastUpdateTime": unix-timestamp-miliseconds,
+    "properties": {
+        <property-map>
+    }
+}

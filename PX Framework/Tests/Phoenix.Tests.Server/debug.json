@@ -1,0 +1,11 @@
+﻿{
+  "workingDirectory": "bin/Debug/net6.0",
+  "arguments": [
+    "--test",
+    "test2",
+    "--hello=world",
+    "--server-port=12345",
+    "--server-name=Test Server"
+  ],
+  "logLevel":  "debug"
+}
