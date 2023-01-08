@@ -38,10 +38,10 @@ PX Player Game Descriptor Fields: (* = required)
    Prestart-Package-File*	-	String		-	File name of the prestarts package (for caching)
    Assembly-Package-File*	-	String		-	File name of the assembly package (for caching)
 
-CLG Launcher Game Descriptor Fields: (* = required)
+PGL Launcher Game Descriptor Fields: (* = required)
    ToS-File*			-	String		-	URL to the Terms of Service text file
    ToS-Version*			-       String		-	Version of the Terms of Service (change this field when changing the terms so players will need to read the new terms before playing)
-   Game-Files-Endpoint*		-	String		-	URL pointing to the CLG Launcher Game Files
+   Game-Files-Endpoint*		-	String		-	URL pointing to the PGL Launcher Game Files
    Game-Executable-Win64*	-	String		-	File name of the game to launch on windows
    Game-Executable-Linux*	-	String		-	File name of the game to launch on linux
    Game-Executable-OSX*		-	String		-	File name of the game to launch on OSX

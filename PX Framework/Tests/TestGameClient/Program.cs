@@ -40,7 +40,7 @@ namespace TestGameClient
             {
                 server = server;
             };
-            scanner.ScanPublicServerList();
+            scanner.ScanPublicServerList(filters: new ServerListFilter("ownerId", "00000000-0000-0000-0000-000000000000"));
             string best = new ServerInstance("soty", true, null, "1.0.0", 2, 1, new string[] { "aerialworks.ddns.net", "127.0.0.1", "192.168.1.65" }, 12345, new Dictionary<string, string>()).BestAddress;
 
             ChannelRegistry registry = new ChannelRegistry();

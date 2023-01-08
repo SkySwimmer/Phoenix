@@ -338,7 +338,8 @@ namespace Phoenix.Client.ServerList
             {
                 if (_unreachable)
                     return -1;
-                PingServer();
+                if (_ping == -1)
+                    PingServer();
                 return _ping;
             }
         }
