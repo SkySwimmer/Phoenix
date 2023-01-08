@@ -297,7 +297,6 @@ namespace Phoenix.Debug.DebugServerRunner
                 File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.exe", "Build/Release/server.exe", true);
             if (File.Exists(AssemblyDirectory + "/Phoenix.Server.Bootstrapper"))
                 File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper", "Build/Release/server", true);
-            File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.deps.json", "Build/Release/Phoenix.Server.Bootstrapper.deps.json", true);
             File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.dll", "Build/Release/Phoenix.Server.Bootstrapper.dll", true);
             File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.runtimeconfig.json", "Build/Release/Phoenix.Server.Bootstrapper.runtimeconfig.json", true);
             logger.Info("Done!");
