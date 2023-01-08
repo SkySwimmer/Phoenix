@@ -18,6 +18,7 @@ Client:
 + Phoenix.Client.NetworkClientLib
 + Phoenix.Client.SceneReplicatorLib
 - Phoenix.Client.SeasonLib
++ Phoenix.Client.ServerListScannerLib
 - Phoenix.Client.StatLib
 + Phoenix.Client.TaskManagerLib
 - Phoenix.Client.TimeLib
