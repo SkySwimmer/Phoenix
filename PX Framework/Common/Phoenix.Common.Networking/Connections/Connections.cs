@@ -105,13 +105,13 @@ namespace Phoenix.Common.Networking.Connections
             return info;
         }
 
-            /// <summary>
-            /// Retrieves the ID of a server (for certificate downloading)
-            /// </summary>
-            /// <param name="ip">Server IP</param>
-            /// <param name="port">Server port</param>
-            /// <returns>Server ID string</returns>
-            public static string DownloadServerID(string ip, int port)
+        /// <summary>
+        /// Retrieves the ID of a server (for certificate downloading)
+        /// </summary>
+        /// <param name="ip">Server IP</param>
+        /// <param name="port">Server port</param>
+        /// <returns>Server ID string</returns>
+        public static string DownloadServerID(string ip, int port)
         {
             TcpClient client = new TcpClient(ip, port);
 

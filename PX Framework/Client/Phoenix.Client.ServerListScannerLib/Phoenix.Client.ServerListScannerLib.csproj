@@ -7,4 +7,11 @@
     <TargetFrameworks>net6.0;net472</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.IO\Phoenix.Common.IO.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common\Phoenix.Common.csproj" />
+    <ProjectReference Include="..\Phoenix.Client\Phoenix.Client.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -46,6 +46,8 @@ namespace Phoenix.Common.SceneReplication.Packets
         public bool HasActiveStatusChanges = false;
         public bool HasDataChanges = false;
 
+        public bool IsInitial = false;
+
         public string? Name;
         public Transform? Transform = new Transform();
         public bool Active;
@@ -67,6 +69,7 @@ namespace Phoenix.Common.SceneReplication.Packets
         {
             ScenePath = reader.ReadString();
             Room = reader.ReadString();
+            IsInitial = reader.ReadBoolean();
 
             ObjectPath = reader.ReadString();
             HasTransformChanges = reader.ReadBoolean();
@@ -93,6 +96,7 @@ namespace Phoenix.Common.SceneReplication.Packets
         {
             writer.WriteString(ScenePath);
             writer.WriteString(Room);
+            writer.WriteBoolean(IsInitial);
 
             writer.WriteString(ObjectPath);
             writer.WriteBoolean(HasTransformChanges);

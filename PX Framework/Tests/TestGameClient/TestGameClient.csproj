@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\Client\Phoenix.Client.IntegratedClientLib\Phoenix.Client.IntegratedClientLib.csproj" />
     <ProjectReference Include="..\..\Client\Phoenix.Client.NetworkClientLib\Phoenix.Client.NetworkClientLib.csproj" />
     <ProjectReference Include="..\..\Client\Phoenix.Client.SceneReplicatorLib\Phoenix.Client.SceneReplicatorLib.csproj" />
+    <ProjectReference Include="..\..\Client\Phoenix.Client.ServerListScannerLib\Phoenix.Client.ServerListScannerLib.csproj" />
     <ProjectReference Include="..\..\Client\Phoenix.Client.TaskManagerLib\Phoenix.Client.TaskManagerLib.csproj" />
     <ProjectReference Include="..\..\Client\Phoenix.Client\Phoenix.Client.csproj" />
     <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />

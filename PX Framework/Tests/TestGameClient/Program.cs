@@ -6,6 +6,7 @@ using Phoenix.Client.Components;
 using Phoenix.Client.Factory;
 using Phoenix.Client.IntegratedServerBootstrapper;
 using Phoenix.Client.Providers;
+using Phoenix.Client.ServerList;
 using Phoenix.Common;
 using Phoenix.Common.Certificates;
 using Phoenix.Common.Logging;
@@ -33,7 +34,14 @@ namespace TestGameClient
             new GameImpl().Register();
             AssetManager.AddProvider(new FileAssetProvider());
 
-
+            // Test server list pinger
+            ServerListScanner scanner = new ServerListScanner(1, "soty");
+            scanner.OnDetectServer += server =>
+            {
+                server = server;
+            };
+            scanner.ScanPublicServerList();
+            string best = new ServerInstance("soty", true, null, "1.0.0", 2, 1, new string[] { "aerialworks.ddns.net", "127.0.0.1", "192.168.1.65" }, 12345, new Dictionary<string, string>()).BestAddress;
 
             ChannelRegistry registry = new ChannelRegistry();
             registry.Register(new SceneReplicationChannel());

@@ -536,6 +536,7 @@ namespace Phoenix.Server.SceneReplication
                         HasDataChanges = true,
                         HasTransformChanges = true,
                         HasNameChanges = true,
+                        IsInitial = true,
 
                         Name = obj.Name,
                         Active = obj.Active,

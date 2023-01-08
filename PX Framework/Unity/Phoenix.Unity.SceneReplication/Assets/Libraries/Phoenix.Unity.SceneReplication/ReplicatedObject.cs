@@ -10,11 +10,11 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
 {
-    public bool SmoothReplicationMovement = false;
-    public float SmoothReplicationMovmentTime = 1f;
-    public LeanTweenType SmoothReplicationMovementPositionEaseStyle = LeanTweenType.linear;
-    public LeanTweenType SmoothReplicationMovementRotationEaseStyle = LeanTweenType.linear;
-    public LeanTweenType SmoothReplicationMovementScaleEaseStyle = LeanTweenType.linear;
+    public bool SmoothReplication = false;
+    public float SmoothReplicationTime = 1f;
+    public LeanTweenType SmoothReplicationPositionEaseStyle = LeanTweenType.linear;
+    public LeanTweenType SmoothReplicationRotationEaseStyle = LeanTweenType.linear;
+    public LeanTweenType SmoothReplicationScaleEaseStyle = LeanTweenType.linear;
 
     /// <summary>
     /// Serializes the object
@@ -43,6 +43,25 @@ public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
     /// <param name="packet">Replication dataframe packet</param>
     public void Replicate(ReplicateObjectPacket packet)
     {
+        if (packet.IsInitial)
+        {
+            if (packet.HasNameChanges)
+                gameObject.name = packet.Name;
+            if (packet.HasActiveStatusChanges)
+                gameObject.SetActive(packet.Active);
+            if (packet.HasTransformChanges)
+            {
+                if (gameObject.transform.localPosition != packet.Transform.Position.ToUnityVector3())
+                    gameObject.transform.localPosition = packet.Transform.Position.ToUnityVector3();
+                if (gameObject.transform.localEulerAngles != packet.Transform.Rotation.ToUnityVector3())
+                    gameObject.transform.localEulerAngles = packet.Transform.Rotation.ToUnityVector3();
+                if (gameObject.transform.localScale != packet.Transform.Scale.ToUnityVector3())
+                    gameObject.transform.localScale = packet.Transform.Scale.ToUnityVector3();
+            }
+            if (packet.HasDataChanges)
+                DeserializeFrom(packet.Data);
+            return;
+        }
         if (packet.HasNameChanges)
             ReplicateName(packet.Name);
         if (packet.HasActiveStatusChanges)
@@ -85,14 +104,31 @@ public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
             ReplicateScale(transform.Scale.ToUnityVector3());
     }
 
+    private bool _tPosR;
+    private bool _tRotR;
+    private bool _tScR;
+    private int _posLtId = -1;
+    private int _rotLtId = -1;
+    private int _scLtId = -1;
+
     /// <summary>
     /// Changes the object's position
     /// </summary>
     /// <param name="newPosition">New position</param>
     public virtual void ReplicatePosition(UnityEngine.Vector3 newPosition)
     {
-        if (SmoothReplicationMovement)
-            LeanTween.moveLocal(gameObject, newPosition, SmoothReplicationMovmentTime).setEase(SmoothReplicationMovementPositionEaseStyle);
+        if (SmoothReplication)
+        {
+            if (_tPosR)
+                LeanTween.cancel(gameObject, _posLtId);
+            LTDescr tween = LeanTween.moveLocal(gameObject, newPosition, SmoothReplicationTime).setEase(SmoothReplicationPositionEaseStyle);
+            tween.setOnComplete(() =>
+            {
+                _tPosR = false;
+            });
+            _posLtId = tween.uniqueId;
+            _tPosR = true;
+        }
         else
             gameObject.transform.localPosition = newPosition;
     }
@@ -103,8 +139,18 @@ public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
     /// <param name="newRotation">New rotation</param>
     public virtual void ReplicateRotation(UnityEngine.Vector3 newRotation)
     {
-        if (SmoothReplicationMovement)
-            LeanTween.rotateLocal(gameObject, newRotation, SmoothReplicationMovmentTime).setEase(SmoothReplicationMovementRotationEaseStyle);
+        if (SmoothReplication)
+        {
+            if (_tRotR)
+                LeanTween.cancel(gameObject, _rotLtId);
+            LTDescr tween = LeanTween.rotateLocal(gameObject, newRotation, SmoothReplicationTime).setEase(SmoothReplicationRotationEaseStyle);
+            tween.setOnComplete(() =>
+            {
+                _tRotR = false;
+            });
+            _rotLtId = tween.uniqueId;
+            _tRotR = true;
+        }
         else
             gameObject.transform.localEulerAngles = newRotation;
     }
@@ -116,8 +162,18 @@ public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
     /// <param name="newScale">New scale</param>
     public virtual void ReplicateScale(UnityEngine.Vector3 newScale)
     {
-        if (SmoothReplicationMovement)
-            LeanTween.scale(gameObject, newScale, SmoothReplicationMovmentTime).setEase(SmoothReplicationMovementScaleEaseStyle);
+        if (SmoothReplication)
+        {
+            if (_tScR)
+                LeanTween.cancel(gameObject, _scLtId);
+            LTDescr tween = LeanTween.scale(gameObject, newScale, SmoothReplicationTime).setEase(SmoothReplicationScaleEaseStyle);
+            tween.setOnComplete(() =>
+            {
+                _tScR = false;
+            });
+            _scLtId = tween.uniqueId;
+            _tScR = true;
+        }
         else
             gameObject.transform.localScale = newScale;
     }

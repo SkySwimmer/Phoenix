@@ -400,54 +400,8 @@ namespace Phoenix.Server.Components
                                 outp.Write(magic);
                                 writer.WriteString("serverinfo");
 
-                                // Collect ips
-                                List<string> ips = new List<string>();
-                                foreach (NetworkInterface inf in NetworkInterface.GetAllNetworkInterfaces())
-                                {
-                                    try
-                                    {
-                                        if (inf.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-                                            continue;
-                                        foreach (UnicastIPAddressInformation ipaddr in inf.GetIPProperties().UnicastAddresses)
-                                        {
-                                            string addr = ipaddr.Address.ToString();
-                                            if (addr.Contains("%"))
-                                                addr = addr.Remove(addr.IndexOf("%"));
-                                            if (!ips.Contains(addr))
-                                                ips.Add(addr);
-                                        }
-                                    }
-                                    catch
-                                    {
-                                    }
-                                }
-                                foreach (NetworkInterface inf in NetworkInterface.GetAllNetworkInterfaces())
-                                {
-                                    try
-                                    {
-                                        if (inf.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                                            continue;
-                                        foreach (UnicastIPAddressInformation ipaddr in inf.GetIPProperties().UnicastAddresses)
-                                        {
-                                            string addr = ipaddr.Address.ToString();
-                                            if (addr.Contains("%"))
-                                                addr = addr.Remove(addr.IndexOf("%"));
-                                            if (!ips.Contains(addr))
-                                                ips.Add(addr);
-                                        }
-                                    }
-                                    catch
-                                    {
-                                    }
-                                }
-
                                 // Secure mode
                                 writer.WriteBoolean(IsSecureServer());
-
-                                // Add ips
-                                writer.WriteInt(ips.Count);
-                                foreach (string ip in ips)
-                                    writer.WriteString(ip);
 
                                 // Add server port
                                 writer.WriteInt(Configuration.GetBool("use-server-port") ? Server.Port : Configuration.GetInteger("server-port"));
