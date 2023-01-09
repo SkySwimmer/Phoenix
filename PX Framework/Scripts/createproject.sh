@@ -97,9 +97,9 @@ echo '
 echo Generating common gitignore...
 echo '
 /phoenix-framework/
-/bin/
-/obj/
-/.vs/
+bin/
+obj/
+.vs/
 ' > .gitignore
 
 echo
