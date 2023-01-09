@@ -18,4 +18,10 @@
     <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server\Phoenix.Server.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy bin\Debug\net472\Common.dll ..\Client\Assets\Libraries /Y" Condition="'$(OS)' != 'Unix'" />
+    <Exec Command="copy bin\Debug\net472\Common.xml ..\Client\Assets\Libraries /Y" Condition="'$(OS)' != 'Unix'" />
+    <Exec Command="cp bin/Debug/net472/Common.* ../Client/Assets/Libraries" Condition="'$(OS)' == 'Unix'" />
+  </Target>
+
 </Project>
