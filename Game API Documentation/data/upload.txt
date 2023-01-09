@@ -13,7 +13,7 @@ Uploads small files for game data distribution, should only be used for bootstra
 This system only provides you with 1MB of data storage and does not allow for subdirectories.
 
 Note: game descriptors are ignored during the size check.
-Furthermore note that abuse will result in deletion of the game and full ban from all PX services.s
+Furthermore note that abuse will result in deletion of the game and full ban from all PX services.
 
 
 The game descriptor file:

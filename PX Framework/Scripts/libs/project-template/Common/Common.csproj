@@ -8,12 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<Reference Include="..\Libraries\Phoenix.Client*.dll" />
-	<Reference Include="..\Libraries\Phoenix.Common*.dll" />
-	<Reference Include="..\Libraries\Phoenix.Server*.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\phoenix-framework\PX Framework\Client\Phoenix.Client.IntegratedServerBootstrapper\Phoenix.Client.IntegratedServerBootstrapper.csproj" />
     <ProjectReference Include="..\phoenix-framework\PX Framework\Common\Phoenix.Common\Phoenix.Common.csproj" />
     <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.AssetManager\Phoenix.Server.AssetManager.csproj" />
