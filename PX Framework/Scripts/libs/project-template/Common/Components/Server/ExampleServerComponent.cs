@@ -239,7 +239,9 @@ namespace Common.Components.Server
                 // Note that you need to have the PRISM scene maps in the server assets for this to work
 
                 // Example use of scene replication:
-                sc.GetObject("Main Camera").Transform.Position.Y += 10; // Move the camera up as an example
+                SceneObject obj = sc.GetObject("Character/Main Camera");
+                obj.Unlock(); // Unlock the object (required to be done at least once to edit properties)
+                obj.Transform.Position.Y += 10; // Move the camera up as an example
 
                 // When the client is done loading it will perform initial replicaiton, note that the camera will be moved up for each player that joins
                 // Scene replication is not client-specific, its for everyone subscribed to the same scene in the same room
