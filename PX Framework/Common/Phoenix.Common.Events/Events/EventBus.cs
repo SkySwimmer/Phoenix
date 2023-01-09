@@ -44,6 +44,11 @@ namespace Phoenix.Common.Events
                 {
                     mth.Method.Invoke(mth.Parent, new object[] { ev });
                 }
+                catch (TargetInvocationException e)
+                {
+                    if (e.InnerException != null)
+                        Logger.GetLogger("event-bus").Error("Exception in event handler " + mth.Parent.GetType().Name, e.InnerException);
+                }
                 catch (Exception e)
                 {
                     Logger.GetLogger("event-bus").Error("Exception in event handler " + mth.Parent.GetType().Name, e);

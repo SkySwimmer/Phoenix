@@ -44,6 +44,12 @@ namespace Phoenix.Common.Logging.Impl
                 string msg = "[" + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss") + "] [" + Source + "] [" + level.ToString() + "] " + GlobalMessagePrefix + message;
                 FileWriter.WriteLine(msg);
                 FileWriter.WriteLine("Exception: " + exception.GetType().FullName + (exception.Message != null ? ": " + exception.Message : ""));
+                Exception? e = exception.InnerException;
+                while (e != null)
+                {
+                    FileWriter.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
+                    e = e.InnerException;
+                }
                 if (Debugger.IsAttached || Game.DebugMode)
                     FileWriter.WriteLine(exception.StackTrace);
                 FileWriter.Flush();

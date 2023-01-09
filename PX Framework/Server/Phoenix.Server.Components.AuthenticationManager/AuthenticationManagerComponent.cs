@@ -135,23 +135,30 @@ namespace Phoenix.Server.Components
         [EventListener]
         public void ClientConnected(ClientConnectedEvent ev)
         {
-            byte[] magic = Encoding.UTF8.GetBytes("PHOENIXAUTHSTART");
-            ev.EventArgs.ClientOutput.WriteRawBytes(magic);
-            for (int i = 0; i < magic.Length; i++)
+            try
             {
-                if(magic[i] != ev.EventArgs.ClientInput.ReadRawByte())
+                byte[] magic = Encoding.UTF8.GetBytes("PHOENIXAUTHSTART");
+                ev.EventArgs.ClientOutput.WriteRawBytes(magic);
+                for (int i = 0; i < magic.Length; i++)
                 {
-                    // Log debug warning
-                    GetLogger().Trace("WARNING! Failed to authenticate client due to the first bit of network traffic not being a Phoenix authentication packet.");
-                    GetLogger().Trace("Please make sure the order of loading for components subscribed to the ClientConnectedEvent event is the same on both client and server.");
-
-                    // Disconnect
-                    if (ev.Client.IsConnected())
-                        ev.Client.Close();
-                    return;
+                    if (magic[i] != ev.EventArgs.ClientInput.ReadRawByte())
+                    {
+                        throw new Exception();
+                    }
                 }
             }
-            
+            catch
+            {
+                // Log debug warning
+                GetLogger().Trace("WARNING! Failed to authenticate client due to the first bit of network traffic not being a Phoenix authentication packet.");
+                GetLogger().Trace("Please make sure the order of loading for components subscribed to the ClientConnectedEvent event is the same on both client and server.");
+
+                // Disconnect
+                if (ev.Client.IsConnected())
+                    ev.Client.Close();
+                return;
+            }
+
             try
             {
                 PlayerManagerService manager = ServiceManager.GetService<PlayerManagerService>();

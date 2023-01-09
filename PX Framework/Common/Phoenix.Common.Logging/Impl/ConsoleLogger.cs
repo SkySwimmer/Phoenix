@@ -89,6 +89,12 @@ namespace Phoenix.Common.Logging.Impl
                     // Normal log messages
                     Console.WriteLine(GlobalMessagePrefix + message);
                     Console.WriteLine("Exception: " + exception.GetType().FullName + (exception.Message != null ? ": " + exception.Message : ""));
+                    Exception? e = exception.InnerException;
+                    while (e != null)
+                    {
+                        Console.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
+                        e = e.InnerException;
+                    }
                     if (Debugger.IsAttached || Game.DebugMode)
                         Console.WriteLine(exception.StackTrace);
                 }
