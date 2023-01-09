@@ -20,8 +20,7 @@ namespace Phoenix.Client
             {
                 // Attempt connect
                 connInfo = new IClientConnectionProvider.ConnectionInfo(server.BestAddress, server.ServerPort);
-                Connections.ServerInfo info = Connections.DownloadServerInfo(server.BestAddress, server.ServerPort);
-                if (!info.SecureMode)
+                if (!server.SecureMode)
                 {
                     if (!InsecureModeCallback())
                         return null;
@@ -36,7 +35,7 @@ namespace Phoenix.Client
                     return () =>
                     {
                         Logger.GetLogger("network-client").Info("Connecting to server at " + server.BestAddress + " with port " + server.ServerPort + "...");
-                        return Connections.CreateNetworkClient(server.IsLanServer ? "lesssecure:" + server.BestAddress : server.BestAddress, info.Port, fac.ChannelRegistry, PXClientsideCertificate.Download(api, info.GameID, info.ServerID));
+                        return Connections.CreateNetworkClient(server.IsLanServer ? "lesssecure:" + server.BestAddress : server.BestAddress, server.ServerPort, fac.ChannelRegistry, PXClientsideCertificate.Download(api, server.GameID, server.ServerID));
                     };
             });
             return fac;
