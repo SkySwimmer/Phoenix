@@ -48,6 +48,8 @@ namespace Phoenix.Common.Events
                 {
                     if (e.InnerException != null)
                         Logger.GetLogger("event-bus").Error("Exception in event handler " + mth.Parent.GetType().Name, e.InnerException);
+                    else
+                        Logger.GetLogger("event-bus").Error("Exception in event handler " + mth.Parent.GetType().Name, e);
                 }
                 catch (Exception e)
                 {
