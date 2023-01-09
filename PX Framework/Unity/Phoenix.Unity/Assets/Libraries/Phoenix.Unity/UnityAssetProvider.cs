@@ -84,6 +84,38 @@ namespace Phoenix.Unity.Bindings
                     TextAsset asset = Resources.Load<TextAsset>(prefix + Path.GetFileNameWithoutExtension(file.Name));
                     if (asset == null)
                         throw new Exception("Cannot load this asset");
+
+                    // Check if it needs compiling
+                    try
+                    {
+                        FileStream strm = file.OpenRead();
+                        Stream assetStrm = AssetCompiler.Compile(strm, file.Name);
+                        if (assetStrm != strm)
+                        {
+                            // Create output and log
+                            Directory.CreateDirectory("Assets/Resources/PhoenixRemapped/" + prefix);
+                            Debug.Log("Remapping and compressing " + prefix + file.Name + " to a text asset...");
+
+                            // Compress
+                            if (File.Exists("Assets/Resources/PhoenixRemapped/" + prefix + file.Name + ".txt"))
+                                File.Delete("Assets/Resources/PhoenixRemapped/" + prefix + file.Name + ".txt");
+                            FileStream output = File.OpenWrite("Assets/Resources/PhoenixRemapped/" + prefix + file.Name + ".txt");
+                            GZipStream gzip = new GZipStream(output, System.IO.Compression.CompressionLevel.Optimal);
+                            assetStrm.CopyTo(gzip);
+                            gzip.Close();
+                            output.Close();
+                        }
+                        assetStrm.Close();
+                        try
+                        {
+                            strm.Close();
+                        }
+                        catch { }
+                    }
+                    catch
+                    {
+                        Debug.LogError("Failed to compile asset: " + file.Name);
+                    }
                 }
                 catch
                 {
@@ -154,7 +186,7 @@ namespace Phoenix.Unity.Bindings
 #if UNITY_EDITOR
             // Load from disk
             if (File.Exists("Assets/Resources/PhoenixAssets/" + asset))
-                return File.OpenRead("Assets/Resources/PhoenixAssets/" + asset);
+                return AssetCompiler.Compile(File.OpenRead("Assets/Resources/PhoenixAssets/" + asset), asset);
             return null;
 #endif
 #if !UNITY_EDITOR

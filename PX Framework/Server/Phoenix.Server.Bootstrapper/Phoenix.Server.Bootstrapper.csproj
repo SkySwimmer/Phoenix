@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <TargetFrameworks>net6.0</TargetFrameworks>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
