@@ -108,7 +108,7 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
                 throw new InvalidOperationException("Server not running");
             GameClientFactory fac = new GameClientFactory();
             fac.WithChannelRegistry(registry);
-            fac.WithIntegratedClient(CreateConnection(registry));
+            fac.WithIntegratedClient(() => CreateConnection(registry));
             return fac;
         }
 
@@ -124,7 +124,7 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
                 throw new InvalidOperationException("Server not running");
             if (fac.ChannelRegistry == null)
                 throw new ArgumentException("Client factory does not have a channel registry! Please add a client channel registry before adding the server to the factory.");
-            fac.WithIntegratedClient(CreateConnection(fac.ChannelRegistry));
+            fac.WithIntegratedClient(() => CreateConnection(fac.ChannelRegistry));
             return fac;
         }
 

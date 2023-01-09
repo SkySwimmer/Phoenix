@@ -127,7 +127,7 @@ namespace Phoenix.Common.Networking.Impl
                             // Unhandled packet
                             // Log if in debug
                             if (Game.DebugMode)
-                                Logger.GetLogger("Client: " + ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
+                                Logger.GetLogger("Client: " + dest.ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
                         }
                     }
                     else
@@ -139,7 +139,7 @@ namespace Phoenix.Common.Networking.Impl
                                 // Unhandled packet
                                 // Log if in debug
                                 if (Game.DebugMode)
-                                    Logger.GetLogger("Client: " + ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
+                                    Logger.GetLogger("Client: " + dest.ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
                             }
                         }
                         catch
@@ -161,7 +161,7 @@ namespace Phoenix.Common.Networking.Impl
                                 // Unhandled packet
                                 // Log if in debug
                                 if (Game.DebugMode)
-                                    Logger.GetLogger("Client: " + ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
+                                    Logger.GetLogger("Client: " + dest.ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
                             }
                         }
                         else
@@ -173,7 +173,7 @@ namespace Phoenix.Common.Networking.Impl
                                     // Unhandled packet
                                     // Log if in debug
                                     if (Game.DebugMode)
-                                        Logger.GetLogger("Client: " + ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
+                                        Logger.GetLogger("Client: " + dest.ToString()).Error("Unhandled packet: " + packet.GetType().Name + ": [" + string.Concat(packetData.Select(x => x.ToString("x2"))) + "], channel type name: " + channel.GetType().Name);
                                 }
                             }
                             catch
@@ -210,7 +210,7 @@ namespace Phoenix.Common.Networking.Impl
                     // Unhandled packet
                     // Log if in debug
                     if (Game.DebugMode)
-                        Logger.GetLogger("Client: " + ToString()).Error("Unhandled packet: " + packet.GetType().Name + ", channel type name: " + channel.GetType().Name);
+                        Logger.GetLogger("Client: " + dest.ToString()).Error("Unhandled packet: " + packet.GetType().Name + ", channel type name: " + channel.GetType().Name);
                 }
                 strm.Close();
             }

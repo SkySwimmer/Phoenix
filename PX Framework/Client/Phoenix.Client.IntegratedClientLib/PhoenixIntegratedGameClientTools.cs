@@ -22,27 +22,13 @@ namespace Phoenix.Client
         {
             fac.WithConnectionProvider((InsecureModeCallback InsecureModeCallback, ref IClientConnectionProvider.ConnectionInfo connInfo) =>
             {
-                // Create bundle
-                ConnectionBundle bundle = Connections.CreateIntegratedConnections(fac.ChannelRegistry);
-                integratedServerOutput((IntegratedServerConnection)bundle.Server);
-                return () => bundle.Client;
-            });
-            return fac;
-        }
-
-        /// <summary>
-        /// Creates a integrated client
-        /// </summary>
-        /// <param name="fac">Client factory</param>
-        /// <param name="integratedServerOutput">Integrated server output</param>
-        public static GameClientFactory WithIntegratedClient(this GameClientFactory fac, out IntegratedServerConnection integratedServerOutput)
-        {
-            // Create bundle
-            ConnectionBundle bundle = Connections.CreateIntegratedConnections(fac.ChannelRegistry);
-            integratedServerOutput = (IntegratedServerConnection)bundle.Server;
-            fac.WithConnectionProvider((InsecureModeCallback InsecureModeCallback, ref IClientConnectionProvider.ConnectionInfo connInfo) =>
-            {
-                return () => bundle.Client;
+                return () =>
+                {
+                    // Create bundle
+                    ConnectionBundle bundle = Connections.CreateIntegratedConnections(fac.ChannelRegistry);
+                    integratedServerOutput((IntegratedServerConnection)bundle.Server);
+                    return bundle.Client;
+                };
             });
             return fac;
         }
@@ -51,12 +37,12 @@ namespace Phoenix.Client
         /// Adds a integrated client
         /// </summary>
         /// <param name="fac">Client factory</param>
-        /// <param name="clientConnection">Client connection</param>
-        public static GameClientFactory WithIntegratedClient(this GameClientFactory fac, IntegratedClientConnection clientConnection)
+        /// <param name="clientConnectionConstr">Client connection constructor</param>
+        public static GameClientFactory WithIntegratedClient(this GameClientFactory fac, Func<IntegratedClientConnection> clientConnectionConstr)
         {
             fac.WithConnectionProvider((InsecureModeCallback InsecureModeCallback, ref IClientConnectionProvider.ConnectionInfo connInfo) =>
             {
-                return () => clientConnection;
+                return () => clientConnectionConstr();
             });
             return fac;
         }
