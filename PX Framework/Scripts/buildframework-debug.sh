@@ -108,5 +108,6 @@ mkdir Build/Unity/Complete
 cp -rfv Unity/* Build/Unity/Projects
 cp -rfv Unity/*/* Build/Unity/Complete
 cp -rfv Build/Assemblies/net472/* Build/Unity/Complete/Assets/Libraries
+rm -v Build/Unity/Complete/Assets/Libraries/Newtonsoft.Json.dll
 
 echo Done.
