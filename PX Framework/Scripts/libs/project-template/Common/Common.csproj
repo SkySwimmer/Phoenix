@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net472</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<Reference Include="..\Libraries\Phoenix.Client*.dll" />
+	<Reference Include="..\Libraries\Phoenix.Common*.dll" />
+	<Reference Include="..\Libraries\Phoenix.Server*.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Client\Phoenix.Client.IntegratedServerBootstrapper\Phoenix.Client.IntegratedServerBootstrapper.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Common\Phoenix.Common\Phoenix.Common.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.AssetManager\Phoenix.Server.AssetManager.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.Components.AuthenticationManager\Phoenix.Server.Components.AuthenticationManager.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.Components.PlayerManager\Phoenix.Server.Components.PlayerManager.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.Components.SceneReplication\Phoenix.Server.Components.SceneReplication.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server.Components.TaskManager\Phoenix.Server.Components.TaskManager.csproj" />
+    <ProjectReference Include="..\phoenix-framework\PX Framework\Server\Phoenix.Server\Phoenix.Server.csproj" />
+  </ItemGroup>
+
+</Project>
