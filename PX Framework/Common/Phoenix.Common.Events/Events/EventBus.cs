@@ -40,7 +40,14 @@ namespace Phoenix.Common.Events
 
             foreach (EventInfo mth in mths)
             {
-                mth.Method.Invoke(mth.Parent, new object[] { ev });
+                try
+                {
+                    mth.Method.Invoke(mth.Parent, new object[] { ev });
+                }
+                catch (Exception e)
+                {
+                    Logger.GetLogger("event-bus").Error("Exception in event handler " + mth.Parent.GetType().Name, e);
+                }
                 if (!ev.ShouldContinue())
                     break;
             }
