@@ -48,22 +48,3 @@ PGL Launcher Game Descriptor Fields: (* = required)
    Game-Arguments-Win64		-	String		-	Arguments to pass to the game on launch (windows)
    Game-Arguments-Linux		-	String		-	Arguments to pass to the game on launch (linux)
    Game-Arguments-OSX		-	String		-	Arguments to pass to the game on launch (OSX)
-
-Ocean Games Game Descriptor Fields: (* = required)
-   Game-Server-Dependant*	-	Boolean		-	Defines if the game depends on servers to be playable
-   Game-Multiplayer-Dependant*	- 	Boolean		-	Defines if the game depends on multiplayer servers to be playables
-   Game-File-Servers*		-	String[]	-	Comma-separated list of URLs to ping to check if the game file servers are online (currently unused)
-   Game-Servers*		-	String[]	-	Comma-separated list of URLs or PX server addresses to ping to check if the game multiplayer servers are online (currently unused)
-   Game-Banner			-	String		-	Game banner image URL for the Ocean Games store (currently unused)
-   Game-Description*		-	String		-	Multiline description for the Ocean Games store (currently unused)
-   Game-Genre-List*		-	String[]	-	Comma-separated list of game genres for the Ocean Games search system (currently unused)
-   Game-Thumbnail		-	String		-	Game thumbnail image URL for the Ocean Games store and library (currently unused)
-   Game-Cover*			-	String		-	Game cd/dvd-style cover image URL for the Ocean Games store (currently unused)
-   Game-Videos			-	String[]	- 	Comma-separated list of gameplay video URLs (supports both mp4 files and youtube links) for the Ocean Games store (currently unused)
-   Game-Screenshots		-	String[]	-	Comma-separated list of ingame screenshot URLs for the Ocean Games store (currently unused)
-   Game-Onsale*			-	Boolean		-	Defines if the game is currently in the Ocean Games store (currently unused)
-   Game-Price*			-	Number		-	Amount of OceanCoins needed to purchase the game from the Ocean Games store (currently unused)
-   Game-Shutting-Down*		-	Boolean		-	Defines if the game is shutting down. If you intend to shut down the game, and its a paid server-dependent game,
-								you are to set this to 'True' 5 MONTHS BEFORE SHUTDOWN, and ONE MONTH BEFORE SHUTDOWN for free server-dependant games.
-   Game-Shutdown-Date		- UNIX TIMESTAMP (SECS) -	Defines the UNIX timestamp on which the game is shutting down, if the above is true, this NEEDS to be present.
-   Game-Shutdown		-	Boolean		-	Defines if the game multiplayer features have been shut down.
