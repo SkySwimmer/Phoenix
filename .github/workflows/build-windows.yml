@@ -1,4 +1,4 @@
-name: Phoenix Stable (Windows)
+name: Build (Win64)
 
 on:
   push:

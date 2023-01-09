@@ -1,4 +1,4 @@
-name: Phoenix Stable (OSX)
+name: Build (OSX)
 
 on:
   push:

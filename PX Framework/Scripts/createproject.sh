@@ -228,8 +228,3 @@ mv -v Server/Assets Client/Assets/Resources/PhoenixAssets
 echo
 echo Done.
 echo Project has been created in "$(realpath "$PWD")".
-
-# TODO:
-# - Finish up samples
-# - Client samples
-# - Create build script

@@ -253,7 +253,6 @@ namespace Common.Components.Server
                 // The samples are not set up on the unity side, you need to do that manually
                 // For this sample to work, add a SimpleReplicatedObject component to the main camera, and after that, dump the scene maps and update them here
                 // Then the sample will work
-                // TODO: change this
             }
 
             #endregion
