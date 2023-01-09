@@ -10,7 +10,9 @@ namespace Phoenix.Client
         /// <summary>
         /// Creates a network client<br/>
         /// <br/>
-        /// <b>Note: for better security, specify the server ID directly, otherwise a DNS redirect can MITM the connection.</b>
+        /// <b>Note: for better security, it is highly recommended to specify the server ID directly, otherwise a DNS redirect can MITM the connection.</b><br/>
+        /// <b>If you do use this method, please alert the player of the potential danger of a MITM attack when they attempt to connect by IP and port.</b><br/>
+        /// <b>Should you provide a way for players to add servers to a list, please make sure to save the ID to disk and to use that to confirm if it is the real server or not.</b>
         /// </summary>
         /// <param name="fac">Client factory</param>
         /// <param name="ip">Server IP</param>
