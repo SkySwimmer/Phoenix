@@ -1,4 +1,4 @@
-name: Phoenix Stable
+name: Phoenix Stable (Linux)
 
 on:
   push:
