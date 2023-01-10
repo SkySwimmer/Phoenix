@@ -67,4 +67,4 @@ Note: project setup might take quite some time to complete.
 ## Documentation
 You can find the documentation at https://aerialworks.ddns.net/phoenix/docs
 
-This project is still a heavy WIP, we hope to ducment things better in the future.s
+This project is still a heavy WIP, we hope to document things better in the future.s
