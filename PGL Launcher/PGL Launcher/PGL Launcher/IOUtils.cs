@@ -16,7 +16,7 @@ namespace PGL_Launcher
         /// <param name="dest">Destination path</param>
         public static void CopyDirectory(string source, string dest, string ignore = "")
         {
-            if (Path.GetFullPath(source) == Path.GetFullPath(ignore))
+            if (ignore != "" && Path.GetFullPath(source.Replace('/', Path.DirectorySeparatorChar)) == Path.GetFullPath(ignore))
                 return;
 
             Directory.CreateDirectory(dest);
