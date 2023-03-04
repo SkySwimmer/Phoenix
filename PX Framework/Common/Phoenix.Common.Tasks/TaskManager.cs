@@ -16,6 +16,22 @@ namespace Phoenix.Common.Tasks
         internal long MillisWait = -1;
 
         /// <summary>
+        /// Checks how many milliseconds are left before the action is invoked
+        /// </summary>
+        public long TimeRemainingBeforeInvoke
+        {
+            get
+            {
+                if (MillisWait == -1)
+                    return -1;
+                long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (time - TimeStart > MillisWait)
+                    return 0;
+                return MillisWait - (time - TimeStart);
+            }
+        }
+
+        /// <summary>
         /// Checks if the task completed at least once
         /// </summary>
         public bool HasCompleted
