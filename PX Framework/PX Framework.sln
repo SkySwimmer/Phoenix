@@ -142,27 +142,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Common.SceneReplication", "Common\Phoenix.Common.SceneReplication\Phoenix.Common.SceneReplication.csproj", "{51FDF42C-72D5-49B8-ACA6-F00E61AF885A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phoenix.Common.SceneReplication", "Common\Phoenix.Common.SceneReplication\Phoenix.Common.SceneReplication.csproj", "{51FDF42C-72D5-49B8-ACA6-F00E61AF885A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Client.ComponentLib", "Client\Phoenix.Client.ComponentLib\Phoenix.Client.ComponentLib.csproj", "{C3393059-5054-436E-A560-2E1195F503E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phoenix.Client.ComponentLib", "Client\Phoenix.Client.ComponentLib\Phoenix.Client.ComponentLib.csproj", "{C3393059-5054-436E-A560-2E1195F503E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Client.TaskManagerLib", "Client\Phoenix.Client.TaskManagerLib\Phoenix.Client.TaskManagerLib.csproj", "{BBE7B21B-64D7-41A6-977B-DEEDA49A907E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phoenix.Client.TaskManagerLib", "Client\Phoenix.Client.TaskManagerLib\Phoenix.Client.TaskManagerLib.csproj", "{BBE7B21B-64D7-41A6-977B-DEEDA49A907E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGameClient", "Tests\TestGameClient\TestGameClient.csproj", "{EE82C424-695C-4E87-81B0-85F7BBADF3D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestGameClient", "Tests\TestGameClient\TestGameClient.csproj", "{EE82C424-695C-4E87-81B0-85F7BBADF3D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatExampleClient", "Tests\ChatExampleClient\ChatExampleClient.csproj", "{BB75C102-A245-4E1F-ADCC-D49914C88659}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatExampleClient", "Tests\ChatExampleClient\ChatExampleClient.csproj", "{BB75C102-A245-4E1F-ADCC-D49914C88659}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatExampleServer", "Tests\ChatExampleServer\ChatExampleServer.csproj", "{81ED17D9-B3C4-4E3E-A63F-7F39029C5DAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatExampleServer", "Tests\ChatExampleServer\ChatExampleServer.csproj", "{81ED17D9-B3C4-4E3E-A63F-7F39029C5DAB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{E19EBB6C-287E-40B4-85A0-4F59C0718170}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChartZ", "ChartZ", "{1BE38D76-25FE-43F3-A1C4-101BB8952A83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartZ.Compiler", "Utils\ChartZ\ChartZ.Compiler\ChartZ.Compiler.csproj", "{060CD838-7620-4148-8129-D1F4C3AEDF62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartZ.Compiler", "Utils\ChartZ\ChartZ.Compiler\ChartZ.Compiler.csproj", "{060CD838-7620-4148-8129-D1F4C3AEDF62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartZ.Engine", "Utils\ChartZ\ChartZ.Engine\ChartZ.Engine.csproj", "{B3A7112C-2CB2-42C6-B382-8BB1E8FA54B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartZ.Engine", "Utils\ChartZ\ChartZ.Engine\ChartZ.Engine.csproj", "{B3A7112C-2CB2-42C6-B382-8BB1E8FA54B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Client.ServerListScannerLib", "Client\Phoenix.Client.ServerListScannerLib\Phoenix.Client.ServerListScannerLib.csproj", "{EADBEEC4-36A9-47EB-9E78-32F05A9610A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Phoenix.Client.ServerListScannerLib", "Client\Phoenix.Client.ServerListScannerLib\Phoenix.Client.ServerListScannerLib.csproj", "{EADBEEC4-36A9-47EB-9E78-32F05A9610A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

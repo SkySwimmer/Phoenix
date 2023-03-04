@@ -30,7 +30,7 @@ namespace Phoenix.Common.Certificates
         public static PXClientsideCertificate Download(string phoenixServer, string gameID, string serverID)
         {
             HttpClient client = new HttpClient();
-            Stream strm = client.GetStreamAsync(phoenixServer + "/api/servers/certificate/" + gameID + "/" + serverID).GetAwaiter().GetResult();
+            Stream strm = client.GetStreamAsync(phoenixServer + "/servers/certificate/" + gameID + "/" + serverID).GetAwaiter().GetResult();
             DataReader rd = new DataReader(strm);
             PXClientsideCertificate cert = PXClientsideCertificate.FromReader(rd);
             strm.Close();

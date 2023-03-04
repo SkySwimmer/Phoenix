@@ -15,8 +15,6 @@ namespace Phoenix.Server.Players
         private Connection _client;
         private PlayerDataContainer _data;
 
-        private List<object> objects = new List<object>();
-
         /// <summary>
         /// Event that is called on disconnect
         /// </summary>
@@ -88,11 +86,6 @@ namespace Phoenix.Server.Players
         /// <returns>Object instance or default (typically null)</returns>
         public T? GetObject<T>()
         {
-            foreach (object obj in objects)
-            {
-                if (obj is T)
-                    return (T)obj;
-            }
             return Client.GetObject<T>();
         }
 
@@ -103,12 +96,7 @@ namespace Phoenix.Server.Players
         /// <param name="obj">Object to add</param>
         public void AddObject<T>(T obj)
         {
-            if (obj == null)
-                return;
-            T? old = GetObject<T>();
-            if (old != null)
-                objects.Remove(old);
-            objects.Add(obj);
+            Client.AddObject(obj);
         }
 
         /// <summary>

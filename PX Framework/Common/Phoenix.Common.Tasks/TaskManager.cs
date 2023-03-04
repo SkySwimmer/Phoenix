@@ -12,6 +12,9 @@ namespace Phoenix.Common.Tasks
         internal Action Action;
         internal bool _ran = false;
 
+        internal long TimeStart;
+        internal long MillisWait = -1;
+
         /// <summary>
         /// Checks if the task completed at least once
         /// </summary>
@@ -96,6 +99,34 @@ namespace Phoenix.Common.Tasks
         private List<ScheduledTask> Actions = new List<ScheduledTask>();
 
         /// <summary>
+        /// Schedules and action that will run after the given amount of seconds have passed
+        /// </summary>
+        /// <param name="action">Action to schedule</param>
+        /// <param name="time">Time delay in seconds</param>
+        /// <returns>ScheduledTask instance</returns>
+        public ScheduledTask AfterSecs(Action action, int time)
+        {
+            return AfterMs(action, time * 1000);
+        }
+
+        /// <summary>
+        /// Schedules and action that will run after the given amount of milliseconds have passed
+        /// </summary>
+        /// <param name="action">Action to schedule</param>
+        /// <param name="time">Time delay in milliseconds</param>
+        /// <returns>ScheduledTask instance</returns>
+        public ScheduledTask AfterMs(Action action, long time)
+        {
+            ScheduledTask acInfo = new ScheduledTask();
+            acInfo.Action = action;
+            acInfo.TimeStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            acInfo.MillisWait = time;
+            lock (Actions)
+                Actions.Add(acInfo);
+            return acInfo;
+        }
+
+        /// <summary>
         /// Schedules a action that runs only once
         /// </summary>
         /// <param name="action">Action to schedule</param>
@@ -104,7 +135,8 @@ namespace Phoenix.Common.Tasks
         {
             ScheduledTask acInfo = new ScheduledTask();
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -118,7 +150,8 @@ namespace Phoenix.Common.Tasks
             ScheduledTask acInfo = new ScheduledTask();
             acInfo.Interval = delay;
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -134,7 +167,8 @@ namespace Phoenix.Common.Tasks
             acInfo.Interval = interval;
             acInfo.Limit = -1;
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -151,7 +185,8 @@ namespace Phoenix.Common.Tasks
             acInfo.Interval = interval;
             acInfo.Limit = limit;
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -165,7 +200,8 @@ namespace Phoenix.Common.Tasks
             ScheduledTask acInfo = new ScheduledTask();
             acInfo.Limit = -1;
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -180,7 +216,8 @@ namespace Phoenix.Common.Tasks
             ScheduledTask acInfo = new ScheduledTask();
             acInfo.Limit = limit;
             acInfo.Action = action;
-            Actions.Add(acInfo);
+            lock (Actions)
+                Actions.Add(acInfo);
             return acInfo;
         }
 
@@ -190,8 +227,11 @@ namespace Phoenix.Common.Tasks
         /// <param name="action">Action to cancel</param>
         public void Cancel(ScheduledTask action)
         {
-            if (Actions.Contains(action))
-                Actions.Remove(action);
+            lock (Actions)
+            {
+                if (Actions.Contains(action))
+                    Actions.Remove(action);
+            }
         }
 
         /// <summary>
@@ -217,7 +257,7 @@ namespace Phoenix.Common.Tasks
             // Run actions
             foreach (ScheduledTask ac in actions)
             {
-                if (ac.Interval != -1 && ac._CInterval++ < ac.Interval)
+                if (ac == null || (ac.MillisWait != -1 && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - ac.TimeStart < ac.MillisWait) || (ac.Interval != -1 && ac._CInterval++ < ac.Interval))
                     continue;
 
                 // Run the action
@@ -242,7 +282,8 @@ namespace Phoenix.Common.Tasks
 
                 // Remove if needed
                 if (ac.Limit != -1 && ac._CCount >= ac.Limit)
-                    Actions.Remove(ac);
+                    lock(Actions)
+                        Actions.Remove(ac);
             }
         }
     }

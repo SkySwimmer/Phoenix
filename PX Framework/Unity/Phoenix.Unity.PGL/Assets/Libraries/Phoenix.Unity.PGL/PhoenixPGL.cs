@@ -75,7 +75,7 @@ namespace Phoenix.Unity.PGL
         /// <summary>
         /// Phoenix API server
         /// </summary>
-        public static string API = "https://aerialworks.ddns.net";
+        public static string? API = null;
 
         private static bool _setup;
         private static Logger _logger;
@@ -437,7 +437,7 @@ namespace Phoenix.Unity.PGL
                         cl.DefaultRequestHeaders.Add("Authorization", "Bearer " + Game.SessionToken);
                         cl.DefaultRequestHeaders.Add("Product-Key", game["Product-Key"]);
                         cl.DefaultRequestHeaders.Add("Digital-Seal", game["Digital-Seal"]);
-                        string res = cl.GetAsync(API + "/api/data/files/" + game["Game-ID"] + "/" + productHash + "/" + timestamp + "/" + game["Game-ID"] + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        string res = cl.GetAsync((API == null ? PhoenixEnvironment.DefaultAPIServer : API) + "data/files/" + game["Game-ID"] + "/" + productHash + "/" + timestamp + "/" + game["Game-ID"] + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
                         if (res == null || res == "")
                             throw new Exception();
                         Dictionary<string, string> data = new Dictionary<string, string>();
@@ -470,7 +470,7 @@ namespace Phoenix.Unity.PGL
             game["Game-Storage-Path"] = runPath + "/gamefiles";
             game["Player-Data-Path"] = runPath + "/playerdata";
             game["Save-Data-Path"] = runPath + "/savedata";
-            game["Refresh-Endpoint"] = API + "/api/tokens/refresh";
+            game["Refresh-Endpoint"] = (API == null ? PhoenixEnvironment.DefaultAPIServer : API) + "tokens/refresh";
 #endif
 
             // Log final game descriptor
@@ -594,7 +594,7 @@ namespace Phoenix.Unity.PGL
                             try 
                             {
                                 HttpClient cl = new HttpClient();
-                                if (!cl.GetAsync(API).GetAwaiter().GetResult().IsSuccessStatusCode)
+                                if (!cl.GetAsync(API + "servers").GetAwaiter().GetResult().IsSuccessStatusCode)
                                     throw new Exception();
                             }
                             catch

@@ -1,4 +1,6 @@
-﻿namespace Phoenix.Server.SceneReplication.Coordinates
+﻿using Phoenix.Server.SceneReplication.Data;
+
+namespace Phoenix.Server.SceneReplication.Coordinates
 {
     public enum ReplicatingTransformProperty
     {
@@ -10,7 +12,7 @@
     /// <summary>
     /// Basic Transform Object - Position, Scale and Rotation vectors
     /// </summary>
-    public class Transform
+    public class Transform : SerializingObject
     {
         private bool readOnly = false;
         public event Replicate? OnReplicate;
@@ -256,6 +258,46 @@
                 new Common.SceneReplication.Packets.Vector3(Position.X, Position.Y, Position.Z),
                 new Common.SceneReplication.Packets.Vector3(Scale.X, Scale.Y, Scale.Z),
                 new Common.SceneReplication.Packets.Vector3(Rotation.X, Rotation.Y, Rotation.Z));
+        }
+
+        public void Deserialize(Dictionary<string, object> data)
+        {
+            // Read transform
+            if (data.ContainsKey("position"))
+            {
+                Dictionary<string, object> vecS = (Dictionary<string, object>)data["position"];
+                Vector3 vec = new Vector3();
+                vec.Deserialize(vecS);
+                Position = vec;
+            }
+            if (data.ContainsKey("scale"))
+            {
+                Dictionary<string, object> vecS = (Dictionary<string, object>)data["scale"];
+                Vector3 vec = new Vector3();
+                vec.Deserialize(vecS);
+                Scale = vec;
+            }
+            if (data.ContainsKey("rotation"))
+            {
+                Dictionary<string, object> vecS = (Dictionary<string, object>)data["rotation"];
+                Vector3 vec = new Vector3();
+                vec.Deserialize(vecS);
+                Rotation = vec;
+            }
+        }
+
+        public void Serialize(Dictionary<string, object> data)
+        {
+            // Write transform
+            Dictionary<string, object> posD = new Dictionary<string, object>();
+            Dictionary<string, object> scaleD = new Dictionary<string, object>();
+            Dictionary<string, object> rotD = new Dictionary<string, object>();
+            Position.Serialize(posD);
+            Scale.Serialize(scaleD);
+            Rotation.Serialize(rotD);
+            data["position"] = posD;
+            data["scale"] = scaleD;
+            data["rotation"] = rotD;
         }
     }
 }

@@ -35,49 +35,65 @@ namespace TestGameClient
             AssetManager.AddProvider(new FileAssetProvider());
 
             // Test server list pinger
-            ServerListScanner scanner = new ServerListScanner(1, "soty");
+            /*ServerListScanner scanner = new ServerListScanner(1, "soty");
             scanner.OnDetectServer += server =>
             {
                 server = server;
             };
             scanner.ScanPublicServerList(filters: new ServerListFilter("ownerId", "00000000-0000-0000-0000-000000000000"));
             string best = new ServerInstance("soty", true, null, "1.0.0", 2, 1, new string[] { "aerialworks.ddns.net", "127.0.0.1", "192.168.1.65" }, 12345, new Dictionary<string, string>()).BestAddress;
+            Console.Write("Login token: ");
+            LoginManager.LoginToken = Console.ReadLine();
+            LoginManager.Login(new Dictionary<string, object>(), t => { }, t => { }, t => { });*/
 
             ChannelRegistry registry = new ChannelRegistry();
             registry.Register(new SceneReplicationChannel());
             registry.Register(new TestChannel());
-            
-            GameClientFactory fac = new GameClientFactory();
-            Console.Write("Login token: ");
-            LoginManager.LoginToken = Console.ReadLine();
-            LoginManager.Login(new Dictionary<string, object>(), t => { }, t => { }, t => { });
-            fac.WithAuthenticator(new PhoenixAuthenticator(LoginManager.Session));
-            fac.WithComponent(new TaskManagerComponent());
-            fac.WithComponent(new SceneReplicationComponent());
-            fac.WithChannelRegistry(registry);
-            fac.WithProtocolVersion(1);
-            fac.WithNetworkClient("localhost", 16719);
-            fac.WithAllowInsecureMode(true, () =>
-            {
-                // Some method that is called in case the server is in insecure mode
 
-                return true; // Allow this, false cancels the connection
-            });
-            fac.WithAutoInit(true);
-            fac.WithAutoConnect(true);
-
-            // Build client
-            GameClientBuildResult res = fac.Build("client-1");
-            if (!res.IsSuccess)
-                return;
-            GameClient client = res.Client;
-            Task.Run(() =>
+            int i = 1;
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
             {
                 while (true)
                 {
                     GameClient.GlobalTick();
                 }
             });
+            while (true)
+            {
+                for (int i2 = 0; i2 < 5; i2++)
+                {
+                    GameClientFactory fac = new GameClientFactory();
+                    fac.WithAuthenticator(new PhoenixAuthenticator(new PhoenixSession("test-" + i, "test-" + i)));
+                    fac.WithComponent(new TaskManagerComponent());
+                    fac.WithComponent(new SceneReplicationComponent());
+                    fac.WithChannelRegistry(registry);
+                    fac.WithProtocolVersion(1);
+                    fac.WithNetworkClient("127.0.0.1", 12345);
+                    fac.WithAllowInsecureMode(true, () =>
+                    {
+                        // Some method that is called in case the server is in insecure mode
+
+                        return true; // Allow this, false cancels the connection
+                    });
+                    fac.WithAutoInit(true);
+                    fac.WithAutoConnect(true);
+
+                    // Build client
+                    GameClientBuildResult res = fac.Build("client-" + i);
+                    if (!res.IsSuccess)
+                    {
+                        Console.Error.WriteLine("Error: failed to set up the client");
+                        Console.ReadLine();
+                        return;
+                    }
+                    else
+                        StartClient(res.Client, "test-" + i);
+                    i++;
+                }
+                Console.WriteLine("Press enter to add 5 more clients");
+                Console.ReadLine();
+            }
+            /*GameClient client = res.Client;
             while (client.IsConnected())
             {
                 string message = Console.ReadLine();
@@ -96,7 +112,7 @@ namespace TestGameClient
                     Sender = "",
                     Message = message
                 });
-            }
+            }*/
 
             /*
             string server = File.ReadAllText("server.id.info");
@@ -148,6 +164,45 @@ namespace TestGameClient
                 });
             }
             */
+        }
+
+        private static Random rnd = new Random();
+        private static void StartClient(GameClient client, string id)
+        {
+            // Send a message
+            client.ClientConnection.GetChannel<TestChannel>().SendPacket(new TestPacket()
+            {
+                Sender = "",
+                Message = "Hello"
+            });
+
+            // Sync initial
+            TestSyncPacket sync = new TestSyncPacket();
+            sync.Transform = new Phoenix.Common.SceneReplication.Packets.Transform();
+            sync.Transform.Position.X = rnd.Next(-100, 100);
+            sync.Transform.Position.Z = rnd.Next(-100, 100);
+            sync.Transform.Position.Y = 476.3808f;
+            sync.Transform.Scale = new Phoenix.Common.SceneReplication.Packets.Vector3(1, 1, 1);
+            client.ClientConnection.GetChannel<TestChannel>().SendPacket(sync);
+
+            // Sync script
+            int r = 0;
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    // Spinnnn
+                    r += 30;
+                    if (r >= 360)
+                        r = 0;
+                    sync.Transform.Rotation.Y = r;
+                    client.ClientConnection.GetChannel<TestChannel>().SendPacket(sync);
+                    Thread.Sleep(500);
+                }
+            })
+            {
+                IsBackground = true
+            }.Start();
         }
     }
 

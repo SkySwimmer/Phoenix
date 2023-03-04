@@ -862,7 +862,7 @@ namespace Phoenix.Client
             Logger.Info("Connected successfully to server");
 
             // Start TPS counter
-            Task.Run(() => {
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() => {
                 int warnState = 0;
                 bool hasTicked = false;
                 while (IsConnected())

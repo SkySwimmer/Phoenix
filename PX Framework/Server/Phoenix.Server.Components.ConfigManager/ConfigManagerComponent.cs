@@ -274,9 +274,20 @@ namespace Phoenix.Server.Components
                         // Assign
                         T v = value;
                         if (v == null)
-                            segment.objects.Remove(key);
+                        {
+                            if (segment.objects.ContainsKey(key))
+                                segment.objects.Remove(key);
+                            else
+                                return;
+                        }
                         else
-                            segment.objects[key] = v.GetType().IsPrimitive ? v.ToString() : v;
+                        {
+                            object val = v.GetType().IsPrimitive ? v.ToString() : v;
+                            if (!segment.objects.ContainsKey(key) || segment.objects[key] != val)
+                                segment.objects[key] = val;
+                            else
+                                return;
+                        }
 
                         // Save
                         File.WriteAllText(segment.filePath, segment.serializer.Serialize(segment.root));

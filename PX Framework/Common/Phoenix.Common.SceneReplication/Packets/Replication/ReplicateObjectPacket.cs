@@ -54,7 +54,7 @@ namespace Phoenix.Common.SceneReplication.Packets
         public List<string> RemovedData = new List<string>();
         public Dictionary<string, object?> Data = new Dictionary<string, object?>();
 
-        public string ObjectPath = "";
+        public string ObjectID = "";
         public string ScenePath = "";
         public string Room = "";
 
@@ -71,7 +71,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             Room = reader.ReadString();
             IsInitial = reader.ReadBoolean();
 
-            ObjectPath = reader.ReadString();
+            ObjectID = reader.ReadString();
             HasTransformChanges = reader.ReadBoolean();
             HasNameChanges = reader.ReadBoolean();
             HasActiveStatusChanges = reader.ReadBoolean();
@@ -98,7 +98,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             writer.WriteString(Room);
             writer.WriteBoolean(IsInitial);
 
-            writer.WriteString(ObjectPath);
+            writer.WriteString(ObjectID);
             writer.WriteBoolean(HasTransformChanges);
             writer.WriteBoolean(HasNameChanges);
             writer.WriteBoolean(HasActiveStatusChanges);

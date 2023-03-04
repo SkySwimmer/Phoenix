@@ -1,4 +1,5 @@
 ﻿using Phoenix.Client.Providers;
+using Phoenix.Common;
 using Phoenix.Common.Certificates;
 using Phoenix.Common.Logging;
 using Phoenix.Common.Networking.Connections;
@@ -18,7 +19,7 @@ namespace Phoenix.Client
         /// <param name="ip">Server IP</param>
         /// <param name="port">Server port</param>
         /// <param name="api">Phoenix API for certificate downloads</param>
-        public static GameClientFactory WithNetworkClient(this GameClientFactory fac, string ip, int port, string api = "https://aerialworks.ddns.net")
+        public static GameClientFactory WithNetworkClient(this GameClientFactory fac, string ip, int port, string? api = null)
         {
             fac.WithConnectionProvider((InsecureModeCallback InsecureModeCallback, ref IClientConnectionProvider.ConnectionInfo connInfo) =>
             {
@@ -40,7 +41,7 @@ namespace Phoenix.Client
                     return () =>
                     {
                         Logger.GetLogger("network-client").Info("Connecting to server at " + ip + " with port " + port + "...");
-                        return Connections.CreateNetworkClient(info.Address, info.Port, fac.ChannelRegistry, PXClientsideCertificate.Download(api, info.GameID, info.ServerID));
+                        return Connections.CreateNetworkClient(info.Address, info.Port, fac.ChannelRegistry, PXClientsideCertificate.Download(api == null ? PhoenixEnvironment.DefaultAPIServer : api, info.GameID, info.ServerID));
                     };
             });
             return fac;
@@ -54,7 +55,7 @@ namespace Phoenix.Client
         /// <param name="port">Server port</param>
         /// <param name="serverID">Server ID</param>
         /// <param name="api">Phoenix API for certificate downloads</param>
-        public static GameClientFactory WithNetworkClient(this GameClientFactory fac, string ip, int port, string serverID, string api = "https://aerialworks.ddns.net")
+        public static GameClientFactory WithNetworkClient(this GameClientFactory fac, string ip, int port, string serverID, string? api = null)
         {
             fac.WithConnectionProvider((InsecureModeCallback InsecureModeCallback, ref IClientConnectionProvider.ConnectionInfo connInfo) =>
             {
@@ -78,7 +79,7 @@ namespace Phoenix.Client
                     return () =>
                     {
                         Logger.GetLogger("network-client").Info("Connecting to server at " + ip + " with port " + port + "...");
-                        return Connections.CreateNetworkClient(info.Address, info.Port, fac.ChannelRegistry, PXClientsideCertificate.Download(api, info.GameID, info.ServerID));
+                        return Connections.CreateNetworkClient(info.Address, info.Port, fac.ChannelRegistry, PXClientsideCertificate.Download(api == null ? PhoenixEnvironment.DefaultAPIServer : api, info.GameID, info.ServerID));
                     };
             });
             return fac;

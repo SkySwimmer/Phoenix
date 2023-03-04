@@ -8,7 +8,7 @@ namespace Phoenix.Common.SceneReplication.Packets
     /// </summary>
     public class ObjectChangeScenePacket : AbstractNetworkPacket
     {
-        public string ObjectPath = "";
+        public string ObjectID = "";
         public string NewScenePath = "";
         public string ScenePath = "";
         public string Room = "";
@@ -25,7 +25,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             ScenePath = reader.ReadString();
             Room = reader.ReadString();
 
-            ObjectPath = reader.ReadString();
+            ObjectID = reader.ReadString();
             NewScenePath = reader.ReadString();
         }
 
@@ -34,7 +34,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             writer.WriteString(ScenePath);
             writer.WriteString(Room);
 
-            writer.WriteString(ObjectPath);
+            writer.WriteString(ObjectID);
             writer.WriteString(NewScenePath);
         }
     }

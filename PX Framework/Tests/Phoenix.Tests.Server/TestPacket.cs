@@ -19,6 +19,7 @@ namespace Phoenix.Tests.Server
         {
             RegisterPacket(new TestPacket());
             RegisterHandler(new TestPacketHandler());
+            RegisterPacket(new TestSyncPacket());
 
             RegisterPacket(new PingPacket());
             RegisterPacket(new PongPacket());

@@ -150,7 +150,7 @@ namespace Phoenix.Common.Networking.Impl
                 }
                 else
                 {
-                    Task.Run(() =>
+                    Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                     {
                         MemoryStream strm = new MemoryStream(packetData);
                         DataReader reader = new DataReader(strm);
@@ -201,7 +201,7 @@ namespace Phoenix.Common.Networking.Impl
                 // This is a bit more tricky, unprefixed packets need to be sent and received in raw at the same time
                 // We use a special stream for this that blocks until read from the same one, both ways
                 LoopbackStream strm = new LoopbackStream();
-                Task.Run(() => {
+                Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() => {
                     packet.Write(new DataWriter(strm));
                 });
                 DataReader reader = new DataReader(strm);
@@ -235,11 +235,11 @@ namespace Phoenix.Common.Networking.Impl
             LoopbackStream strm1 = new LoopbackStream();
             LoopbackStream strm2 = new LoopbackStream();
             if (server != null)
-                Task.Run(() =>
+                Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                 {
                     server.DoCallConnected(Other, new ConnectionEventArgs(new DataWriter(strm1), new DataReader(strm2)));
                 });
-            Task.Run(() =>
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
             {
                 dest.CallConnected(new ConnectionEventArgs(new DataWriter(strm1), new DataReader(strm2)));
             });

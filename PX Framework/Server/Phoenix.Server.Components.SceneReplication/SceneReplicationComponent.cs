@@ -18,18 +18,6 @@ namespace Phoenix.Server.Components
         public override void PreInit()
         {
             ServiceManager.RegisterService(new SceneManager(Server));
-            SceneManager manager = ServiceManager.GetService<SceneManager>();
-
-            // Bind event
-            Server.OnPostTick += () =>
-            {
-                // Replicate objects
-                Task.Run(() =>
-                {
-                    if (!manager.IsReplicating)
-                        manager.ReplicateNow();
-                });
-            };
         }
 
         [EventListener]

@@ -25,6 +25,9 @@ namespace Phoenix.Common.Networking.Impl
         private Logger logger;
         private static SecureRandom rnd = new SecureRandom();
 
+        private static object _locker = new object();
+        private bool _sending;
+
         private string _ip;
         private string? _serverID;
 
@@ -603,7 +606,7 @@ namespace Phoenix.Common.Networking.Impl
             }
 
             logger.Trace("Starting packet handlers...");
-            Task.Run(() =>
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
             {
                 // Input
                 while (Client != null)
@@ -661,7 +664,7 @@ namespace Phoenix.Common.Networking.Impl
                         DataReader rd = new DataReader(strm);
 
                         // Handle
-                        Task.Run(() =>
+                        Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                         {
                             if (cId == -1)
                             {
@@ -734,8 +737,6 @@ namespace Phoenix.Common.Networking.Impl
             logger.Trace("Connection successfully established!");
         }
 
-        private bool transmitting = false;
-
         public override void Close(string reason, params string[] args)
         {
             // Check if connected
@@ -767,13 +768,25 @@ namespace Phoenix.Common.Networking.Impl
                 strm.Close();
 
                 // Send disconnect
-                while (transmitting)
-                    Thread.Sleep(1);
-                transmitting = true;
-                Writer.WriteInt(-1);
-                Writer.WriteInt(0);
-                Writer.WriteBytes(packet);
-                transmitting = false;
+                lock (_locker)
+                {
+                    // Backup in case the lock somehow fails
+                    // THIS FUCKING HAPPENED
+                    while (_sending) ;
+                    _sending = true;
+
+                    try
+                    {
+                        Writer.WriteInt(-1);
+                        Writer.WriteInt(0);
+                        Writer.WriteBytes(packet);
+                    }
+                    finally
+                    {
+                        // Unlock
+                        _sending = false;
+                    }
+                }
             }
             catch { }
 
@@ -823,13 +836,24 @@ namespace Phoenix.Common.Networking.Impl
                 // Send
                 if (_connected)
                 {
-                    while (transmitting)
-                        Thread.Sleep(1);
-                    transmitting = true;
-                    Writer.WriteInt(cId);
-                    Writer.WriteInt(id);
-                    Writer.WriteBytes(packetData);
-                    transmitting = false;
+                    lock (_locker)
+                    {
+                        // Backup in case the lock somehow fails
+                        while (_sending) ;
+                        _sending = true;
+
+                        try
+                        {
+                            Writer.WriteInt(cId);
+                            Writer.WriteInt(id);
+                            Writer.WriteBytes(packetData);
+                        }
+                        finally
+                        {
+                            // Unlock
+                            _sending = false;
+                        }
+                    }
                 }
             }
             else
@@ -837,13 +861,24 @@ namespace Phoenix.Common.Networking.Impl
                 // Send
                 if (_connected)
                 {
-                    while (transmitting)
-                        Thread.Sleep(1);
-                    transmitting = true;
-                    Writer.WriteInt(cId);
-                    Writer.WriteInt(id);
-                    packet.Write(Writer);
-                    transmitting = false;
+                    lock (_locker)
+                    {
+                        // Backup in case the lock somehow fails
+                        while (_sending) ;
+                        _sending = true;
+
+                        try
+                        {
+                            Writer.WriteInt(cId);
+                            Writer.WriteInt(id);
+                            packet.Write(Writer);
+                        }
+                        finally
+                        {
+                            // Unlock
+                            _sending = false;
+                        }
+                    }
                 }
             }
         }

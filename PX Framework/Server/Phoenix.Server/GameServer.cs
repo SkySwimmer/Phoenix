@@ -654,7 +654,7 @@ namespace Phoenix.Server
             ticking = true;
 
             // Start TPS counter
-            Task.Run(() => { 
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() => { 
                 while (ticking)
                 {
                     tps = ticksRun;

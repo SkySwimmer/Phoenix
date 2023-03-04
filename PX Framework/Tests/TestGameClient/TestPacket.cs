@@ -19,6 +19,7 @@ namespace TestGameClient
         {
             RegisterPacket(new TestPacket());
             RegisterHandler(new TestPacketHandler());
+            RegisterPacket(new Phoenix.Tests.Server.TestSyncPacket());
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Phoenix.Client.Authenticators.PhoenixAPI;
 using Phoenix.Client.Providers;
+using Phoenix.Common;
 using Phoenix.Common.Networking.Connections;
 using Phoenix.Common.Networking.Impl;
 using System.Net.Http;
@@ -22,14 +23,14 @@ namespace Phoenix.Client.Authenticators
         }
 
         private PhoenixSession auth;
-        private string api = "https://aerialworks.ddns.net";
+        private string? api = null;
 
         /// <summary>
         /// Creates the authenticator
         /// </summary>
         /// <param name="authData">Authentication data</param>
         /// <param name="api">API server</param>
-        public PhoenixAuthenticator(PhoenixSession authData, string api = "https://aerialworks.ddns.net")
+        public PhoenixAuthenticator(PhoenixSession authData, string api = null)
         {
             auth = authData;
             this.api = api;
@@ -92,10 +93,14 @@ namespace Phoenix.Client.Authenticators
                 {
                     // Build URL
                     GetLogger().Info("Attempting to authenticate with Phoenix...");
-                    string url = api;
+                    string url;
+                    if (api == null)
+                        url = PhoenixEnvironment.DefaultAPIServer;
+                    else
+                        url = api;
                     if (!url.EndsWith("/"))
                         url += "/";
-                    url += "api/auth/joinserver";
+                    url += "auth/joinserver";
 
                     // Get server ID
                     NetworkClientConnection client = (NetworkClientConnection)connection;

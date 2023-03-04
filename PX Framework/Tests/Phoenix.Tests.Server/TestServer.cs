@@ -28,6 +28,7 @@ namespace Phoenix.Tests.Server
             ChannelRegistry registry = new ChannelRegistry();
             registry.Register(new SceneReplicationChannel());
             registry.Register(new TestChannel());
+            registry.GetChannel<TestChannel>().RegisterHandler(new TestSyncHandler());
 
             // Game server
             GameServer testServer = new GameServer("test");

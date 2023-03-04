@@ -1,142 +1,211 @@
-﻿using Newtonsoft.Json;
-using Phoenix.Common.Logging;
+﻿using Phoenix.Common.Networking.Connections;
 using Phoenix.Server.SceneReplication.Coordinates;
 using Phoenix.Server.SceneReplication.Data;
+using Phoenix.Server.SceneReplication.Impl;
+using System.Reflection;
 
 namespace Phoenix.Server.SceneReplication
 {
-    internal class JsonVector3
-    {
-        public float x;
-        public float y;
-        public float z;
-    }
-    internal class JsonTransform
-    {
-        public JsonVector3 position;
-        public JsonVector3 angles;
-        public JsonVector3 scale;
-    }
-    internal class JsonSceneObject
-    {
-        public string name;
-        public bool replicating;
-        public bool active;
-
-        public JsonTransform transform;
-        public Dictionary<string, object?> replication = new Dictionary<string, object?>();
-
-        public List<JsonSceneObject> children = new List<JsonSceneObject>();
-    }
-
+    /// <summary>
+    /// Types of replication properties
+    /// </summary>
     public enum ReplicatingProperty
     {
+        /// <summary>
+        /// Object name
+        /// </summary>
         NAME,
+
+        /// <summary>
+        /// Object active state
+        /// </summary>
         IS_ACTIVE,
-        TRANSFORM_POSITION,
-        TRANSFORM_ROTATION,
-        TRANSFORM_SCALE,
+
+        /// <summary>
+        /// Object transform
+        /// </summary>
+        TRANSFORM,
+
+        /// <summary>
+        /// Replication data
+        /// </summary>
         REPLICATION_DATA,
+
+        /// <summary>
+        /// Removed replication data keys
+        /// </summary>
         REPLICATION_DATA_REMOVEKEY
     }
 
+    #region Event handler definitions
+
     /// <summary>
-    /// Scene objects
+    /// Object destroy event handler
+    /// </summary>
+    /// <param name="sender">Object that was destroyed</param>
+    public delegate void DestroyHandler(SceneObject sender);
+
+    /// <summary>
+    /// Scene change event handler
+    /// </summary>
+    /// <param name="sender">Object that was moved</param>
+    /// <param name="oldScene">Old scene instance</param>
+    /// <param name="newScene">New scene instance/param>
+    public delegate void ChangeSceneHandler(SceneObject sender, Scene? oldScene, Scene? newScene);
+
+    /// <summary>
+    /// Object reparent event handler
+    /// </summary>
+    /// <param name="sender">Object that was reparented</param>
+    /// <param name="oldParent">Old parent instance</param>
+    /// <param name="newParent">New parent instance</param>
+    public delegate void ReParentHandler(SceneObject sender, SceneObject? oldParent, SceneObject? newParent);
+
+    /// <summary>
+    /// Object replication event handler
+    /// </summary>
+    /// <param name="sender">Object that was replicated</param>
+    /// <param name="property">Property that was changed</param>
+    /// <param name="key">Optional key field</param>
+    /// <param name="value">Optional value field</param>
+    public delegate void ReplicationHandler(SceneObject sender, ReplicatingProperty property, string? key, object? value);
+
+    #endregion
+    /// <summary>
+    /// Scene object
     /// </summary>
     public abstract class SceneObject
     {
-        protected string? room;
-        protected SceneManager? manager;
-
-        public delegate void DestroyHandler(SceneObject sender);
-        public delegate void ChangeSceneHandler(SceneObject sender, Scene? oldScene, Scene? newScene);
-        public delegate void ReParentHandler(SceneObject sender, SceneObject? oldParent, SceneObject? newParent);
-        public delegate void ReplicationHandler(SceneObject sender, ReplicatingProperty property, object? value, string? key = null);
+        private static Dictionary<string, SceneObject> _allObjects = new Dictionary<string, SceneObject>();
+        private List<AbstractObjectComponent> _components = new List<AbstractObjectComponent>();
+        private Connection? _owningConnection;
 
         /// <summary>
-        /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
+        /// Retrieves the owning connection of this object (assigning this will prevent other clients from receiving and sending messages to this object)
         /// </summary>
-        /// <param name="filePath">Prefab path (without .prpm)</param>
-        /// <returns>SceneObject instance</returns>
-        public SceneObject SpawnPrefab(string filePath)
+        public Connection? OwningConnection
         {
-            string assetPath = "SceneReplication/" + filePath + ".prpm";
-            string prefabData;
-            try
+            get
             {
-                prefabData = AssetManager.GetAssetString(assetPath);
+                if (_owningConnection != null)
+                    return _owningConnection;
+                if (Parent != null)
+                    return Parent.OwningConnection;
+                return null;
             }
-            catch
+
+            set
             {
-                throw new ArgumentException("Prefab not found: " + filePath);
+                if (_owningConnection != null)
+                    _owningConnection.Disconnected -= DisconnectHandler;
+                _owningConnection = value;
+                if (_owningConnection != null)
+                    _owningConnection.Disconnected += DisconnectHandler;
             }
-            SceneObject obj = SceneObject.FromJson(prefabData, manager, room);
-            AddChild(obj);
-            if (manager != null && room != null && Scene != null)
-                manager.ReplicateAddPrefab(obj, filePath, room, Scene, this);
-            return obj;
         }
 
-        internal SceneObject(SceneManager? manager, string? room)
+        internal void DisposeInternal()
         {
-            this.manager = manager;
-            this.room = room;
+            Unregister(this);
+            foreach (SceneObject obj in Children)
+                Unregister(obj);
+        }
+
+        private void DisconnectHandler(Connection connection, string reason, string[] args)
+        {
+            // Call for all components that do not have a custom handler
+            foreach (AbstractObjectComponent comp in Components)
+            {
+                if (comp.OwningConnection == connection)
+                    comp.Disconnect(reason, args);
+            }
+
+            // Call for child objects
+            foreach (SceneObject obj in Children)
+                obj.DisconnectHandler(connection, reason, args);
         }
 
         /// <summary>
-        /// Creates a reflecting scene object
+        /// Active handler for the FromJson method
         /// </summary>
-        /// <param name="original">Original object</param>
-        /// <param name="parent">Parent object</param>
-        /// <param name="manager">Scene manager</param>
-        /// <param name="room">Room ID</param>
-        /// <returns>SceneObject instance</returns>
-        public static SceneObject Reflecting(SceneObject original, SceneObject? parent, SceneManager? manager, string? room)
+        protected static FromJsonHandler CreateFromJsonHandler = json =>
         {
-            return new ReflectingSceneObject(original, parent, manager, room);
-        }
+            return JsonSceneObject.CreateFromJson(json);
+        };
 
         /// <summary>
-        /// De-serializes Scene Objects
+        /// Handler for loading scene objects from json paylaods
+        /// </summary>
+        /// <param name="json">Json payload</param>
+        /// <returns>SceneObject instance</returns>
+        protected delegate SceneObject FromJsonHandler(string json);
+
+        /// <summary>
+        /// De-serializes Scene Objects (<b>BEWARE!</b> Objects are kept in memory until destroyed, make sure to destroy objects to clean them up!)
         /// </summary>
         /// <param name="json">Serialized scene object</param>
         /// <returns>SceneObject instances</returns>
         public static SceneObject FromJson(string json)
         {
-            JsonSceneObject? obj = JsonConvert.DeserializeObject<JsonSceneObject>(json);
-            if (obj == null)
-                throw new ArgumentException("Invalid JSON data");
-            SceneObjectImpl scO = new SceneObjectImpl(obj, null, null);
-            scO.AddChildren(obj);
-            return scO;
+            return CreateFromJsonHandler(json);
         }
 
         /// <summary>
-        /// De-serializes Scene Objects
+        /// Retrieves scene objects by ID (throws an exception if not present)
         /// </summary>
-        /// <param name="json">Serialized scene object</param>
-        /// <param name="manager">Scene manager</param>
-        /// <param name="room">Room ID</param>
-        /// <returns>SceneObject instances</returns>
-        internal static SceneObject FromJson(string json, SceneManager? manager, string? room)
+        /// <param name="id">Object ID</param>
+        /// <returns>SceneObject isntance</returns>
+        public static SceneObject GetObject(string id)
         {
-            JsonSceneObject? obj = JsonConvert.DeserializeObject<JsonSceneObject>(json);
-            if (obj == null)
-                throw new ArgumentException("Invalid JSON data");
-            SceneObjectImpl scO = new SceneObjectImpl(obj, manager, room);
-            scO.AddChildren(obj);
-            return scO;
+            lock (_allObjects)
+            {
+                if (_allObjects.ContainsKey(id))
+                    return _allObjects[id];
+            }
+            throw new ArgumentException("Scene object not recognized");
         }
 
         /// <summary>
-        /// Retrieves the scene the object is in
+        /// Allocates an object ID and registers a scene object
         /// </summary>
-        public abstract Scene? Scene { get; set; }
+        /// <param name="obj">Object to register</param>
+        /// <returns>Object ID</returns>
+        protected string Register(SceneObject obj)
+        {
+            lock (_allObjects)
+            {
+                while (true)
+                {
+                    string id = Guid.NewGuid().ToString();
+                    if (_allObjects.ContainsKey(id))
+                        continue;
+                    _allObjects[id] = obj;
+                    return id;
+                }
+            }
+        }
 
         /// <summary>
-        /// Retrieves the object parent
+        /// Removes a registered scene object
         /// </summary>
-        public abstract SceneObject? Parent { get; set; }
+        /// <param name="obj">Object to unregister</param>
+        protected void Unregister(SceneObject obj)
+        {
+            lock (_allObjects)
+                _allObjects.Remove(obj.ID);
+        }
+
+        #region Fields
+
+        /// <summary>
+        /// Defines if the object is active
+        /// </summary>
+        public abstract bool Active { get; set; }
+
+        /// <summary>
+        /// Object ID
+        /// </summary>
+        public abstract string ID { get; }
 
         /// <summary>
         /// Object path
@@ -149,47 +218,29 @@ namespace Phoenix.Server.SceneReplication
         public abstract string Name { get; set; }
 
         /// <summary>
-        /// Checks if the object replicates
+        /// Checks if this object replicates or is read-only
         /// </summary>
-        public abstract bool Replicates { get; }
+        public abstract bool Replicating { get; }
 
         /// <summary>
-        /// Defines if the object is active or not
+        /// Removes child objects
         /// </summary>
-        public abstract bool Active { get; set; }
+        /// <param name="child">Child object to remove</param>
+        internal abstract void RemoveChild(SceneObject child);
 
         /// <summary>
-        /// Destroys the object
+        /// Adds child objects
         /// </summary>
-        public abstract void Destroy();
+        /// <param name="child">Child object to add</param>
+        internal abstract void AddChild(SceneObject child);
 
         /// <summary>
-        /// Destroys the object without replication lockouts
+        /// Retrieves the parent object (may be null)
         /// </summary>
-        internal abstract void DestroyForced();
+        public abstract SceneObject? Parent { get; set; }
 
         /// <summary>
-        /// Called when this object or a child of it requires to be replicated (called when properties change)
-        /// </summary>
-        public event ReplicationHandler? OnReplicate;
-
-        /// <summary>
-        /// Called when this object or a child of it is destroyed
-        /// </summary>
-        public event DestroyHandler? OnDestroy;
-
-        /// <summary>
-        /// Called when this object or a child of it is reparented
-        /// </summary>
-        public event ReParentHandler? OnReparent;
-
-        /// <summary>
-        /// Called when this object or a child of it is moved to a different scene
-        /// </summary>
-        public event ChangeSceneHandler? OnChangeScene;
-
-        /// <summary>
-        /// Object transform
+        /// Retrieves the object transform
         /// </summary>
         public abstract Transform Transform { get; }
 
@@ -204,9 +255,166 @@ namespace Phoenix.Server.SceneReplication
         public abstract SceneObject[] Children { get; }
 
         /// <summary>
-        /// Unlocks the object
+        /// Retrieves the owning scene
         /// </summary>
-        public abstract void Unlock();
+        public abstract Scene? Scene { get; set; }
+
+        /// <summary>
+        /// Assigns the scene instance without running any scene processing
+        /// </summary>
+        /// <param name="scene">Scene instance</param>
+        internal abstract void InternalSetScene(Scene scene);
+
+        /// <summary>
+        /// Unsets the scene instance without running any scene processing
+        /// </summary>
+        internal abstract void InternalUnsetScene();
+
+        #endregion
+        #region Pre-defined fields and methods
+
+        /// <summary>
+        /// Retrieves all object components
+        /// </summary>
+        public AbstractObjectComponent[] Components
+        {
+            get
+            {
+                while (true)
+                {
+                    try
+                    {
+                        return _components.ToArray();
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes object components
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>True if removed, false otherwise</returns>
+        public bool RemoveComponent<T>() where T : AbstractObjectComponent
+        {
+            foreach (AbstractObjectComponent comp in Components)
+            {
+                if (comp is T)
+                {
+                    comp.Destroy();
+                    lock (_components)
+                        _components.Remove(comp);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Removes object components
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <param name="instance">Component instance</param>
+        /// <returns>True if removed, false otherwise</returns>
+        public bool RemoveComponent<T>(T instance) where T : AbstractObjectComponent
+        {
+            if (_components.Contains(instance))
+            {
+                lock (_components)
+                    _components.Remove(instance);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Adds object components
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>Component instance or existing instance if one is present</returns>
+        public T AddComponent<T>() where T : AbstractObjectComponent
+        {
+            if (HasComponent<T>())
+                return GetComponent<T>();
+            try
+            {
+                // Find constructor
+                ConstructorInfo? constr = typeof(T).GetConstructor(new Type[0]);
+                if (constr == null)
+                    throw new ArgumentException();
+
+                // Create instance
+                object inst = constr.Invoke(new object[0]);
+                if (inst is T)
+                {
+                    T instance = (T)inst;
+                    lock (_components)
+                        _components.Add(instance);
+                    instance.Setup(this);
+                    return instance;
+                }
+                throw new ArgumentException();
+            }
+            catch
+            {
+                throw new ArgumentException("Component does not have an empty constructor");
+            }
+        }
+
+        /// <summary>
+        /// Adds object components
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <param name="instance">Component instance</param>
+        /// <returns>Component instance</returns>
+        public T AddComponent<T>(T instance) where T : AbstractObjectComponent
+        {
+            lock (_components)
+                _components.Add(instance);
+            instance.Setup(this);
+            return instance;
+        }
+
+        /// <summary>
+        /// Checks if a component is present
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>True if present, false otherwise</returns>
+        public bool HasComponent<T>() where T : AbstractObjectComponent
+        {
+            foreach (AbstractObjectComponent comp in Components)
+            {
+                if (comp is T)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Retrieves object components (throws an exception if not present)
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>Component instance</returns>
+        public T GetComponent<T>() where T : AbstractObjectComponent
+        {
+            foreach (AbstractObjectComponent comp in Components)
+            {
+                if (comp is T)
+                    return (T)comp;
+            }
+            throw new ArgumentException("Component not present");
+        }
+
+        /// <summary>
+        /// Retrieves all object components of a type
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>Array of component instances</returns>
+        public T[] GetComponents<T>() where T : AbstractObjectComponent
+        {
+            return Components.Where(t => t is T).Select(t => (T)t).ToArray();
+        }
 
         /// <summary>
         /// Retrieves child objects by name
@@ -219,6 +427,31 @@ namespace Phoenix.Server.SceneReplication
             if (res == null)
                 throw new ArgumentException("Object not found");
             return res;
+        }
+
+        /// <summary>
+        /// Retrieves child objects by name
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <returns>Array of SceneObject instances</returns>
+        public SceneObject[] GetChildren(string name)
+        {
+            if (name.Contains("/"))
+            {
+                string pth = name.Remove(name.IndexOf("/"));
+                string ch = name.Substring(name.IndexOf("/") + 1);
+                foreach (SceneObject obj in Children)
+                {
+                    if (obj.Name == pth)
+                    {
+                        SceneObject[] objs = obj.GetChildren(ch);
+                        if (objs.Length != 0)
+                            return objs;
+                    }
+                }
+                return new SceneObject[0];
+            }
+            return Children.Where(t => t.Name == name).ToArray();
         }
 
         /// <summary>
@@ -252,62 +485,169 @@ namespace Phoenix.Server.SceneReplication
         }
 
         /// <summary>
-        /// Assigns the parent scene object without running any replication
+        /// Destroys the object
         /// </summary>
-        /// <param name="scene">New parent scene</param>
-        internal abstract void SetScene(Scene? scene);
-
-        /// <summary>
-        /// Assigns the object path without running any replication
-        /// </summary>
-        /// <param name="path">New path</param>
-        internal abstract void SetPath(string path);
-
-        /// <summary>
-        /// Assigns the parent object without running any replication
-        /// </summary>
-        /// <param name="parent">Parent object</param>
-        internal abstract void SetParent(SceneObject? parent);
-
-        /// <summary>
-        /// Adds child objects without running any replication
-        /// </summary>
-        /// <param name="child">Child object to add</param>
-        internal abstract void AddChild(SceneObject child);
-
-        /// <summary>
-        /// Removes child objects without running any replication
-        /// </summary>
-        /// <param name="child">Child object to remove</param>
-        internal abstract void RemoveChild(SceneObject child);
-
-        protected void CallOnReplicate(SceneObject sender, ReplicatingProperty property, object? value, string? key = null)
+        public void Destroy()
         {
-            OnReplicate?.Invoke(sender, property, value, key);
-            if (Parent != null)
-                Parent.CallOnReplicate(sender, property, value, key);
-            else if (Scene != null)
-                Scene.HandleReplicate(sender, property, value, key);
+            if (!Replicating)
+                throw new ArgumentException("Cannot modify read-only objects");
+            DestroyForced();
         }
 
+        /// <summary>
+        /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
+        /// </summary>
+        /// <param name="filePath">Prefab path (without .prpm)</param>
+        /// <returns>SceneObject instance</returns>
+        public SceneObject SpawnPrefab(string filePath)
+        {
+            string assetPath = "SceneReplication/" + filePath + ".prpm";
+            string prefabData;
+            try
+            {
+                prefabData = AssetManager.GetAssetString(assetPath);
+            }
+            catch
+            {
+                throw new ArgumentException("Prefab not found: " + filePath);
+            }
+            SceneObject obj = SceneObject.FromJson(prefabData);
+            if (Scene != null)
+                Scene.HandleSpawnPrefab(filePath, obj, this);
+            obj.Parent = this;
+            return obj;
+        }
+
+        #endregion
+        #region Internal methods
+
+        /// <summary>
+        /// Updates all components
+        /// </summary>
+        internal void Update()
+        {
+            foreach (AbstractObjectComponent comp in Components)
+            {
+                if (comp == null)
+                    continue;
+                comp.Update();
+            }
+        }
+
+        /// <summary>
+        /// Calls destroy, should be called only if the object has not been destroyed before and before unsetting the parent and scene
+        /// </summary>
+        /// <param name="sender">Object that caused this object to be destroyed (eg. a parent or root)</param>
         protected void CallOnDestroy(SceneObject sender)
         {
             OnDestroy?.Invoke(sender);
-            if (Parent != null)
-                Parent.CallOnDestroy(sender);
-            else if (Scene != null)
-                Scene.HandleOnDestroy(sender);
+            if (sender == this)
+            {
+                foreach (AbstractObjectComponent comp in Components)
+                {
+                    if (comp == null)
+                        continue;
+                    if (Scene != null)
+                    {
+                        if (Active)
+                            comp.Disable();
+                        comp.Stop();
+                    }
+                    comp.Destroy();
+                }
+            }
         }
 
+        /// <summary>
+        /// Calls events needed after destroy, should be called after unsetting the scene and parent
+        /// </summary>
+        /// <param name="sender">Object that caused this object to be destroyed (eg. a parent or root)</param>
+        /// <param name="oldParent">Old parent object</param>
+        /// <param name="oldScene">Old scene object</param>
+        protected void PostCallDestroy(SceneObject sender, SceneObject? oldParent, Scene? oldScene)
+        {
+            if (oldParent != null)
+            {
+                oldParent.CallOnDestroy(sender);
+                oldParent.PostCallDestroy(sender, oldParent == null ? null : oldParent.Parent, oldScene);
+            }
+            else if (oldScene != null)
+                oldScene.HandleOnDestroy(sender);
+
+            if (sender == this)
+            {
+                // Destroy child objects
+                foreach (SceneObject ch in Children)
+                {
+                    ch.DestroyForced();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calls replication
+        /// </summary>
+        /// <param name="sender">Object firing the event</param>
+        /// <param name="property">Property type</param>
+        /// <param name="key">Key field</param>
+        /// <param name="value">Value field</param>
+        protected void CallOnReplicate(SceneObject sender, ReplicatingProperty property, string? key, object? value)
+        {
+            OnReplicate?.Invoke(sender, property, key, value);
+            if (Parent != null)
+                Parent.CallOnReplicate(sender, property, key, value);
+            else if (Scene != null)
+                Scene.HandleReplicate(sender, property, key, value);
+        }
+
+        /// <summary>
+        /// Calls scene change
+        /// </summary>
+        /// <param name="sender">Sender object</param>
+        /// <param name="oldScene">Old scene</param>
+        /// <param name="newScene">New scene</param>
         protected void CallOnChangeScene(SceneObject sender, Scene? oldScene, Scene? newScene)
         {
+            if (oldScene != null && sender == this)
+            {
+                foreach (AbstractObjectComponent comp in Components)
+                {
+                    if (comp == null)
+                        continue;
+                    comp.Stop();
+                }
+            }
             OnChangeScene?.Invoke(sender, oldScene, newScene);
             if (Parent != null)
                 Parent.CallOnChangeScene(sender, oldScene, newScene);
-            else if (Scene != null)
-                Scene.HandleOnChangeScene(sender, oldScene, newScene);
+            else
+            {
+                // Root
+                if (oldScene != null)
+                {
+                    oldScene.HandleOnChangeScene(sender, oldScene, newScene);
+                    oldScene.RemoveFromScene(sender);
+                }
+                if (newScene != null)
+                    newScene.AddToScene(sender);
+            }
+            if (newScene != null && sender == this)
+            {
+                foreach (AbstractObjectComponent comp in Components)
+                {
+                    if (comp == null)
+                        continue;
+                    comp.Start();
+                }
+            }
         }
 
+        /// <summary>
+        /// Calls object reparent
+        /// </summary>
+        /// <param name="sender">Sender object</param>
+        /// <param name="oldParent">Old parent</param>
+        /// <param name="newParent">new parent</param>
         protected void CallOnReparent(SceneObject sender, SceneObject? oldParent, SceneObject? newParent)
         {
             OnReparent?.Invoke(sender, oldParent, newParent);
@@ -317,499 +657,67 @@ namespace Phoenix.Server.SceneReplication
                 Scene.HandleReparent(sender, oldParent, newParent);
         }
 
+        /// <summary>
+        /// Handles Active state changes for components (must be called AFTER changing the value of Active)
+        /// </summary>
+        /// <param name="lastState">Previous state</param>
+        protected void OnChangeActiveState(bool lastState)
+        {
+            if (Active != lastState)
+            {
+                foreach (AbstractObjectComponent comp in Components)
+                {
+                    if (comp == null)
+                        continue;
+                    if (Active)
+                        comp.Enable();
+                    else
+                        comp.Disable();
+                }
+            }
+        }
+
+        #endregion
+        #region Abstract methods
+
+        /// <summary>
+        /// Unlocks the object for changing properties (only possible for non-read-only objects)
+        /// </summary>
+        public abstract void Unlock();
+
+        /// <summary>
+        /// Destroys the object without replication lockouts
+        /// </summary>
+        protected abstract void DestroyForced();
+
+        #endregion
+        #region Events
+
+        /// <summary>
+        /// Called when this object or a child of it requires to be replicated (called when properties change)
+        /// </summary>
+        public event ReplicationHandler? OnReplicate;
+
+        /// <summary>
+        /// Called when this object or a child of it is destroyed
+        /// </summary>
+        public event DestroyHandler? OnDestroy;
+
+        /// <summary>
+        /// Called when this object or a child of it is reparented
+        /// </summary>
+        public event ReParentHandler? OnReparent;
+
+        /// <summary>
+        /// Called when this object or a child of it is moved to a different scene
+        /// </summary>
+        public event ChangeSceneHandler? OnChangeScene;
+
+        #endregion
+
         public override string ToString()
         {
             return (Scene != null ? Scene.Name + ":" : "") + Path;
-        }
-    }
-
-    internal class ReflectingSceneObject : SceneObjectImpl
-    {
-        private Scene? _originalScene;
-        private SceneObject _data;
-        private bool unlocked;
-        private string _originalPath;
-
-        internal ReflectingSceneObject(SceneObject original, SceneObject? parent, SceneManager? manager, string? room) : base(manager, room)
-        {
-            _data = original;
-            _path = original.Path;
-            _originalPath = original.Path;
-            _parent = parent;
-
-            // Add child objects
-            foreach (SceneObject ch in original.Children)
-            {
-                _children.Add(new ReflectingSceneObject(ch, this, manager, room));
-            }
-        }
-
-        internal override void SetScene(Scene? scene)
-        {
-            base.SetScene(scene);
-            if (_originalScene == null)
-                _originalScene = scene;
-        }
-
-        // Unlock
-        public override void Unlock()
-        {
-            if (!_data.Replicates)
-                throw new ArgumentException("Cannot unlock objects that do not replicate");
-            if (unlocked)
-                return;
-
-            // Copy original
-            _name = _data.Name;
-            _replicating = true;
-            _active = _data.Active;
-            _transform = new(new Vector3(_data.Transform.Position.X, _data.Transform.Position.Y, _data.Transform.Position.Z), new Vector3(_data.Transform.Scale.X, _data.Transform.Scale.Y, _data.Transform.Scale.Z), new Vector3(_data.Transform.Rotation.X, _data.Transform.Rotation.Y, _data.Transform.Rotation.Z));
-            _transform.OnReplicate += prop =>
-            {
-                switch (prop)
-                {
-                    case ReplicatingTransformProperty.POSITION:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_POSITION, Transform);
-                        break;
-                    case ReplicatingTransformProperty.ROTATION:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_ROTATION, Transform);
-                        break;
-                    case ReplicatingTransformProperty.SCALE:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_SCALE, Transform);
-                        break;
-                }
-            };
-            _replication = new ReplicationDataMap(JsonConvert.DeserializeObject<Dictionary<string,object>>(JsonConvert.SerializeObject(_data.ReplicationData.data)));
-            _replication.OnChange += (key, val) => {
-                CallOnReplicate(this, ReplicatingProperty.REPLICATION_DATA, val, key);
-            };
-            _replication.OnRemove += (key) => {
-                CallOnReplicate(this, ReplicatingProperty.REPLICATION_DATA_REMOVEKEY, key);
-            };
-
-            // Unset data and unlock
-            _data = null;
-            unlocked = true;
-        }
-
-        public override string Name
-        {
-            get
-            {
-                if (unlocked)
-                    return base.Name;
-                return _data.Name;
-            }
-
-            set
-            {
-                if (!unlocked)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                base.Name = value;
-            }
-        }
-
-        public override string Path
-        {
-            get
-            {
-                if (unlocked)
-                    return base.Path;
-                return _data.Path;
-            }
-        }
-
-        public override bool Replicates
-        {
-            get
-            {
-                if (unlocked)
-                    return base.Replicates;
-                return _data.Replicates;
-            }
-        }
-
-        public override bool Active
-        {
-            get
-            {
-                if (unlocked)
-                    return base.Active;
-                return _data.Active;
-            }
-
-            set
-            {
-                if (!unlocked)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                base.Active = value;
-            }
-        }
-
-        public override Scene? Scene
-        {
-            get
-            {
-                return _scene;
-            }
-
-            set
-            {
-                if (!unlocked)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                base.Scene = value;
-                if (_originalScene != null)
-                    _originalScene._newObjectScenes[_originalPath] = Scene.Path;
-            }
-        }
-
-        public override SceneObject? Parent
-        {
-            get
-            {
-                return _parent;
-            }
-
-            set
-            {
-                if (!unlocked)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                base.Parent = value;
-                if (_originalScene != null)
-                    _originalScene._reparentedObjects[_originalPath] = value;
-            }
-        }
-
-        public override Transform Transform
-        {
-            get
-            {
-                if (!unlocked && _data.Replicates)
-                    return new Transform(new Vector3(_data.Transform.Position.X,
-                            _data.Transform.Position.Y,
-                            _data.Transform.Position.Z,
-                            true
-                        ), new Vector3(_data.Transform.Scale.X,
-                            _data.Transform.Scale.Y,
-                            _data.Transform.Scale.Z,
-                            true
-                        ), new Vector3(_data.Transform.Rotation.X,
-                            _data.Transform.Rotation.Y,
-                            _data.Transform.Rotation.Z,
-                            true
-                        ), true);
-                else if (!unlocked)
-                    return _data.Transform;
-                return base.Transform;
-            }
-        }
-
-        public override ReplicationDataMap ReplicationData
-        {
-            get
-            {
-                if (!unlocked)
-                    return _data.ReplicationData.ReadOnlyCopy();
-                return base.ReplicationData;
-            }
-        }
-
-        public override void Destroy()
-        {
-            if (!unlocked)
-                throw new ArgumentException("Cannot change properties of a read-only object");
-            base.Destroy();
-            if (_originalScene != null)
-            {
-                _originalScene._destroyedObjects.Add(_originalPath);
-                if (_originalScene._reparentedObjects.ContainsKey(_originalPath))
-                    _originalScene._reparentedObjects.Remove(_originalPath);
-                if (_originalScene._newObjectScenes.ContainsKey(_originalPath))
-                    _originalScene._newObjectScenes.Remove(_originalPath);
-            }
-            _originalScene = null;
-        }
-    }
-
-    internal class SceneObjectImpl : SceneObject
-    {
-        protected string _path;
-        protected string _name;
-        
-        protected bool _replicating = false;
-        protected bool _active = false;
-        protected Transform _transform;
-        protected ReplicationDataMap _replication;
-        protected List<SceneObject> _children = new List<SceneObject>();
-        protected SceneObject? _parent;
-        internal Scene? _scene;
-
-        internal SceneObjectImpl(SceneManager? manager, string? room) : base(manager, room) {}
-
-        internal SceneObjectImpl(JsonSceneObject obj, SceneManager? manager, string? room) : base(manager, room)
-        {
-            _name = obj.name;
-            _replicating = obj.replicating;
-            _active = obj.active;
-            _transform = new(new Vector3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z, !_replicating), new Vector3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z, !_replicating), new Vector3(obj.transform.angles.x, obj.transform.angles.y, obj.transform.angles.z, !_replicating));
-            _transform.OnReplicate += prop =>
-            {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                switch (prop)
-                {
-                    case ReplicatingTransformProperty.POSITION:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_POSITION, Transform);
-                        break;
-                    case ReplicatingTransformProperty.ROTATION:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_ROTATION, Transform);
-                        break;
-                    case ReplicatingTransformProperty.SCALE:
-                        CallOnReplicate(this, ReplicatingProperty.TRANSFORM_SCALE, Transform);
-                        break;
-                }
-            };
-            _replication = new ReplicationDataMap(obj.replication, !_replicating);
-            _replication.OnChange += (key, val) => {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                CallOnReplicate(this, ReplicatingProperty.REPLICATION_DATA, val, key);
-            };
-            _replication.OnRemove += (key) => {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                CallOnReplicate(this, ReplicatingProperty.REPLICATION_DATA_REMOVEKEY, key);
-            };
-            _path = obj.name;
-        }
-
-        internal void AddChildren(JsonSceneObject obj)
-        {
-            foreach (JsonSceneObject ch in obj.children)
-            {
-                SceneObjectImpl objC = new SceneObjectImpl(ch, manager, room);
-                AddChild(objC);
-                objC.AddChildren(ch);
-            }
-        }
-
-        internal override void SetParent(SceneObject? parent)
-        {
-            _parent = parent;
-        }
-
-        internal override void SetScene(Scene? scene)
-        {
-            _scene = scene;
-        }
-
-        internal override void SetPath(string path)
-        {
-            _path = path;
-        }
-
-        internal override void AddChild(SceneObject objC)
-        {
-            objC.SetScene(_scene);
-            objC.SetParent(this);
-            objC.SetPath(_path + "/" + objC.Path);
-            if (_replicating && _children.Any(t => t.Name == objC.Name))
-                Logger.GetLogger("scene-replication").Warn("Replication conflict: " + objC.Path + " has multiple matches!");
-            _children.Add(objC);
-        }
-
-        internal override void RemoveChild(SceneObject objC)
-        {
-            _children.Remove(objC);
-        }
-
-        /// <summary>
-        /// Retrieves the scene the object is in
-        /// </summary>
-        public override Scene? Scene
-        {
-            get
-            {
-                return _scene;
-            }
-            set
-            {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                if (value == null)
-                    throw new ArgumentException("Null scene assignment unsupported as it breaks replication");
-                if (_parent != null)
-                    Parent = null;
-                else if (_scene != null)
-                    _scene.RemoveFromScene(this); // Only root nodes need to call this
-                Scene? oldScene = _scene;
-                _scene = value;
-                _scene.AddToScene(this);
-                CallOnChangeScene(this, oldScene, value);
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the object parent
-        /// </summary>
-        public override SceneObject? Parent
-        {
-            get
-            {
-                return _parent;
-            }
-            set
-            {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-
-                // Call re-parent
-                SceneObject? oldParent = _parent;
-                if (_parent != null)
-                    _parent.RemoveChild(this);
-                _parent = value;
-                _path = _name;
-                if (_parent != null)
-                    _parent.AddChild(this);
-                else if (_scene != null && !_scene.Objects.Contains(this))
-                    _scene.AddToScene(this);
-                CallOnReparent(this, oldParent, value);
-            }
-        }
-
-        /// <summary>
-        /// Destroys the object
-        /// </summary>
-        public override void Destroy()
-        {
-            if (!_replicating)
-                throw new ArgumentException("Cannot change properties of a read-only object");
-            DestroyForced();
-        }
-
-        internal override void DestroyForced()
-        {
-            if (_parent == null && _scene != null)
-                _scene.RemoveFromScene(this);
-            if (_parent != null)
-                _parent.RemoveChild(this);
-            SetParent(null);
-            SetScene(null);
-            CallOnDestroy(this);
-
-            // Destroy children
-            SceneObject[] chs = Children;
-            _children.Clear();
-            foreach (SceneObject obj in chs)
-            {
-                obj.SetParent(null);
-                obj.SetScene(null);
-                obj.DestroyForced();
-            }
-        }
-
-        // Dummy
-        public override void Unlock()
-        {
-            if (!_replicating)
-                throw new ArgumentException("Cannot unlock objects that do not replicate");
-        }
-
-        /// <summary>
-        /// Object path
-        /// </summary>
-        public override string Path
-        {
-            get
-            {
-                return _path;
-            }
-        }
-
-        /// <summary>
-        /// Object name
-        /// </summary>
-        public override string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                _name = value;
-                CallOnReplicate(this, ReplicatingProperty.NAME, _name);
-            }
-        }
-
-        /// <summary>
-        /// Checks if the object replicates
-        /// </summary>
-        public override bool Replicates
-        {
-            get
-            {
-                return _replicating;
-            }
-        }
-
-        /// <summary>
-        /// Defines if the object is active or not
-        /// </summary>
-        public override bool Active
-        {
-            get
-            {
-                return _active;
-            }
-            set
-            {
-                if (!_replicating)
-                    throw new ArgumentException("Cannot change properties of a read-only object");
-                _active = value;
-                CallOnReplicate(this, ReplicatingProperty.IS_ACTIVE, value);
-            }
-        }
-        /// <summary>
-        /// Object transform
-        /// </summary>
-        public override Transform Transform
-        {
-            get
-            {
-                return _transform;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the replication data map
-        /// </summary>
-        public override ReplicationDataMap ReplicationData
-        {
-            get
-            {
-                return _replication;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the child objects of this scene object
-        /// </summary>
-        public override SceneObject[] Children
-        {
-            get
-            {
-                while (true)
-                {
-                    try
-                    {
-                        return _children.ToArray();
-                    }
-                    catch { }
-                }
-            }
         }
     }
 }

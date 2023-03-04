@@ -12,10 +12,12 @@ namespace TestGameClient
 {
     public class TestSceneReplicationBindings : SceneReplicationBindings
     {
+        public static TestSceneReplicationBindings inst;
         private SceneReplicationComponent comp;
         public TestSceneReplicationBindings(SceneReplicationComponent component)
         {
             comp = component;
+            inst = this;
         }
 
         public override string GetName()

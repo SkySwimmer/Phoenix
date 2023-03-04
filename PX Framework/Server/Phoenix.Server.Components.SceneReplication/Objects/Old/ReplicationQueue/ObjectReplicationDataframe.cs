@@ -1,6 +1,6 @@
 ﻿using Phoenix.Server.SceneReplication.Coordinates;
 
-namespace Phoenix.Server.Components.SceneReplication.Objects.ReplicationQueue
+namespace Phoenix.Server.Components.SceneReplication.Old.Objects.ReplicationQueue
 {
     public class ObjectReplicationDataframe : ReplicationDataframe
     {

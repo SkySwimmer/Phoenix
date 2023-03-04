@@ -44,7 +44,7 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
         /// <summary>
         /// Defines the API used to log into the game
         /// </summary>
-        public static string API = "https://aerialworks.ddns.net";
+        public static string? API = null;
 
         /// <summary>
         /// Defines the token used to call the authentication API, null makes it use the token from the Game descriptor
@@ -104,10 +104,14 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                     string? tkn = LoginToken;
                     if (tkn == null)
                         tkn = Game.SessionToken;
-                    string url = API;
+                    string url;
+                    if (API == null)
+                        url = PhoenixEnvironment.DefaultAPIServer;
+                    else
+                        url = API;
                     if (!url.EndsWith("/"))
                         url += "/";
-                    url += "api/auth/authenticate";
+                    url += "auth/authenticate";
 
                     // Contact phoenix
                     HttpClient cl = new HttpClient();
@@ -138,7 +142,7 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                                     onSuccess(_session);
 
                                     // Start refresh
-                                    Task.Run(() =>
+                                    Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                                     {
                                         while (IsLoggedIn)
                                         {

@@ -321,7 +321,7 @@ namespace Phoenix.Debug.DebugServerRunner
             {
                 logger.Info("Starting tick loop for server " + serverID);
                 runningServers++;
-                Task.Run(() => {
+                Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() => {
                     srv.ServerLoop();
                     runningServers--;
                 });

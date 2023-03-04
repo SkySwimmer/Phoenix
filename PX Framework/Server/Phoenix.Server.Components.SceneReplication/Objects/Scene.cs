@@ -4,149 +4,39 @@ using Newtonsoft.Json.Linq;
 namespace Phoenix.Server.SceneReplication
 {
     /// <summary>
+    /// Event handler for prefab spawning
+    /// </summary>
+    /// <param name="filePath">Prefab path</param>
+    /// <param name="scene">Scene the prefab was spawned in</param>
+    /// <param name="prefab">Prefab object</param>
+    /// <param name="parent">Parent object</param>
+    public delegate void SpawnPrefabHandler(string filePath, Scene scene, SceneObject prefab, SceneObject? parent);
+
+    /// <summary>
     /// Replicated scene object
     /// </summary>
     public class Scene
     {
-        private string? room;
-        private SceneManager? manager;
+        private string _name;
+        private string _path;
 
-        private string name;
-        private string path;
-        private List<SceneObject> objects = new List<SceneObject>();
-
-        internal Dictionary<string, string?> _spawnedPrefabs = new Dictionary<string, string?>();
-        internal string[] SpawnedPrefabs
+        private Dictionary<string, SceneObject> _objects = new Dictionary<string, SceneObject>();
+        
+        private Scene(string name, string path)
         {
-            get
-            {
-                while (true)
-                {
-                    try
-                    {
-                        return _spawnedPrefabs.Keys.ToArray();
-                    }
-                    catch { }
-                }
-            }
+            _name = name;
+            _path = path;
         }
 
-        internal Dictionary<string, SceneObject?> _reparentedObjects = new Dictionary<string, SceneObject?>();
-        internal string[] ReparentedObjects
+        private Scene(string path, string name, SceneObject[] objects)
         {
-            get
-            {
-                while (true)
-                {
-                    try
-                    {
-                        return _reparentedObjects.Keys.ToArray();
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        internal Dictionary<string, string> _newObjectScenes = new Dictionary<string, string>();
-        internal string[] NewObjectScenes
-        {
-            get
-            {
-                while (true)
-                {
-                    try
-                    {
-                        return _newObjectScenes.Keys.ToArray();
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        internal List<string> _destroyedObjects = new List<string>();
-        internal string[] DestroyedObjects
-        {
-            get
-            {
-                while (true)
-                {
-                    try
-                    {
-                        return _destroyedObjects.ToArray();
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        private Scene(string path, string name, SceneObject[] objects, SceneManager? manager, string? room)
-        {
-            this.manager = manager;
-            this.room = room;
             foreach (SceneObject obj in objects)
             {
-                SetScene(obj);
+                AddToScene(obj);
             }
-            this.objects.AddRange(objects);
-            this.name = name;
-            this.path = path;
+            _name = name;
+            _path = path;
         }
-
-        private void SetScene(SceneObject obj)
-        {
-            obj.SetScene(this);
-            foreach (SceneObject ch in obj.Children)
-                SetScene(ch);
-        }
-
-        public delegate void DestroyHandler(SceneObject sender);
-        public delegate void ChangeSceneHandler(SceneObject sender, Scene? oldScene, Scene? newScene);
-        public delegate void ReParentHandler(SceneObject sender, SceneObject? oldParent, SceneObject? newParent);
-        public delegate void ReplicationHandler(SceneObject sender, ReplicatingProperty property, object? value, string? key = null);
-
-        /// <summary>
-        /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
-        /// </summary>
-        /// <param name="filePath">Prefab path (without .prpm)</param>
-        /// <returns>SceneObject instance</returns>
-        public SceneObject SpawnPrefab(string filePath)
-        {
-            string assetPath = "SceneReplication/" + filePath + ".prpm";
-            string prefabData;
-            try
-            {
-                prefabData = AssetManager.GetAssetString(assetPath);
-            }
-            catch
-            {
-                throw new ArgumentException("Prefab not found: " + filePath);
-            }
-            SceneObject obj = SceneObject.FromJson(prefabData, manager, room);
-            objects.Add(obj);
-            if (manager != null && room != null)
-                manager.ReplicateAddPrefab(obj, filePath, room, this, null);
-            return obj;
-        }
-
-        /// <summary>
-        /// Called when a object requires to be replicated (called when properties change)
-        /// </summary>
-        public event ReplicationHandler? OnReplicate;
-
-        /// <summary>
-        /// Called when a object is destroyed
-        /// </summary>
-        public event DestroyHandler? OnDestroy;
-
-        /// <summary>
-        /// Called when a object is reparented
-        /// </summary>
-        public event ReParentHandler? OnReparent;
-
-        /// <summary>
-        /// Called when a object is moved to a different scene
-        /// </summary>
-        public event ChangeSceneHandler? OnChangeScene;
 
         /// <summary>
         /// Reads a scene from a PRISM scene map
@@ -166,7 +56,7 @@ namespace Phoenix.Server.SceneReplication
                     sceneObjects.Add(SceneObject.FromJson(JsonConvert.SerializeObject(obj)));
                 }
             }
-            return new Scene(path, name, sceneObjects.ToArray(), null, null);
+            return new Scene(path, name, sceneObjects.ToArray());
         }
 
         /// <summary>
@@ -175,47 +65,33 @@ namespace Phoenix.Server.SceneReplication
         /// <param name="path">Scene path</param>
         /// <param name="name">Scene name</param>
         /// <param name="objects">Scene objects</param>
-        /// <param name="manager">Scene manager</param>
-        /// <param name="room">Room ID</param>
         /// <returns>Scene object</returns>
-        internal static Scene FromObjects(string path, string name, SceneObject[] objects, SceneManager manager, string? room)
+        internal static Scene FromObjects(string path, string name, SceneObject[] objects)
         {
-            return new Scene(path, name, objects, manager, room);
+            return new Scene(path, name, objects);
         }
 
-        internal void AddToScene(SceneObject obj)
+        /// <summary>
+        /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
+        /// </summary>
+        /// <param name="filePath">Prefab path (without .prpm)</param>
+        /// <returns>SceneObject instance</returns>
+        public SceneObject SpawnPrefab(string filePath)
         {
-            objects.Add(obj);
-        }
-
-        internal void RemoveFromScene(SceneObject obj)
-        {
-            objects.Remove(obj);
-        }
-
-        internal void HandleOnDestroy(SceneObject sender)
-        {
-            OnDestroy?.Invoke(sender);
-        }
-
-        internal void HandleOnChangeScene(SceneObject sender, Scene? oldScene, Scene? newScene)
-        {
-            OnChangeScene?.Invoke(sender, oldScene, newScene);
-        }
-
-        internal void HandleReparent(SceneObject sender, SceneObject? oldParent, SceneObject? newParent)
-        {
-            OnReparent?.Invoke(sender, oldParent, newParent);
-        }
-
-        internal void HandleReplicate(SceneObject sender, ReplicatingProperty property, object? value, string? key)
-        {
-            OnReplicate?.Invoke(sender, property, value, key);
-        }
-
-        public override string ToString()
-        {
-            return "Scene " + Name;
+            string assetPath = "SceneReplication/" + filePath + ".prpm";
+            string prefabData;
+            try
+            {
+                prefabData = AssetManager.GetAssetString(assetPath);
+            }
+            catch
+            {
+                throw new ArgumentException("Prefab not found: " + filePath);
+            }
+            SceneObject obj = SceneObject.FromJson(prefabData);
+            obj.Scene = this;
+            HandleSpawnPrefab(filePath, obj, null);
+            return obj;
         }
 
         /// <summary>
@@ -225,7 +101,7 @@ namespace Phoenix.Server.SceneReplication
         {
             get
             {
-                return name;
+                return _name;
             }
         }
 
@@ -236,7 +112,7 @@ namespace Phoenix.Server.SceneReplication
         {
             get
             {
-                return path;
+                return _path;
             }
         }
 
@@ -251,7 +127,7 @@ namespace Phoenix.Server.SceneReplication
                 {
                     try
                     {
-                        return objects.ToArray();
+                        return _objects.Values.ToArray();
                     }
                     catch { }
                 }
@@ -269,6 +145,31 @@ namespace Phoenix.Server.SceneReplication
             if (res == null)
                 throw new ArgumentException("Object not found");
             return res;
+        }
+
+        /// <summary>
+        /// Retrieves objects by name
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <returns>Array of SceneObject instances</returns>
+        public SceneObject[] GetObjects(string name)
+        {
+            if (name.Contains("/"))
+            {
+                string pth = name.Remove(name.IndexOf("/"));
+                string ch = name.Substring(name.IndexOf("/") + 1);
+                foreach (SceneObject obj in Objects)
+                {
+                    if (obj.Name == pth)
+                    {
+                        SceneObject[] objs = obj.GetChildren(ch);
+                        if (objs.Length != 0)
+                            return objs;
+                    }
+                }
+                return new SceneObject[0];
+            }
+            return Objects.Where(t => t.Name == name).ToArray();
         }
 
         /// <summary>
@@ -299,6 +200,88 @@ namespace Phoenix.Server.SceneReplication
                     return obj;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Ticks the scene
+        /// </summary>
+        public void Tick()
+        {
+            foreach (SceneObject obj in Objects)
+            {
+                obj.Update();
+            }
+        }
+
+        /// <summary>
+        /// Called when this object or a child of it requires to be replicated (called when properties change)
+        /// </summary>
+        public event ReplicationHandler? OnReplicate;
+
+        /// <summary>
+        /// Called when this object or a child of it is destroyed
+        /// </summary>
+        public event DestroyHandler? OnDestroy;
+
+        /// <summary>
+        /// Called when this object or a child of it is reparented
+        /// </summary>
+        public event ReParentHandler? OnReparent;
+
+        /// <summary>
+        /// Called when this object or a child of it is moved to a different scene
+        /// </summary>
+        public event ChangeSceneHandler? OnChangeScene;
+
+        /// <summary>
+        /// Called when a prefab is spawned in the scene
+        /// </summary>
+        public event SpawnPrefabHandler? OnSpawnPrefab;
+
+        public override string ToString()
+        {
+            return "Scene " + Name;
+        }
+
+        internal void AddToScene(SceneObject sender)
+        {
+            // Set scene and add
+            lock (_objects)
+                _objects[sender.ID] = sender;
+            sender.InternalSetScene(this);
+        }
+
+        internal void RemoveFromScene(SceneObject sender)
+        {
+            // Unset scene and remove
+            lock (_objects)
+                _objects.Remove(sender.ID);
+            sender.InternalUnsetScene();
+        }
+
+        internal void HandleOnDestroy(SceneObject sender)
+        {
+            OnDestroy?.Invoke(sender);
+        }
+
+        internal void HandleReplicate(SceneObject sender, ReplicatingProperty property, string? key, object? value)
+        {
+            OnReplicate?.Invoke(sender, property, key, value);
+        }
+
+        internal void HandleOnChangeScene(SceneObject sender, Scene oldScene, Scene? newScene)
+        {
+            OnChangeScene?.Invoke(sender, oldScene, newScene);
+        }
+
+        internal void HandleReparent(SceneObject sender, SceneObject? oldParent, SceneObject? newParent)
+        {
+            OnReparent?.Invoke(sender, oldParent, newParent);
+        }
+
+        internal void HandleSpawnPrefab(string filePath, SceneObject prefab, SceneObject? parent)
+        {
+            OnSpawnPrefab?.Invoke(filePath, this, prefab, parent);
         }
     }
 }

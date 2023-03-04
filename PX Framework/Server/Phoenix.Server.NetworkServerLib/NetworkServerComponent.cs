@@ -62,7 +62,7 @@ namespace Phoenix.Server.NetworkServerLib
             if (!Configuration.HasEntry("addresses"))
                 Configuration.SetStringArray("addresses", new string[0]);
             if (!Configuration.HasEntry("phoenix-api-server"))
-                Configuration.SetString("phoenix-api-server", "https://aerialworks.ddns.net/api/servers");
+                Configuration.SetString("phoenix-api-server", PhoenixEnvironment.DefaultAPIServer + "servers");
             bool secureMode = Configuration.GetBool("secure-mode");
 
             // Show warning if needed

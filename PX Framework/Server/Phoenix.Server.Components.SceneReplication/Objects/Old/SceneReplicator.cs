@@ -2,7 +2,7 @@
 using Phoenix.Common.SceneReplication;
 using Phoenix.Common.SceneReplication.Packets;
 
-namespace Phoenix.Server.SceneReplication
+namespace Phoenix.Server.SceneReplication.Old
 {
     public enum SceneLoadMethod
     {
@@ -69,7 +69,8 @@ namespace Phoenix.Server.SceneReplication
             }
         }
 
-        internal SceneReplicator(Connection client, SceneManager manager)
+
+        public SceneReplicator(Connection client, SceneManager manager)
         {
             _client = client;
             _manager = manager;
@@ -374,8 +375,7 @@ namespace Phoenix.Server.SceneReplication
             {
                 throw new ArgumentException("No replication packet channel in packet registry. Please add Phoenix.Common.SceneReplication.SceneReplicationChannel to the server packet registry.");
             }
-            channel.SendPacket(new LoadScenePacket()
-            {
+            channel.SendPacket(new LoadScenePacket() { 
                 ScenePath = sc.Path,
                 Additive = loadMethod == SceneLoadMethod.ADDITIVE
             });
@@ -447,8 +447,113 @@ namespace Phoenix.Server.SceneReplication
                 Room = room
             });
 
-            // TODO: send over the ID map
-            // TODO: initial sync
+            // Send objects that were destroyed
+            foreach (string destroyed in sc.DestroyedObjects)
+            {
+                channel.SendPacket(new DestroyObjectPacket() { 
+                    ObjectID = destroyed,
+                    ScenePath = sc.Path,
+                    Room = room
+                });
+            }
+
+            // Send objects that were moved to a different scene
+            foreach (string moved in sc.NewObjectScenes)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (sc._newObjectScenes.ContainsKey(moved))
+                            channel.SendPacket(new ObjectChangeScenePacket()
+                            {
+                                NewScenePath = sc._newObjectScenes[moved],
+                                ObjectID = moved,
+                                ScenePath = sc.Path,
+                                Room = room
+                            });
+                        break;
+                    }
+                    catch { }
+                }
+            }
+
+            // Send objects that were reparented
+            foreach (string reparented in sc.ReparentedObjects)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (sc._reparentedObjects.ContainsKey(reparented))
+                        {
+                            SceneObject? obj = sc._reparentedObjects[reparented];
+                            channel.SendPacket(new ReparentObjectPacket()
+                            {
+                                NewParentPath = obj == null ? null : obj.Path,
+                                ObjectID = reparented,
+                                ScenePath = sc.Path,
+                                Room = room
+                            });
+                        }
+                        break;
+                    }
+                    catch { }
+                }
+            }
+
+            // Send prefabs
+            foreach (string prefab in sc.SpawnedPrefabs)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (sc._spawnedPrefabs.ContainsKey(prefab))
+                        {
+                            channel.SendPacket(new SpawnPrefabPacket()
+                            {
+                                PrefabPath = prefab,
+                                ScenePath = sc.Path,
+                                Room = room
+                            });
+                        }
+                        break;
+                    }
+                    catch { }
+                }
+            }
+
+            // Send replication data
+            void SyncObj(SceneObject obj)
+            {
+                if (obj.Replicates)
+                {
+                    channel.SendPacket(new ReplicateObjectPacket()
+                    {
+                        HasActiveStatusChanges = true,
+                        HasDataChanges = true,
+                        HasTransformChanges = true,
+                        HasNameChanges = true,
+                        IsInitial = true,
+
+                        Name = obj.Name,
+                        Active = obj.Active,
+                        Data = obj.ReplicationData.data,
+                        Transform = obj.Transform.ToPacketTransform(),
+
+                        ObjectID = obj.ID,
+                        ScenePath = sc.Path,
+                        Room = room
+                    });
+                }
+                foreach (SceneObject ch in obj.Children)
+                    SyncObj(ch);
+            }
+            foreach (SceneObject obj in sc.Objects)
+            {
+                SyncObj(obj);
+            }
 
             // Send finish
             channel.SendPacket(new SceneReplicationCompletePacket()
@@ -456,7 +561,7 @@ namespace Phoenix.Server.SceneReplication
                 ScenePath = sc.Path,
                 Room = room
             });
-
+            
             #endregion Replication
 
             // Send sync complete packet

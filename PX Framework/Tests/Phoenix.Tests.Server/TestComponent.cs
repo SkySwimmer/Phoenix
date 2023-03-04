@@ -57,10 +57,20 @@ namespace Phoenix.Tests.Server
             chain.RegisterCommand(new TestChartDialogueCommand());
             chain.EntrySegment?.Run();
 
+            // Test delayed tasks
+            ServiceManager.GetService<TaskManager>().AfterSecs(() =>
+            {
+                GetLogger().Info("test");
+            }, 5);
+
             // Test replication loading
             Scene sc = Scene.FromJson("Scenes/TitleScreen", "TitleScreen", AssetManager.GetAssetString("SceneReplication/Scenes/TitleScreen.prsm"));
             SceneObject prefab = SceneObject.FromJson(AssetManager.GetAssetString("SceneReplication/TestReplicationPrefab.prpm"));
             SceneObject ipBox = sc.GetObject("LoadCanvas/Panel/ServerPanel/ConnectPanel/IPBox");
+            prefab.Parent = ipBox;
+            prefab.Destroy();
+            ipBox.SpawnPrefab("TestReplicationPrefab").AddComponent<TestObjectComponent>();
+            ipBox = ipBox;
 
             // Test interaction with the scene manager
             SceneManager manager = ServiceManager.GetService<SceneManager>();
@@ -75,9 +85,30 @@ namespace Phoenix.Tests.Server
         }
 
         [EventListener]
+        public void LeavePlayer(PlayerLeaveEvent ev)
+        {
+            TestPlayerCharacterContainer? cont = ev.Player.GetObject<TestPlayerCharacterContainer>();
+            if (cont != null)
+                cont.Character.Destroy();
+        }
+
+        [EventListener]
         public void JoinPlayer(PlayerJoinEvent ev)
         {
-            ev.Player.GetObject<SceneReplicator>().LoadScene("Scenes/WorldScene");
+            Scene? sc = ev.Player.GetObject<SceneReplicator>()?.LoadScene("Scenes/WorldScene");
+            if (sc != null)
+            {
+                ServiceManager.GetService<TaskManager>().Oneshot(() =>
+                {
+                    SceneObject obj = sc.SpawnPrefab("TestReplicationPrefab");
+                    obj.Name = "Player-" + ev.Player.PlayerID;
+                    ev.Player.AddObject(new TestPlayerCharacterContainer()
+                    {
+                        Character = obj
+                    });
+                    obj.OwningConnection = ev.Player.Client;
+                });
+            }
         }
 
         [EventListener]

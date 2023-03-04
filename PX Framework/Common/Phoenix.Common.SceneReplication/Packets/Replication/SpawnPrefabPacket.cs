@@ -9,6 +9,7 @@ namespace Phoenix.Common.SceneReplication.Packets
     public class SpawnPrefabPacket : AbstractNetworkPacket
     {
         public string PrefabPath = "";
+        public string ObjectID = "";
         public string? ParentObjectPath = null;
         public string ScenePath = "";
         public string Room = "";
@@ -26,6 +27,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             Room = reader.ReadString();
 
             PrefabPath = reader.ReadString();
+            ObjectID = reader.ReadString();
             if (reader.ReadBoolean())
                 ParentObjectPath = reader.ReadString();
         }
@@ -36,6 +38,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             writer.WriteString(Room);
 
             writer.WriteString(PrefabPath);
+            writer.WriteString(ObjectID);
             writer.WriteBoolean(ParentObjectPath != null);
             if (ParentObjectPath != null)
                 writer.WriteString(ParentObjectPath);

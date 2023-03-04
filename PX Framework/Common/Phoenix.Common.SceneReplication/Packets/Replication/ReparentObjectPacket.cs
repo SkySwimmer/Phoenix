@@ -8,7 +8,7 @@ namespace Phoenix.Common.SceneReplication.Packets
     /// </summary>
     public class ReparentObjectPacket : AbstractNetworkPacket
     {
-        public string ObjectPath = "";
+        public string ObjectID = "";
         public string? OldParentPath = null;
         public string? NewParentPath = null;
         public string ScenePath = "";
@@ -26,7 +26,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             ScenePath = reader.ReadString();
             Room = reader.ReadString();
 
-            ObjectPath = reader.ReadString();
+            ObjectID = reader.ReadString();
             if (reader.ReadBoolean())
                 OldParentPath = reader.ReadString();
             if (reader.ReadBoolean())
@@ -38,7 +38,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             writer.WriteString(ScenePath);
             writer.WriteString(Room);
 
-            writer.WriteString(ObjectPath);
+            writer.WriteString(ObjectID);
             writer.WriteBoolean(OldParentPath != null);
             if (OldParentPath != null)
                 writer.WriteString(OldParentPath);

@@ -59,7 +59,7 @@ namespace Phoenix.Common.Networking.Connections
         {
             TcpClient client = listener.EndAcceptTcpClient(ar);
             logger.Trace("Client socket connected: " + client.Client.RemoteEndPoint);
-            Task.Run(() =>
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
             {
                 // Initial handshake
                 try
@@ -151,7 +151,10 @@ namespace Phoenix.Common.Networking.Connections
 
                     // Add client if it is still connected
                     if (t.IsConnected())
-                        clients.Add(conn);
+                        lock(clients)
+                        {
+                            clients.Add(conn);
+                        }
                 };
                 conn.ConnectionSuccess += (t) =>
                 {
@@ -162,8 +165,11 @@ namespace Phoenix.Common.Networking.Connections
                     // Disconnect event
 
                     // Remove client
-                    if (clients.Contains(t))
-                        clients.Remove(t);
+                    lock (clients)
+                    {
+                        if (clients.Contains(t))
+                            clients.Remove(t);
+                    }
 
                     // Call disconnected
                     CallDisconnected(r, a, t);

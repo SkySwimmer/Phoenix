@@ -22,9 +22,9 @@ namespace Phoenix.Client.ServerList
         /// <summary>
         /// Defines the API server used to scan the server list
         /// </summary>
-        public static string API = "https://aerialworks.ddns.net/";
+        public static string? API = null;
 
-        private string _api = API;
+        private string? _api = API;
 
         /// <summary>
         /// Defines if the scanner should filter servers with incompatible phoenix protocol versions
@@ -109,10 +109,14 @@ namespace Phoenix.Client.ServerList
                 // Contact Phoenix
 
                 // Build URL
-                string url = _api;
+                string url;
+                if (_api == null)
+                    url = PhoenixEnvironment.DefaultAPIServer;
+                else
+                    url = _api;
                 if (!url.EndsWith("/"))
                     url += "/";
-                url += "api/servers/serverlist/" + gameID;
+                url += "servers/serverlist/" + gameID;
 
                 // Send request
                 HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -159,7 +163,7 @@ namespace Phoenix.Client.ServerList
                                 if (data != null && data.id != null && data.ownerId != null && data.protocol != null && data.version != null)
                                 {
                                     // Ping on another thread
-                                    Task.Run(() =>
+                                    Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                                     {
                                         // Call event
                                         ServerInstance inst = new ServerInstance(gameID, true, data.id, data.version, data.protocol.phoenixVersion, data.protocol.version, data.addresses, data.port, data.details);
@@ -295,7 +299,7 @@ namespace Phoenix.Client.ServerList
                                 entries.Add("[" + addr + "]:" + port);
 
                                 // Ping on another thread
-                                Task.Run(() =>
+                                Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                                 {
                                     // Call event
                                     ServerInstance inst = new ServerInstance(gameid, secureMode, secureMode ? serverID : null, version, phoenixProtocol, protocol, addr, true, port, details);

@@ -99,7 +99,7 @@ namespace Phoenix.Server.Components
             {
                 AbstractConfigurationSegment conf = Server.GetConfiguration("server");
                 if (!conf.HasEntry("phoenix-api-server"))
-                    conf.SetString("phoenix-api-server", "https://aerialworks.ddns.net/api/servers");
+                    conf.SetString("phoenix-api-server", PhoenixEnvironment.DefaultAPIServer + "servers");
 
                 // Verify certificate & token validity
                 bool secureMode = conf.GetBool("secure-mode");
@@ -502,7 +502,7 @@ namespace Phoenix.Server.Components
                 // Load url from config
                 AbstractConfigurationSegment conf = Server.GetConfiguration("server");
                 if (!conf.HasEntry("phoenix-api-server"))
-                    conf.SetString("phoenix-api-server", "https://aerialworks.ddns.net/api/servers");
+                    conf.SetString("phoenix-api-server", PhoenixEnvironment.DefaultAPIServer + "servers");
                 string phoenixAPI = conf.GetString("phoenix-api-server");
 
                 try
