@@ -81,7 +81,9 @@ namespace Phoenix.Tests.Server
             cam.ReplicationData.Set("Tester", "test");
             cam.ReplicationData.Set("Tester 2", "123");
             cam.ReplicationData.Set("Tester 3", "456");
-            sc.SpawnPrefab("TestReplicationPrefab").Parent = cam;
+            prefab = sc.SpawnPrefab("TestReplicationPrefab");
+            prefab.Parent = cam;
+            prefab.AddComponent<TestObjectComponent>();
         }
 
         [EventListener]
@@ -107,6 +109,7 @@ namespace Phoenix.Tests.Server
                         Character = obj
                     });
                     obj.OwningConnection = ev.Player.Client;
+                    obj.AddComponent<TestObjectComponent>();
                 });
             }
         }

@@ -22,10 +22,10 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.Replication
                 {
                     comp.Bindings.RunOnNextFrameUpdate(() =>
                     {
-                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectInScene(packet.Room, packet.ScenePath, packet.ObjectPath);
+                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectInScene(packet.Room, packet.ScenePath, packet.ObjectID);
                         if (obj != null)
                         {
-                            comp.GetLogger().Trace("Moving object " + packet.ObjectPath + " to scene " + packet.NewScenePath + " in room " + packet.Room + "...");
+                            comp.GetLogger().Trace("Moving object " + packet.ObjectID + " to scene " + packet.NewScenePath + " in room " + packet.Room + "...");
                             obj.ChangeScene(packet.NewScenePath);
                         }
                     });

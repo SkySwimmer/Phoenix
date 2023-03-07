@@ -89,7 +89,7 @@ namespace Phoenix.Server.SceneReplication.Data
         /// <typeparam name="T">Entry type</typeparam>
         /// <param name="key">Entry key</param>
         /// <param name="value">Entry value</param>
-        public void Set<T>(string key, T value)
+        public void Set<T>(string key, T value) 
         {
             if (readOnly)
                 throw new ArgumentException("Cannot change properties of a read-only object");

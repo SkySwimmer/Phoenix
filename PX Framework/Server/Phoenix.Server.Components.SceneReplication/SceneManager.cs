@@ -1,5 +1,7 @@
 ﻿using Phoenix.Common.Services;
 using Phoenix.Common.Networking.Connections;
+using Phoenix.Common.AsyncTasks;
+using static Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket;
 
 namespace Phoenix.Server.SceneReplication
 {
@@ -27,6 +29,7 @@ namespace Phoenix.Server.SceneReplication
 
         private Dictionary<string, Scene> _sceneMemory = new Dictionary<string, Scene>();
         private Dictionary<string, Dictionary<string, SceneInfo>> _rooms = new Dictionary<string, Dictionary<string, SceneInfo>>();
+        internal Dictionary<Scene, Dictionary<string, SceneObjectID>> _sceneObjectMaps = new Dictionary<Scene, Dictionary<string, SceneObjectID>>();
 
         private Scene? GetRealSceneFromMemory(string scene)
         {
@@ -79,7 +82,8 @@ namespace Phoenix.Server.SceneReplication
         /// <returns>True if present, false otherwise</returns>
         public bool RoomExists(string id)
         {
-            return _rooms.ContainsKey(id);
+            lock(_rooms)
+                return _rooms.ContainsKey(id);
         }
 
         /// <summary>
@@ -91,7 +95,8 @@ namespace Phoenix.Server.SceneReplication
             if (RoomExists(id))
             {
                 Dictionary<string, SceneInfo>? room = GetRoom(id);
-                _rooms.Remove(id);
+                lock(_rooms)
+                    _rooms.Remove(id);
 
                 // Unbind replication events
                 if (room != null)
@@ -103,10 +108,8 @@ namespace Phoenix.Server.SceneReplication
                         scene.Scene.OnChangeScene -= scene.ChangeSceneHandler;
                         scene.Scene.OnDestroy -= scene.DestroyHandler;
                         scene.Scene.OnSpawnPrefab -= scene.PrefabSpawnHandler;
-                        foreach (SceneObject obj in scene.Scene.Objects)
-                        {
-                            obj.DisposeInternal();
-                        }
+                        lock (_sceneObjectMaps)
+                            _sceneObjectMaps.Remove(scene.Scene);
                     }
                 }
 
@@ -201,82 +204,124 @@ namespace Phoenix.Server.SceneReplication
                 if (roomD == null)
                 {
                     roomD = new Dictionary<string, SceneInfo>();
-                    _rooms[room] = roomD;
+                    lock(_rooms)
+                        _rooms[room] = roomD;
                 }
 
                 // Grab scene from memory
-                SceneInfo? scene = GetSceneFrom(roomD, scenePath);
-                if (scene == null)
+                SceneInfo? scene;
+                lock (roomD)
                 {
-                    // Check if the scene has been loaded
-                    Scene? realScene = GetRealSceneFromMemory(assetPath);
-                    if (realScene == null)
+                    scene = GetSceneFrom(roomD, scenePath);
+                    if (scene == null)
                     {
-                        // Load scene
-                        string sceneData;
-                        try
+                        // Check if the scene has been loaded
+                        Scene? realScene = GetRealSceneFromMemory(assetPath);
+                        lock (_sceneMemory)
                         {
-                            sceneData = AssetManager.GetAssetString(assetPath);
+                            if (realScene == null)
+                            {
+                                // Load scene
+                                string sceneData;
+                                try
+                                {
+                                    sceneData = AssetManager.GetAssetString(assetPath);
+                                }
+                                catch
+                                {
+                                    loadingScene = false;
+                                    throw new ArgumentException("Scene not found: " + scenePath);
+                                }
+                                try
+                                {
+                                    realScene = Scene.FromJson(scenePath, Path.GetFileNameWithoutExtension(assetPath), sceneData);
+                                }
+                                catch
+                                {
+                                    loadingScene = false;
+                                    throw new ArgumentException("Invalid scene file: " + assetPath);
+                                }
+                                _sceneMemory[assetPath] = realScene;
+                            }
                         }
-                        catch
-                        {
-                            loadingScene = false;
-                            throw new ArgumentException("Scene not found: " + scenePath);
-                        }
-                        try
-                        {
-                            realScene = Scene.FromJson(scenePath, Path.GetFileNameWithoutExtension(assetPath), sceneData);
-                        }
-                        catch
-                        {
-                            loadingScene = false;
-                            throw new ArgumentException("Invalid scene file: " + assetPath);
-                        }
-                        _sceneMemory[assetPath] = realScene;
-                    }
 
-                    // Create reflective scene objects
-                    List<SceneObject> objects = new List<SceneObject>();
-                    foreach (SceneObject obj in realScene.Objects)
-                    {
-                        // TODO: FIXME: HAVE TO CHANGE THIS
-                        objects.Add(obj); //objects.Add(SceneObject.Reflecting(obj, null)); 
-                    }
+                        // Create reflective scene objects
+                        List<SceneObject> objects = new List<SceneObject>();
+                        foreach (SceneObject obj in realScene.Objects)
+                        {
+                            objects.Add(SceneObject.Reflecting(obj, null));
+                        }
 
-                    // Create scene
-                    scene = new SceneInfo();
-                    scene.Scene = Scene.FromObjects(scenePath, Path.GetFileNameWithoutExtension(assetPath), objects.ToArray());
-                    scene.PrefabSpawnHandler = (path, sceneInst, prefab, parent) =>
-                    {
-                        // TODO
-                        path = path;
-                    };
-                    scene.DestroyHandler = obj =>
-                    {
-                        // TODO
-                        obj = obj;
-                    };
-                    scene.ChangeSceneHandler += (obj, oldScene, newScene) =>
-                    {
-                        // TODO
-                        obj = obj;
-                    };
-                    scene.ReParentHandler += (obj, oldParent, newParent) =>
-                    {
-                        // TODO
-                        obj = obj;
-                    };
-                    scene.ReplicationHandler += (obj, prop, value, key) =>
-                    {
-                        // TODO
-                        obj = obj;
-                    };
-                    scene.Scene.OnSpawnPrefab += scene.PrefabSpawnHandler;
-                    scene.Scene.OnReparent += scene.ReParentHandler;
-                    scene.Scene.OnReplicate += scene.ReplicationHandler;
-                    scene.Scene.OnChangeScene += scene.ChangeSceneHandler;
-                    scene.Scene.OnDestroy += scene.DestroyHandler;
-                    roomD[scenePath] = scene;
+                        // Create scene
+                        scene = new SceneInfo();
+                        scene.Scene = Scene.FromObjects(scenePath, Path.GetFileNameWithoutExtension(assetPath), objects.ToArray());
+                        scene.PrefabSpawnHandler = (path, sceneInst, prefab, parent) =>
+                        {
+                            // TODO
+                            path = path;
+                        };
+                        scene.DestroyHandler = obj =>
+                        {
+                            // TODO
+                            obj = obj;
+                        };
+                        scene.ChangeSceneHandler += (obj, oldScene, newScene) =>
+                        {
+                            // TODO
+                            obj = obj;
+                        };
+                        scene.ReParentHandler += (obj, oldParent, newParent) =>
+                        {
+                            // TODO
+                            obj = obj;
+                        };
+                        scene.ReplicationHandler += (obj, prop, value, key) =>
+                        {
+                            // TODO
+                            obj = obj;
+                        };
+                        scene.Scene.OnSpawnPrefab += scene.PrefabSpawnHandler;
+                        scene.Scene.OnReparent += scene.ReParentHandler;
+                        scene.Scene.OnReplicate += scene.ReplicationHandler;
+                        scene.Scene.OnChangeScene += scene.ChangeSceneHandler;
+                        scene.Scene.OnDestroy += scene.DestroyHandler;
+                        roomD[scenePath] = scene;
+
+                        lock (_sceneObjectMaps)
+                        {
+                            if (!_sceneObjectMaps.ContainsKey(scene.Scene))
+                            {
+                                // Build object map
+                                Dictionary<string, int> ids = new Dictionary<string, int>();
+                                Dictionary<string, SceneObjectID> objMap = new Dictionary<string, SceneObjectID>();
+                                void scan(SceneObject[] objs)
+                                {
+                                    foreach (SceneObject obj in objs)
+                                    {
+                                        // Load map
+                                        int ind = ids.GetValueOrDefault(obj.Path, 0);
+                                        ids[obj.Path] = ind + 1;
+                                        objMap[obj.ID] = new SceneObjectID(obj.Path, ind);
+
+                                        // Scan children
+                                        scan(obj.Children);
+                                    }
+                                }
+                                scan(realScene.Objects);
+                                _sceneObjectMaps[scene.Scene] = objMap;
+                            }
+                        }
+
+                        // Run scene update
+                        AsyncTaskManager.RunAsync(() =>
+                        {
+                            while (true)
+                            {
+                                scene.Scene.Tick();
+                                Thread.Sleep(5);
+                            }
+                        });
+                    }
                 }
 
                 loadingScene = false;

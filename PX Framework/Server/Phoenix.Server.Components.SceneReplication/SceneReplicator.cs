@@ -435,7 +435,8 @@ namespace Phoenix.Server.SceneReplication
             channel.SendPacket(new InitialSceneReplicationStartPacket()
             {
                 ScenePath = sc.Path,
-                Room = room
+                Room = room,
+                ObjectMap = _manager._sceneObjectMaps[sc]
             });
 
             #region Replication
@@ -447,7 +448,6 @@ namespace Phoenix.Server.SceneReplication
                 Room = room
             });
 
-            // TODO: send over the ID map
             // TODO: initial sync
 
             // Send finish

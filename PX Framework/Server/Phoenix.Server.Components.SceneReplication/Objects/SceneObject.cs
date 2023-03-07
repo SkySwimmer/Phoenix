@@ -76,7 +76,6 @@ namespace Phoenix.Server.SceneReplication
     /// </summary>
     public abstract class SceneObject
     {
-        private static Dictionary<string, SceneObject> _allObjects = new Dictionary<string, SceneObject>();
         private List<AbstractObjectComponent> _components = new List<AbstractObjectComponent>();
         private Connection? _owningConnection;
 
@@ -104,13 +103,6 @@ namespace Phoenix.Server.SceneReplication
             }
         }
 
-        internal void DisposeInternal()
-        {
-            Unregister(this);
-            foreach (SceneObject obj in Children)
-                Unregister(obj);
-        }
-
         private void DisconnectHandler(Connection connection, string reason, string[] args)
         {
             // Call for all components that do not have a custom handler
@@ -134,6 +126,17 @@ namespace Phoenix.Server.SceneReplication
         };
 
         /// <summary>
+        /// Creates a reflecting scene object
+        /// </summary>
+        /// <param name="original">Original object</param>
+        /// <param name="parent">Parent object</param>
+        /// <returns>SceneObject instance</returns>
+        public static SceneObject Reflecting(SceneObject original, SceneObject? parent)
+        {
+            return new ReflectingSceneObject(original, parent);
+        }
+
+        /// <summary>
         /// Handler for loading scene objects from json paylaods
         /// </summary>
         /// <param name="json">Json payload</param>
@@ -141,58 +144,13 @@ namespace Phoenix.Server.SceneReplication
         protected delegate SceneObject FromJsonHandler(string json);
 
         /// <summary>
-        /// De-serializes Scene Objects (<b>BEWARE!</b> Objects are kept in memory until destroyed, make sure to destroy objects to clean them up!)
+        /// De-serializes Scene Objects
         /// </summary>
         /// <param name="json">Serialized scene object</param>
         /// <returns>SceneObject instances</returns>
         public static SceneObject FromJson(string json)
         {
             return CreateFromJsonHandler(json);
-        }
-
-        /// <summary>
-        /// Retrieves scene objects by ID (throws an exception if not present)
-        /// </summary>
-        /// <param name="id">Object ID</param>
-        /// <returns>SceneObject isntance</returns>
-        public static SceneObject GetObject(string id)
-        {
-            lock (_allObjects)
-            {
-                if (_allObjects.ContainsKey(id))
-                    return _allObjects[id];
-            }
-            throw new ArgumentException("Scene object not recognized");
-        }
-
-        /// <summary>
-        /// Allocates an object ID and registers a scene object
-        /// </summary>
-        /// <param name="obj">Object to register</param>
-        /// <returns>Object ID</returns>
-        protected string Register(SceneObject obj)
-        {
-            lock (_allObjects)
-            {
-                while (true)
-                {
-                    string id = Guid.NewGuid().ToString();
-                    if (_allObjects.ContainsKey(id))
-                        continue;
-                    _allObjects[id] = obj;
-                    return id;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes a registered scene object
-        /// </summary>
-        /// <param name="obj">Object to unregister</param>
-        protected void Unregister(SceneObject obj)
-        {
-            lock (_allObjects)
-                _allObjects.Remove(obj.ID);
         }
 
         #region Fields
@@ -211,6 +169,11 @@ namespace Phoenix.Server.SceneReplication
         /// Object path
         /// </summary>
         public abstract string Path { get; }
+
+        /// <summary>
+        /// Object original path
+        /// </summary>
+        public virtual string OriginalPath { get { return Path; } }
 
         /// <summary>
         /// Object name
@@ -487,7 +450,7 @@ namespace Phoenix.Server.SceneReplication
         /// <summary>
         /// Destroys the object
         /// </summary>
-        public void Destroy()
+        public virtual void Destroy()
         {
             if (!Replicating)
                 throw new ArgumentException("Cannot modify read-only objects");
@@ -532,6 +495,8 @@ namespace Phoenix.Server.SceneReplication
                     continue;
                 comp.Update();
             }
+            foreach (SceneObject ch in Children)
+                ch.Update();
         }
 
         /// <summary>

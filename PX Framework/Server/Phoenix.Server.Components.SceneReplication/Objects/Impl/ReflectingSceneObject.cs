@@ -1,50 +1,22 @@
-﻿using Newtonsoft.Json;
-using Phoenix.Common.Logging;
+﻿using Phoenix.Common.Logging;
 using Phoenix.Server.SceneReplication.Coordinates;
 using Phoenix.Server.SceneReplication.Data;
 using System.Reflection;
 
 namespace Phoenix.Server.SceneReplication.Impl
 {
-    internal class JsonVector3
+    internal class ReflectingSceneObject : SceneObject
     {
-        public float x;
-        public float y;
-        public float z;
-    }
+        private bool unlocked;
+        private object locker = new object();
 
-    internal class JsonTransform
-    {
-        public JsonVector3 position;
-        public JsonVector3 angles;
-        public JsonVector3 scale;
-    }
-
-    internal class JsonSceneObjectData
-    {
-        public string name;
-        public bool replicating;
-        public bool active;
-
-        public JsonTransform transform;
-        public Dictionary<string, object?> replication = new Dictionary<string, object?>();
-        public List<JsonComponentInfo> components = new List<JsonComponentInfo>();
-
-        public List<JsonSceneObjectData> children = new List<JsonSceneObjectData>();
-    }
-
-    internal class JsonComponentInfo
-    {
-        public string type;
-        public Dictionary<string, object> data;
-    }
-
-    internal class JsonSceneObject : SceneObject
-    {
-        private List<SceneObject> _children = new List<SceneObject>();
-
+        private SceneObject _original;
         private SceneObject? _parent;
         private Scene? _scene;
+
+        private string _originalPath;
+        
+        private List<SceneObject> _children = new List<SceneObject>();
 
         private string _id;
         private string _path;
@@ -56,16 +28,33 @@ namespace Phoenix.Server.SceneReplication.Impl
         private Transform _transform;
         private ReplicationDataMap _data;
 
-        public JsonSceneObject(JsonSceneObjectData obj)
+
+        public ReflectingSceneObject(SceneObject original, SceneObject? parent)
         {
             // Load fields
-            _name = obj.name;
-            _path = obj.name;
-            _active = obj.active;
-            _replicating = obj.replicating;
+            _original = original;
+            _path = _original.Path;
+            _originalPath = _path;
+            _replicating = _original.Replicating;
+
+            // Set ID
+            _id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("x2") + (Guid.NewGuid().ToString().Replace("-", ""));
+
+            // Add child objects
+            foreach (SceneObject ch in original.Children)
+            {
+                _children.Add(new ReflectingSceneObject(ch, this));
+            }
+        }
+
+        private void Copy()
+        {
+            // Load fields
+            _name = _original.Name;
+            _active = _original.Active;
 
             // Load transform
-            _transform = new(new Vector3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z, !_replicating), new Vector3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z, !_replicating), new Vector3(obj.transform.angles.x, obj.transform.angles.y, obj.transform.angles.z, !_replicating));
+            _transform = new(new Vector3(_original.Transform.Position.X, _original.Transform.Position.Y, _original.Transform.Position.Z, !_replicating), new Vector3(_original.Transform.Scale.X, _original.Transform.Scale.Y, _original.Transform.Scale.Z, !_replicating), new Vector3(_original.Transform.Rotation.X, _original.Transform.Rotation.Y, _original.Transform.Rotation.Z, !_replicating));
             _transform.OnReplicate += prop =>
             {
                 if (!_replicating)
@@ -74,7 +63,7 @@ namespace Phoenix.Server.SceneReplication.Impl
             };
 
             // Load data
-            _data = new ReplicationDataMap(obj.replication, !_replicating);
+            _data = new ReplicationDataMap(_original.ReplicationData.data, !_replicating);
             _data.OnChange += (key, val) => {
                 if (!_replicating)
                     throw new ArgumentException("Cannot change properties of a read-only object");
@@ -86,69 +75,51 @@ namespace Phoenix.Server.SceneReplication.Impl
                 CallOnReplicate(this, ReplicatingProperty.REPLICATION_DATA_REMOVEKEY, null, key);
             };
 
-            // Set ID
-            _id = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("x2") + (Guid.NewGuid().ToString().Replace("-", ""));
-
             // Add components
-            foreach (JsonComponentInfo comp in obj.components)
+            foreach (AbstractObjectComponent comp in _original.Components)
             {
-                // Find type
+                // Found it
                 try
                 {
-                    foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                    ConstructorInfo? constr = comp.GetType().GetConstructor(new Type[0]);
+                    if (constr == null)
+                        throw new ArgumentException("No parameterless constructor");
+                    object compInst = constr.Invoke(new object[0]);
+                    if (compInst is AbstractObjectComponent)
                     {
-                        try
-                        {
-                            Type? compType = asm.GetType(comp.type);
-                            if (compType != null)
-                            {
-                                // Found it
-                                try
-                                {
-                                    ConstructorInfo? constr = compType.GetConstructor(new Type[0]);
-                                    if (constr == null)
-                                        throw new ArgumentException("No parameterless constructor");
-                                    object compInst = constr.Invoke(new object[0]);
-                                    if (compInst is AbstractObjectComponent)
-                                    {
-                                        AddComponent((AbstractObjectComponent)compInst).Deserialize(comp.data);
-                                    }
-                                    else
-                                    {
-                                        throw new ArgumentException("Instantiated object is not an object component");
-                                    }
-                                }
-                                catch (Exception e)
-                                {
-                                    Logger.GetLogger("scene-manager").Error("Failed to add component " + comp.type + " to object " + _id + " (" + _path + ")", e);
-                                }
-                            }
-                        }
-                        catch
-                        {
-                        }
+                        Dictionary<string, object> data = new Dictionary<string, object>();
+                        comp.Serialize(data);
+                        AddComponent((AbstractObjectComponent)compInst).Deserialize(data);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Instantiated object is not an object component");
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Logger.GetLogger("scene-manager").Error("Failed to add component " + comp.GetType().FullName + " to object " + _id + " (" + _path + ")", e);
                 }
             }
         }
 
-        private void AddChildren(JsonSceneObjectData obj)
+        public override bool Active
         {
-            foreach (JsonSceneObjectData data in obj.children)
+            get
             {
-                JsonSceneObject ch = new JsonSceneObject(data)
-                {
-                    _parent = this,
-                    _scene = this._scene
-                };
-                ch._path = _path + "/" + ch.Path;
-                ch.AddChildren(data);
-                lock(_children)
-                    _children.Add(ch);
-            } 
+                if (unlocked)
+                    return _active;
+                return _original.Active;
+            }
+
+            set
+            {
+                if (!unlocked)
+                    throw new ArgumentException("Cannot change properties of a read-only object");
+                bool last = _active;
+                _active = value;
+                OnChangeActiveState(last);
+            }
         }
 
         public override string ID
@@ -163,24 +134,9 @@ namespace Phoenix.Server.SceneReplication.Impl
         {
             get
             {
-                return _path;
-            }
-        }
-
-        public override bool Active
-        {
-            get
-            {
-                return _active;
-            }
-
-            set
-            {
-                if (!Replicating)
-                    throw new ArgumentException("Cannot modify read-only objects");
-                bool last = _active;
-                _active = value;
-                OnChangeActiveState(last);
+                if (unlocked)
+                    return _path;
+                return _original.Path;
             }
         }
 
@@ -188,13 +144,15 @@ namespace Phoenix.Server.SceneReplication.Impl
         {
             get
             {
-                return _name;
+                if (unlocked)
+                    return _name;
+                return _original.Name;
             }
 
             set
             {
-                if (!Replicating)
-                    throw new ArgumentException("Cannot modify read-only objects");
+                if (!unlocked)
+                    throw new ArgumentException("Cannot change properties of a read-only object");
                 _name = value;
                 CallOnReplicate(this, ReplicatingProperty.NAME, null, _name);
             }
@@ -217,8 +175,8 @@ namespace Phoenix.Server.SceneReplication.Impl
 
             set
             {
-                if (!Replicating)
-                    throw new ArgumentException("Cannot modify read-only objects");
+                if (!unlocked)
+                    throw new ArgumentException("Cannot change properties of a read-only object");
                 if (value == null)
                     throw new ArgumentException("Null scene assignment unsupported as it breaks replication");
                 if (_parent != null)
@@ -242,8 +200,8 @@ namespace Phoenix.Server.SceneReplication.Impl
 
             set
             {
-                if (!Replicating)
-                    throw new ArgumentException("Cannot modify read-only objects");
+                if (!unlocked)
+                    throw new ArgumentException("Cannot change properties of a read-only object");
                 SceneObject? oldParent = _parent;
                 SceneObject? newParent = value;
                 if (oldParent != null)
@@ -273,7 +231,21 @@ namespace Phoenix.Server.SceneReplication.Impl
         {
             get
             {
-                return _transform;
+                if (unlocked)
+                    return _transform;
+                return new Transform(new Vector3(_original.Transform.Position.X,
+                        _original.Transform.Position.Y,
+                        _original.Transform.Position.Z,
+                        true
+                    ), new Vector3(_original.Transform.Scale.X,
+                        _original.Transform.Scale.Y,
+                        _original.Transform.Scale.Z,
+                        true
+                    ), new Vector3(_original.Transform.Rotation.X,
+                        _original.Transform.Rotation.Y,
+                        _original.Transform.Rotation.Z,
+                        true
+                    ), true);
             }
         }
 
@@ -281,6 +253,8 @@ namespace Phoenix.Server.SceneReplication.Impl
         {
             get
             {
+                if (!unlocked)
+                    return _original.ReplicationData.ReadOnlyCopy();
                 return _data;
             }
         }
@@ -298,6 +272,29 @@ namespace Phoenix.Server.SceneReplication.Impl
                     catch { }
                 }
             }
+        }
+
+        public override string OriginalPath => _originalPath;
+
+        public override void Unlock()
+        {
+            if (unlocked)
+                return;
+            lock (locker)
+            {
+                if (!_original.Replicating)
+                    throw new ArgumentException("Cannot unlock objects that do not replicate");
+                Copy();
+                unlocked = true;
+                _original = null;
+            }
+        }
+
+        public override void Destroy()
+        {
+            if (!unlocked)
+                throw new ArgumentException("Cannot change properties of a read-only object");
+            base.Destroy();
         }
 
         protected override void DestroyForced()
@@ -318,6 +315,12 @@ namespace Phoenix.Server.SceneReplication.Impl
             _children.Clear();
         }
 
+        internal override void AddChild(SceneObject child)
+        {
+            lock (_children)
+                _children.Add(child);
+        }
+
         internal override void InternalSetScene(Scene scene)
         {
             _scene = scene;
@@ -332,31 +335,10 @@ namespace Phoenix.Server.SceneReplication.Impl
                 ch.InternalUnsetScene();
         }
 
-        public override void Unlock()
-        {
-            // Dummy, not needed here
-        }
-
-        internal static SceneObject CreateFromJson(string json)
-        {
-            JsonSceneObjectData? obj = JsonConvert.DeserializeObject<JsonSceneObjectData>(json);
-            if (obj == null)
-                throw new ArgumentException("Invalid JSON data");
-            JsonSceneObject scO = new JsonSceneObject(obj);
-            scO.AddChildren(obj);
-            return scO;
-        }
-
         internal override void RemoveChild(SceneObject child)
         {
             lock (_children)
                 _children.Remove(child);
-        }
-
-        internal override void AddChild(SceneObject child)
-        {
-            lock (_children)
-                _children.Add(child);
         }
     }
 }
