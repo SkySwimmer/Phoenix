@@ -365,7 +365,7 @@ namespace Phoenix.Unity.PGL
             {
                 _logger.Info("Loading debug configuration...");
                 Dictionary<string, string> debugConfig = new Dictionary<string, string>();
-                string conf = File.ReadAllText("Assets/Editor/phoenixdebug.txt");
+                string conf = File.ReadAllText("Assets/Editor/phoenixdebug.txt").Replace("\r", "");
                 foreach (string line in conf.Split('\n'))
                 {
                     if (line == "" || line.StartsWith("#") || line.StartsWith("//"))
