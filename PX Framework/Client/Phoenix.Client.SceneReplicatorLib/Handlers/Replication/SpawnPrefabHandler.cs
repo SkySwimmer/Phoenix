@@ -21,7 +21,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.Replication
                 {
                     comp.Bindings.RunOnNextFrameUpdate(() =>
                     {
-                        comp.GetLogger().Trace("Spawning prefab " + packet.PrefabPath + " in scene " + packet.ScenePath + " of room " + packet.Room + ", parent object: " + (packet.ParentObjectPath == null ? "<root object>" : packet.ParentObjectPath) + "...");
+                        comp.GetLogger().Trace("Spawning prefab " + packet.PrefabPath + " in scene " + packet.ScenePath + " of room " + packet.Room + ", parent object: " + (packet.ParentObjectID == null ? "<root object>" : packet.ParentObjectID) + "...");
                         comp.Bindings.SpawnPrefab(packet);
                     });
                 }

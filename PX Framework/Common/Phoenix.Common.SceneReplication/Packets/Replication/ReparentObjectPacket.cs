@@ -9,8 +9,7 @@ namespace Phoenix.Common.SceneReplication.Packets
     public class ReparentObjectPacket : AbstractNetworkPacket
     {
         public string ObjectID = "";
-        public string? OldParentPath = null;
-        public string? NewParentPath = null;
+        public string? NewParentID = null;
         public string ScenePath = "";
         public string Room = "";
 
@@ -28,9 +27,7 @@ namespace Phoenix.Common.SceneReplication.Packets
 
             ObjectID = reader.ReadString();
             if (reader.ReadBoolean())
-                OldParentPath = reader.ReadString();
-            if (reader.ReadBoolean())
-                NewParentPath = reader.ReadString();
+                NewParentID = reader.ReadString();
         }
 
         public override void Write(DataWriter writer)
@@ -39,12 +36,9 @@ namespace Phoenix.Common.SceneReplication.Packets
             writer.WriteString(Room);
 
             writer.WriteString(ObjectID);
-            writer.WriteBoolean(OldParentPath != null);
-            if (OldParentPath != null)
-                writer.WriteString(OldParentPath);
-            writer.WriteBoolean(NewParentPath != null);
-            if (NewParentPath != null)
-                writer.WriteString(NewParentPath);
+            writer.WriteBoolean(NewParentID != null);
+            if (NewParentID != null)
+                writer.WriteString(NewParentID);
         }
     }
 }

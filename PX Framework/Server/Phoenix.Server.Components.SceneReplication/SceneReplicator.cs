@@ -1,4 +1,5 @@
 ﻿using Phoenix.Common.Networking.Connections;
+using Phoenix.Common.Networking.Packets;
 using Phoenix.Common.SceneReplication;
 using Phoenix.Common.SceneReplication.Packets;
 
@@ -20,53 +21,34 @@ namespace Phoenix.Server.SceneReplication
         private List<string> _subscribedScenes = new List<string>();
         private List<string> _scenesAwaitingSubscription = new List<string>();
 
-        internal string? _presentlyReplicatingRoom = null;
-        internal string? _presentlyReplicatingSceneObject = null;
-        internal string? _presentlyReplicatingScene = null;
-        internal bool _replicating = false;
+        internal List<AbstractNetworkPacket> _replicationPackets = new List<AbstractNetworkPacket>();
+        private bool _replicationReady;
 
-        /// <summary>
-        /// Checks if the server is currently replicating scenes to clients
-        /// </summary>
-        public bool IsReplicating
+        internal void Sync()
         {
-            get
-            {
-                return _replicating;
-            }
-        }
+            if (!_replicationReady)
+                return;
 
-        /// <summary>
-        /// Retrieves the scene that is currently being transferred to the clients
-        /// </summary>
-        public string? PresentlyReplicatingScene
-        {
-            get
+            // Perform sync
+            AbstractNetworkPacket[] packets;
+            lock (_replicationPackets)
             {
-                return _presentlyReplicatingScene;
+                packets = _replicationPackets.ToArray();
+                _replicationPackets.Clear();
             }
-        }
 
-        /// <summary>
-        /// Retrieves the scene object that is currently being transferred to the clients
-        /// </summary>
-        public string? PresentlyReplicatingSceneObject
-        {
-            get
+            // Send sync
+            SceneReplicationChannel channel;
+            try
             {
-                return _presentlyReplicatingSceneObject;
+                channel = _client.GetChannel<SceneReplicationChannel>();
             }
-        }
-
-        /// <summary>
-        /// Retrieves the room that is currently being transferred to the clients
-        /// </summary>
-        public string? PresentlyReplicatingRoom
-        {
-            get
+            catch
             {
-                return _presentlyReplicatingRoom;
+                return;
             }
+            foreach (AbstractNetworkPacket pkt in packets)
+                channel.SendPacket(pkt);
         }
 
         internal SceneReplicator(Connection client, SceneManager manager)
@@ -424,12 +406,8 @@ namespace Phoenix.Server.SceneReplication
                 throw new ArgumentException("No replication packet channel in packet registry. Please add Phoenix.Common.SceneReplication.SceneReplicationChannel to the server packet registry.");
             }
 
-            // Wait for replication to finish
-            while (_replicating)
-                Thread.Sleep(1);
-
-            // Stop the main replicator until the initial sync is done
-            _replicating = true;
+            // Lock replicator
+            _replicationReady = false;
 
             // Send initial sync packet
             channel.SendPacket(new InitialSceneReplicationStartPacket()
@@ -441,21 +419,112 @@ namespace Phoenix.Server.SceneReplication
 
             #region Replication
 
-            // Send start
-            channel.SendPacket(new SceneReplicationStartPacket()
+            // Send destroyed objects
+            List<string> objIds;
+            lock (_manager._destroyedObjects)
+                objIds = _manager._destroyedObjects[sc];
+            foreach (string id in objIds)
             {
-                ScenePath = sc.Path,
-                Room = room
-            });
+                // Send packet
+                channel.SendPacket(new DestroyObjectPacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+                    ObjectID = id
+                });
+            }
 
-            // TODO: initial sync
-
-            // Send finish
-            channel.SendPacket(new SceneReplicationCompletePacket()
+            // Send scene changes
+            List<SceneObject> objs;
+            lock (_manager._sceneSwitchedObjects)
+                objs = _manager._sceneSwitchedObjects[sc];
+            foreach (SceneObject obj in objs)
             {
-                ScenePath = sc.Path,
-                Room = room
-            });
+                // Send packet
+                channel.SendPacket(new ObjectChangeScenePacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+
+                    ObjectID = obj.ID,
+                    NewScenePath = obj.Scene == null ? null : obj.Scene.Path
+                });
+            }
+
+            // Send reparented objects
+            lock (_manager._reparentedObjects)
+                objs = _manager._reparentedObjects[sc];
+            foreach (SceneObject obj in objs)
+            {
+                // Send packet
+                channel.SendPacket(new ReparentObjectPacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+
+                    ObjectID = obj.ID,
+                    NewParentID = obj.Parent == null ? null : obj.Parent.ID
+                });
+            }
+
+            // Send spawned prefabs
+            Dictionary<SceneObject, string> prefabs;
+            lock (_manager._spawnedPrefabs)
+                prefabs = _manager._spawnedPrefabs[sc];
+            List<string> replicatingPrefabs = new List<string>();
+            void replicatePrefab(SceneObject prefab)
+            {
+                if (replicatingPrefabs.Contains(prefab.ID))
+                    return;
+                replicatingPrefabs.Add(prefab.ID);
+
+                // Replicate parent prefab first if its a prefab
+                if (prefab.Parent != null)
+                    replicatePrefab(prefab.Parent);
+                if (!prefabs.ContainsKey(prefab))
+                    return; // Not a prefab, prob a parent object
+
+                // Replicate prefab
+                channel.SendPacket(new SpawnPrefabPacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+                    
+                    PrefabPath = prefabs[prefab],
+                    ObjectID = prefab.ID,
+                    ParentObjectID = prefab.Parent == null ? null : prefab.Parent.ID
+                });
+            }
+            foreach (SceneObject prefab in prefabs.Keys)
+            {
+                replicatePrefab(prefab);
+            }
+
+            // Replicate fields
+            lock (_manager._editedSceneObjets)
+                objs = _manager._editedSceneObjets[sc];
+            foreach (SceneObject obj in objs)
+            {
+                // Send packet
+                channel.SendPacket(new ReplicateObjectPacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+
+                    ObjectID = obj.ID,
+
+                    HasActiveStatusChanges = true,
+                    HasDataChanges = true,
+                    HasNameChanges = true,
+                    HasTransformChanges = true,
+                    IsInitial = true,
+
+                    Active = obj.Active,
+                    Data = obj.ReplicationData.data,
+                    Name = obj.Name,
+                    Transform = obj.Transform.ToPacketTransform()
+                });
+            }
 
             #endregion Replication
 
@@ -467,7 +536,7 @@ namespace Phoenix.Server.SceneReplication
             });
 
             // Resume main replicator
-            _replicating = false;
+            _replicationReady = true;
         }
     }
 }

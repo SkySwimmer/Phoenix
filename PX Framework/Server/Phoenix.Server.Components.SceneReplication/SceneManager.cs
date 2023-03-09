@@ -2,6 +2,8 @@
 using Phoenix.Common.Networking.Connections;
 using Phoenix.Common.AsyncTasks;
 using static Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket;
+using Phoenix.Common.SceneReplication.Packets;
+using Phoenix.Common.Logging;
 
 namespace Phoenix.Server.SceneReplication
 {
@@ -30,6 +32,13 @@ namespace Phoenix.Server.SceneReplication
         private Dictionary<string, Scene> _sceneMemory = new Dictionary<string, Scene>();
         private Dictionary<string, Dictionary<string, SceneInfo>> _rooms = new Dictionary<string, Dictionary<string, SceneInfo>>();
         internal Dictionary<Scene, Dictionary<string, SceneObjectID>> _sceneObjectMaps = new Dictionary<Scene, Dictionary<string, SceneObjectID>>();
+
+        // Replication memory
+        internal Dictionary<Scene, List<string>> _destroyedObjects = new Dictionary<Scene, List<string>>();
+        internal Dictionary<Scene, Dictionary<SceneObject, string>> _spawnedPrefabs = new Dictionary<Scene, Dictionary<SceneObject, string>>();
+        internal Dictionary<Scene, List<SceneObject>> _reparentedObjects = new Dictionary<Scene, List<SceneObject>>();
+        internal Dictionary<Scene, List<SceneObject>> _sceneSwitchedObjects = new Dictionary<Scene, List<SceneObject>>();
+        internal Dictionary<Scene, List<SceneObject>> _editedSceneObjets = new Dictionary<Scene, List<SceneObject>>();
 
         private Scene? GetRealSceneFromMemory(string scene)
         {
@@ -82,7 +91,7 @@ namespace Phoenix.Server.SceneReplication
         /// <returns>True if present, false otherwise</returns>
         public bool RoomExists(string id)
         {
-            lock(_rooms)
+            lock (_rooms)
                 return _rooms.ContainsKey(id);
         }
 
@@ -95,7 +104,7 @@ namespace Phoenix.Server.SceneReplication
             if (RoomExists(id))
             {
                 Dictionary<string, SceneInfo>? room = GetRoom(id);
-                lock(_rooms)
+                lock (_rooms)
                     _rooms.Remove(id);
 
                 // Unbind replication events
@@ -110,6 +119,16 @@ namespace Phoenix.Server.SceneReplication
                         scene.Scene.OnSpawnPrefab -= scene.PrefabSpawnHandler;
                         lock (_sceneObjectMaps)
                             _sceneObjectMaps.Remove(scene.Scene);
+                        lock (_destroyedObjects)
+                            _destroyedObjects.Remove(scene.Scene);
+                        lock (_reparentedObjects)
+                            _reparentedObjects.Remove(scene.Scene);
+                        lock (_sceneSwitchedObjects)
+                            _sceneSwitchedObjects.Remove(scene.Scene);
+                        lock (_destroyedObjects)
+                            _editedSceneObjets.Remove(scene.Scene);
+                        lock (_spawnedPrefabs)
+                            _spawnedPrefabs.Remove(scene.Scene);
                     }
                 }
 
@@ -204,7 +223,7 @@ namespace Phoenix.Server.SceneReplication
                 if (roomD == null)
                 {
                     roomD = new Dictionary<string, SceneInfo>();
-                    lock(_rooms)
+                    lock (_rooms)
                         _rooms[room] = roomD;
                 }
 
@@ -255,31 +274,257 @@ namespace Phoenix.Server.SceneReplication
                         // Create scene
                         scene = new SceneInfo();
                         scene.Scene = Scene.FromObjects(scenePath, Path.GetFileNameWithoutExtension(assetPath), objects.ToArray());
+                        lock (_destroyedObjects)
+                            _destroyedObjects[scene.Scene] = new List<string>();
+                        lock (_reparentedObjects)
+                            _reparentedObjects[scene.Scene] = new List<SceneObject>();
+                        lock (_sceneSwitchedObjects)
+                            _sceneSwitchedObjects[scene.Scene] = new List<SceneObject>();
+                        lock (_destroyedObjects)
+                            _editedSceneObjets[scene.Scene] = new List<SceneObject>();
+                        lock (_spawnedPrefabs)
+                            _spawnedPrefabs[scene.Scene] = new Dictionary<SceneObject, string>();
                         scene.PrefabSpawnHandler = (path, sceneInst, prefab, parent) =>
                         {
-                            // TODO
-                            path = path;
+                            // Add to prefab memory
+                            lock (_spawnedPrefabs)
+                                if (!_spawnedPrefabs[scene.Scene].ContainsKey(prefab))
+                                    _spawnedPrefabs[scene.Scene][prefab] = path;
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        lock (repl._replicationPackets)
+                                        {
+                                            repl._replicationPackets.Add(new SpawnPrefabPacket()
+                                            {
+                                                Room = room,
+                                                ScenePath = scenePath,
+
+                                                ObjectID = prefab.ID,
+                                                PrefabPath = path,
+                                                ParentObjectID = parent == null ? null : parent.ID
+                                            });
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    // Overflow or something
+                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                }
+                            }
                         };
                         scene.DestroyHandler = obj =>
                         {
-                            // TODO
-                            obj = obj;
+                            // Add to destroyed object memory if needed
+                            if (objects.Contains(obj))
+                            {
+                                lock (_destroyedObjects)
+                                    if (!_destroyedObjects[scene.Scene].Contains(obj.ID))
+                                        _destroyedObjects[scene.Scene].Add(obj.ID);
+                            }
+                            lock (_spawnedPrefabs)
+                                if (_spawnedPrefabs[scene.Scene].ContainsKey(obj))
+                                    _spawnedPrefabs[scene.Scene].Remove(obj);
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        lock (repl._replicationPackets)
+                                        {
+                                            repl._replicationPackets.Add(new DestroyObjectPacket()
+                                            {
+                                                Room = room,
+                                                ScenePath = scenePath,
+
+                                                ObjectID = obj.ID
+                                            });
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    // Overflow or something
+                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                }
+                            }
                         };
-                        scene.ChangeSceneHandler += (obj, oldScene, newScene) =>
+                        scene.ChangeSceneHandler = (obj, oldScene, newScene) =>
                         {
-                            // TODO
-                            obj = obj;
+                            // Add to scene change memory if needed
+                            if (objects.Contains(obj))
+                            {
+                                lock (_sceneSwitchedObjects)
+                                    if (!_sceneSwitchedObjects[scene.Scene].Contains(obj))
+                                        _sceneSwitchedObjects[scene.Scene].Add(obj);
+                            }
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        lock (repl._replicationPackets)
+                                        {
+                                            repl._replicationPackets.Add(new ObjectChangeScenePacket()
+                                            {
+                                                Room = room,
+                                                ScenePath = scenePath,
+
+                                                ObjectID = obj.ID,
+                                                NewScenePath = newScene == null ? null : newScene.Path
+                                            });
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    // Overflow or something
+                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                }
+                            }
                         };
-                        scene.ReParentHandler += (obj, oldParent, newParent) =>
+                        scene.ReParentHandler = (obj, oldParent, newParent) =>
                         {
-                            // TODO
-                            obj = obj;
+                            // Add to reparenting memory if needed
+                            if (objects.Contains(obj))
+                            {
+                                lock (_reparentedObjects)
+                                    if (!_reparentedObjects[scene.Scene].Contains(obj))
+                                        _reparentedObjects[scene.Scene].Add(obj);
+                            }
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        lock (repl._replicationPackets)
+                                        {
+                                            repl._replicationPackets.Add(new ReparentObjectPacket()
+                                            {
+                                                Room = room,
+                                                ScenePath = scenePath,
+
+                                                ObjectID = obj.ID,
+                                                NewParentID = newParent == null ? null : newParent.ID
+                                            });
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    // Overflow or something
+                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                }
+                            }
                         };
-                        scene.ReplicationHandler += (obj, prop, value, key) =>
+                        scene.ReplicationHandler = (obj, prop, key, value) =>
                         {
-                            // TODO
-                            obj = obj;
+                            // Add to replication memory if needed
+                            if (objects.Contains(obj))
+                            {
+                                lock (_editedSceneObjets)
+                                    if (!_editedSceneObjets[scene.Scene].Contains(obj))
+                                        _editedSceneObjets[scene.Scene].Add(obj);
+                            }
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        lock (repl._replicationPackets)
+                                        {
+                                            switch (prop)
+                                            {
+                                                case ReplicatingProperty.NAME:
+                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
+                                                    {
+                                                        Room = room,
+                                                        ScenePath = scenePath,
+                                                        ObjectID = obj.ID,
+
+                                                        HasNameChanges = true,
+                                                        Name = value.ToString()
+                                                    });
+                                                    break;
+                                                case ReplicatingProperty.IS_ACTIVE:
+                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
+                                                    {
+                                                        Room = room,
+                                                        ScenePath = scenePath,
+                                                        ObjectID = obj.ID,
+
+                                                        HasActiveStatusChanges = true,
+                                                        Active = (bool)value
+                                                    });
+                                                    break;
+                                                case ReplicatingProperty.TRANSFORM:
+                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
+                                                    {
+                                                        Room = room,
+                                                        ScenePath = scenePath,
+                                                        ObjectID = obj.ID,
+
+                                                        HasTransformChanges = true,
+                                                        Transform = ((Phoenix.Server.SceneReplication.Coordinates.Transform)value).ToPacketTransform()
+                                                    });
+                                                    break;
+                                                case ReplicatingProperty.REPLICATION_DATA:
+                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
+                                                    {
+                                                        Room = room,
+                                                        ScenePath = scenePath,
+                                                        ObjectID = obj.ID,
+
+                                                        HasDataChanges = true,
+                                                        Data = new Dictionary<string, object?>() { [key] = value }
+                                                    });
+                                                    break;
+                                                case ReplicatingProperty.REPLICATION_DATA_REMOVEKEY:
+                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
+                                                    {
+                                                        Room = room,
+                                                        ScenePath = scenePath,
+                                                        ObjectID = obj.ID,
+
+                                                        HasDataChanges = true,
+                                                        RemovedData = new List<string>() { value.ToString() }
+                                                    });
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    // Overflow or something
+                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                }
+                            }
                         };
+
                         scene.Scene.OnSpawnPrefab += scene.PrefabSpawnHandler;
                         scene.Scene.OnReparent += scene.ReParentHandler;
                         scene.Scene.OnReplicate += scene.ReplicationHandler;
@@ -317,15 +562,26 @@ namespace Phoenix.Server.SceneReplication
                         {
                             while (true)
                             {
-                                scene.Scene.Tick();
-                                Thread.Sleep(5);
+                                    // Tick scene
+                                    scene.Scene.Tick();
+
+                                    // Replicate
+                                    foreach (Connection conn in _server.ServerConnection.GetClients())
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null)
+                                        repl.Sync();
+                                }
+
+                                    // Wait
+                                    Thread.Sleep(5);
                             }
                         });
                     }
-                }
 
-                loadingScene = false;
-                return scene.Scene;
+                    loadingScene = false;
+                    return scene.Scene;
+                }
             }
             finally
             {

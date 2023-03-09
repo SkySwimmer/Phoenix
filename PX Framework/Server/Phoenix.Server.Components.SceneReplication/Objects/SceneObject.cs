@@ -630,6 +630,7 @@ namespace Phoenix.Server.SceneReplication
         {
             if (Active != lastState)
             {
+                CallOnReplicate(this, ReplicatingProperty.IS_ACTIVE, null, Active);
                 foreach (AbstractObjectComponent comp in Components)
                 {
                     if (comp == null)

@@ -24,8 +24,6 @@ namespace Phoenix.Common.SceneReplication
             RegisterPacket(new InitialSceneReplicationCompletePacket());
 
             // Replication
-            RegisterPacket(new SceneReplicationStartPacket());
-            RegisterPacket(new SceneReplicationCompletePacket());
             RegisterPacket(new SpawnPrefabPacket());
             RegisterPacket(new DestroyObjectPacket());
             RegisterPacket(new ReparentObjectPacket());

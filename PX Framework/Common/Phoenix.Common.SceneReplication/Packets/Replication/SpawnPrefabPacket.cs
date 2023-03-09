@@ -10,7 +10,7 @@ namespace Phoenix.Common.SceneReplication.Packets
     {
         public string PrefabPath = "";
         public string ObjectID = "";
-        public string? ParentObjectPath = null;
+        public string? ParentObjectID = null;
         public string ScenePath = "";
         public string Room = "";
         
@@ -29,7 +29,7 @@ namespace Phoenix.Common.SceneReplication.Packets
             PrefabPath = reader.ReadString();
             ObjectID = reader.ReadString();
             if (reader.ReadBoolean())
-                ParentObjectPath = reader.ReadString();
+                ParentObjectID = reader.ReadString();
         }
 
         public override void Write(DataWriter writer)
@@ -39,9 +39,9 @@ namespace Phoenix.Common.SceneReplication.Packets
 
             writer.WriteString(PrefabPath);
             writer.WriteString(ObjectID);
-            writer.WriteBoolean(ParentObjectPath != null);
-            if (ParentObjectPath != null)
-                writer.WriteString(ParentObjectPath);
+            writer.WriteBoolean(ParentObjectID != null);
+            if (ParentObjectID != null)
+                writer.WriteString(ParentObjectID);
         }
     }
 }
