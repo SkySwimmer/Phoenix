@@ -69,8 +69,6 @@ namespace Phoenix.Tests.Server
             SceneObject ipBox = sc.GetObject("LoadCanvas/Panel/ServerPanel/ConnectPanel/IPBox");
             prefab.Parent = ipBox;
             prefab.Destroy();
-            ipBox.SpawnPrefab("TestReplicationPrefab").AddComponent<TestObjectComponent>();
-            ipBox = ipBox;
 
             // Test interaction with the scene manager
             SceneManager manager = ServiceManager.GetService<SceneManager>();
@@ -110,6 +108,7 @@ namespace Phoenix.Tests.Server
                     });
                     obj.OwningConnection = ev.Player.Client;
                     obj.AddComponent<TestObjectComponent>();
+                    GetLogger().Info(obj.Name + ": " + obj.ID);
                 });
             }
         }

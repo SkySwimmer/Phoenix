@@ -29,6 +29,7 @@ namespace Phoenix.Common.SceneReplication
             RegisterPacket(new ReparentObjectPacket());
             RegisterPacket(new ObjectChangeScenePacket());
             RegisterPacket(new ReplicateObjectPacket());
+            RegisterPacket(new ComponentMessagePacket());
 
             // Subscription event packets
             RegisterPacket(new SceneReplicationSubscribeRoomPacket());

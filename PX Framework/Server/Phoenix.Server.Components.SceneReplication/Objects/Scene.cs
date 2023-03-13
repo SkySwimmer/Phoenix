@@ -213,6 +213,14 @@ namespace Phoenix.Server.SceneReplication
             }
         }
 
+        internal delegate void AddComponentHandler(AbstractObjectComponent comp, SceneObject obj);
+        internal event AddComponentHandler? OnAddComponent;
+
+        internal void CallAddComponent(AbstractObjectComponent comp, SceneObject obj)
+        {
+            OnAddComponent?.Invoke(comp, obj);
+        }
+
         /// <summary>
         /// Called when this object or a child of it requires to be replicated (called when properties change)
         /// </summary>

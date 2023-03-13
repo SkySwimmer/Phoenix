@@ -1,4 +1,4 @@
-﻿using Phoenix.Server.SceneReplication.Data;
+﻿using Phoenix.Common.SceneReplication.Data;
 
 namespace Phoenix.Server.SceneReplication.Coordinates
 {

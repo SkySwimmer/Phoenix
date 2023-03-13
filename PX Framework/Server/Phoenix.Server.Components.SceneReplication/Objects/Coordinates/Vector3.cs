@@ -1,4 +1,4 @@
-﻿using Phoenix.Server.SceneReplication.Data;
+﻿using Phoenix.Common.SceneReplication.Data;
 
 namespace Phoenix.Server.SceneReplication.Coordinates
 {
@@ -182,14 +182,14 @@ namespace Phoenix.Server.SceneReplication.Coordinates
             return false;
         }
 
-        public void Deserialize(Dictionary<string, object> data)
+        public void Deserialize(Dictionary<string, object?> data)
         {
             x = (float)data["X"];
             y = (float)data["Y"];
             z = (float)data["Z"];
         }
 
-        public void Serialize(Dictionary<string, object> data)
+        public void Serialize(Dictionary<string, object?> data)
         {
             data["X"] = x;
             data["Y"] = y;

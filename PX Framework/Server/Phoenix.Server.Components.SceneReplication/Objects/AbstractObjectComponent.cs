@@ -1,6 +1,12 @@
-﻿using Phoenix.Common.Networking.Connections;
+﻿using Phoenix.Common;
+using Phoenix.Common.Networking.Connections;
+using Phoenix.Common.SceneReplication;
+using Phoenix.Common.SceneReplication.Data;
+using Phoenix.Common.SceneReplication.Messages;
+using Phoenix.Common.SceneReplication.Packets;
 using Phoenix.Server.SceneReplication.Coordinates;
 using Phoenix.Server.SceneReplication.Data;
+using Transform = Phoenix.Server.SceneReplication.Coordinates.Transform;
 
 namespace Phoenix.Server.SceneReplication
 {
@@ -12,6 +18,12 @@ namespace Phoenix.Server.SceneReplication
         private bool _inited;
         private SceneObject _object;
         private Connection? _owningConnection;
+
+        private GameServer _server;
+        private string _room;
+
+        private bool inited;
+        internal List<IComponentMessage> _messageRegistry = new List<IComponentMessage>();
 
         /// <summary>
         /// Retrieves the owning connection of this object (assigning this will prevent other clients from receiving and sending messages to this component)
@@ -40,6 +52,123 @@ namespace Phoenix.Server.SceneReplication
             Disconnect(reason, args);
         }
 
+        internal void SetupNetwork(GameServer server, string room)
+        {
+            if (inited)
+                return;
+            RegisterMessages();
+            _server = server;
+            _room = room;
+            inited = true;
+        }
+
+        /// <summary>
+        /// Called to register component messages
+        /// </summary>
+        protected virtual void RegisterMessages() { }
+
+        internal ComponentMessageSender InternalReplySender(Connection origin)
+        {
+            return message =>
+            {
+                if (!_messageRegistry.Any(t => t.MessageID == message.MessageID))
+                    throw new ArgumentException("Message not registered");
+                if (SceneObject.Scene == null)
+                    throw new ArgumentException("Not in any scene");
+
+                // Create packet
+                ComponentMessagePacket pkt = new ComponentMessagePacket();
+                pkt.ObjectID = SceneObject.ID;
+                pkt.ScenePath = SceneObject.Scene.Path;
+                pkt.MessengerComponentIndex = Array.IndexOf(SceneObject.Components, this);
+                pkt.Room = _room;
+                if (Game.DebugMode)
+                {
+                    // Add debug information                
+                    pkt.HasDebugHeaders = true;
+                    pkt.DebugRemoteComponentTypeName = GetType().FullName;
+                    pkt.DebugComponentMessageRegistry = new Dictionary<string, int>();
+
+                    // Add registry
+                    int index = 0;
+                    foreach (IComponentMessage msg in _messageRegistry)
+                        pkt.DebugComponentMessageRegistry[msg.MessageID] = index++;
+                }
+                pkt.MessageID = _messageRegistry.FindIndex(t => t.MessageID == message.MessageID);
+                pkt.MessagePayload = SerializingObjects.SerializeObject(message);
+
+                // Send message
+                origin.GetChannel<SceneReplicationChannel>().SendPacket(pkt);
+            };
+        }
+
+        internal void HandleMessageInternal(IComponentMessage msg, Connection origin)
+        {
+            HandleMessage(msg, InternalReplySender(origin));
+        }
+
+        /// <summary>
+        /// Registers component messages
+        /// </summary>
+        /// <param name="message">Component message to register</param>
+        protected void RegisterMessage(IComponentMessage message)
+        {
+            if (inited)
+                throw new ArgumentException("Registry locked");
+            if (_messageRegistry.Any(t => t.MessageID == message.MessageID))
+                throw new ArgumentException("Message already registered or another exists with the same ID");
+            _messageRegistry.Add(message);
+        }
+
+        /// <summary>
+        /// Sends messages to clients
+        /// </summary>
+        /// <typeparam name="T">Message type</typeparam>
+        /// <param name="message">Message instance</param>
+        public void SendMessage<T>(T message) where T:IComponentMessage
+        {
+            if (!_messageRegistry.Any(t => t.MessageID == message.MessageID))
+                throw new ArgumentException("Message not registered");
+            if (SceneObject.Scene == null)
+                throw new ArgumentException("Not in any scene");
+
+            // Find connection
+            Connection? conn = OwningConnection;
+            if (conn == null)
+                conn = _server.ServerConnection;
+
+            // Create packet
+            ComponentMessagePacket pkt = new ComponentMessagePacket();
+            pkt.ObjectID = SceneObject.ID;
+            pkt.ScenePath = SceneObject.Scene.Path;
+            pkt.MessengerComponentIndex = Array.IndexOf(SceneObject.Components, this);
+            pkt.Room = _room;
+            if (Game.DebugMode)
+            {
+                // Add debug information                
+                pkt.HasDebugHeaders = true;
+                pkt.DebugRemoteComponentTypeName = GetType().FullName;
+                pkt.DebugComponentMessageRegistry = new Dictionary<string, int>();
+
+                // Add registry
+                int index = 0;
+                foreach (IComponentMessage msg in _messageRegistry)
+                    pkt.DebugComponentMessageRegistry[msg.MessageID] = index++;
+            }
+            pkt.MessageID = _messageRegistry.FindIndex(t => t.MessageID == message.MessageID);
+            pkt.MessagePayload = SerializingObjects.SerializeObject(message);
+
+            // Send message
+            conn.GetChannel<SceneReplicationChannel>().SendPacket(pkt);
+        }
+
+        /// <summary>
+        /// Called to handle component messages
+        /// </summary>
+        /// <param name="message">Message instance to handle</param>
+        /// <param name="sendMessage">Message sender callback, use this for easy access to reply sending</param>
+        protected virtual void HandleMessage(IComponentMessage message, ComponentMessageSender sendMessage) { }
+
         /// <summary>
         /// Retrieves the owning scene object
         /// </summary>
@@ -59,6 +188,17 @@ namespace Phoenix.Server.SceneReplication
             get
             {
                 return _object.Transform;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the object scene
+        /// </summary>
+        public Scene? Scene
+        {
+            get
+            {
+                return _object.Scene;
             }
         }
 
@@ -117,10 +257,10 @@ namespace Phoenix.Server.SceneReplication
         public virtual void Destroy() { }
 
         /// <inheritdoc/>
-        public virtual void Deserialize(Dictionary<string, object> data) { }
+        public virtual void Deserialize(Dictionary<string, object?> data) { }
 
         /// <inheritdoc/>
-        public virtual void Serialize(Dictionary<string, object> data) { }
+        public virtual void Serialize(Dictionary<string, object?> data) { }
 
         /// <summary>
         /// Called when the owning connection disconnects

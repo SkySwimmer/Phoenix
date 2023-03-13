@@ -96,6 +96,20 @@ namespace Phoenix.Server.SceneReplication
         }
 
         /// <summary>
+        /// Checks if a scene is loaded in the default or specified room
+        /// </summary>
+        /// <param name="scenePath">Scene path</param>
+        /// <param name="room">Room ID</param>
+        /// <returns>True if present, false otherwise</returns>
+        public bool IsSceneLoaded(string scenePath, string room = "DEFAULT")
+        {
+            Dictionary<string, SceneInfo>? roomD = GetRoom(room);
+            if (roomD == null)
+                return false;
+            return roomD.ContainsKey(scenePath);
+        }
+
+        /// <summary>
         /// Deletes rooms
         /// </summary>
         /// <param name="id">Room ID</param>
@@ -530,6 +544,10 @@ namespace Phoenix.Server.SceneReplication
                         scene.Scene.OnReplicate += scene.ReplicationHandler;
                         scene.Scene.OnChangeScene += scene.ChangeSceneHandler;
                         scene.Scene.OnDestroy += scene.DestroyHandler;
+                        scene.Scene.OnAddComponent += (comp, obj) =>
+                        {
+                            comp.SetupNetwork(_server, room);
+                        };
                         roomD[scenePath] = scene;
 
                         lock (_sceneObjectMaps)

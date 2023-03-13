@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Phoenix.Common.SceneReplication.Data;
 
 namespace Phoenix.Server.SceneReplication.Data
 {
@@ -95,7 +96,7 @@ namespace Phoenix.Server.SceneReplication.Data
                 throw new ArgumentException("Cannot change properties of a read-only object");
             if (value is SerializingObject)
             {
-                Dictionary<string, object> data = new Dictionary<string, object>();
+                Dictionary<string, object?> data = new Dictionary<string, object?>();
                 ((SerializingObject)value).Serialize(data);
                 Set(key, data);
                 return;
@@ -156,7 +157,7 @@ namespace Phoenix.Server.SceneReplication.Data
                 if (typeof(SerializingObject).IsAssignableFrom(typeof(T)))
                 {
                     SerializingObject baseObj = (SerializingObject)typeof(T).GetConstructor(new Type[0]).Invoke(new object[0]);
-                    baseObj.Deserialize((Dictionary<string, object>)val);
+                    baseObj.Deserialize((Dictionary<string, object?>)val);
                     return (T)baseObj;
                 }
                 else

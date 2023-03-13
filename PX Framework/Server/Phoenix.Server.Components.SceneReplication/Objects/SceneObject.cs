@@ -300,29 +300,24 @@ namespace Phoenix.Server.SceneReplication
         {
             if (HasComponent<T>())
                 return GetComponent<T>();
-            try
-            {
-                // Find constructor
-                ConstructorInfo? constr = typeof(T).GetConstructor(new Type[0]);
-                if (constr == null)
-                    throw new ArgumentException();
 
-                // Create instance
-                object inst = constr.Invoke(new object[0]);
-                if (inst is T)
-                {
-                    T instance = (T)inst;
-                    lock (_components)
-                        _components.Add(instance);
-                    instance.Setup(this);
-                    return instance;
-                }
-                throw new ArgumentException();
-            }
-            catch
-            {
+            // Find constructor
+            ConstructorInfo? constr = typeof(T).GetConstructor(new Type[0]);
+            if (constr == null)
                 throw new ArgumentException("Component does not have an empty constructor");
+
+            // Create instance
+            object inst = constr.Invoke(new object[0]);
+            if (inst is T)
+            {
+                T instance = (T)inst;
+                lock (_components)
+                    _components.Add(instance);
+                Scene?.CallAddComponent(instance, this);
+                instance.Setup(this);
+                return instance;
             }
+            throw new ArgumentException("Invalid component type");
         }
 
         /// <summary>
@@ -335,6 +330,7 @@ namespace Phoenix.Server.SceneReplication
         {
             lock (_components)
                 _components.Add(instance);
+            Scene?.CallAddComponent(instance, this);
             instance.Setup(this);
             return instance;
         }

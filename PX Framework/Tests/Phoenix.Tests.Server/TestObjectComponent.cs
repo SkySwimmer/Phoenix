@@ -1,4 +1,5 @@
-﻿using Phoenix.Server.SceneReplication;
+﻿using Phoenix.Common.SceneReplication.Messages;
+using Phoenix.Server.SceneReplication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,28 @@ namespace Phoenix.Tests.Server
 {
     public class TestObjectComponent : AbstractObjectComponent
     {
+        protected override void RegisterMessages()
+        {
+            RegisterMessage(new TestMessage());
+        }
+
         public override void Start()
         {
-            base.Start();
+            SendMessage(new TestMessage()
+            {
+                MessagePayload = "test"
+            });
         }
 
         public override void Update()
         {
             base.Update();
+        }
+
+        [MessageHandler]
+        public void HandleTest(TestMessage msg, ComponentMessageSender replySender)
+        {
+            msg = msg;
         }
 
         public override void Disconnect(string reason, string[] args)
