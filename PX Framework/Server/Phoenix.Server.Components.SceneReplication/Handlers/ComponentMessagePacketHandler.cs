@@ -62,7 +62,7 @@ namespace Phoenix.Server.Components.SceneReplication.Handlers
                                     // Check IDs
                                     if (packet.DebugComponentMessageRegistry.Keys.ToArray()[packet.MessageID] != comp._messageRegistry[packet.MessageID].MessageID)
                                     {
-                                        Logger.GetLogger("scene-replication").Error("Failed to handle component message packet: message registry mismatch, message ID does not match, remote end out of sync.\n"
+                                        Logger.GetLogger("scene-replication").Error("Failed to handle component message packet: message registry mismatch, message ID does not match, local side out of sync.\n"
                                         + "\nScene: " + sc.Path
                                         + "\nScene object: " + obj.Path
                                         + "\nComponent: " + comp.GetType().FullName
@@ -71,7 +71,9 @@ namespace Phoenix.Server.Components.SceneReplication.Handlers
                                         + "\nMessage ID: " + packet.MessageID
                                         + "\nRemote ID string: " + packet.DebugComponentMessageRegistry.Keys.ToArray()[packet.MessageID]
                                         + "\nLocal ID string: " + comp._messageRegistry[packet.MessageID].MessageID
-                                        + "\nLocal message type: " + comp._messageRegistry[packet.MessageID].GetType().FullName);
+                                        + "\nLocal message type: " + comp._messageRegistry[packet.MessageID].GetType().FullName
+                                        + "\n"
+                                        + "\nPlease make sure that the remote end has the same registry order as the local side, else the local message type won't match the remote message type.");
                                         return false;
                                     }
                                 }
