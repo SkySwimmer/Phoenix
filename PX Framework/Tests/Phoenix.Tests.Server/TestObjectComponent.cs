@@ -32,6 +32,11 @@ namespace Phoenix.Tests.Server
         public void HandleTest(TestMessage msg, ComponentMessageSender replySender)
         {
             msg = msg;
+
+            replySender(new TestMessage()
+            {
+                MessagePayload = "Response"
+            });
         }
 
         public override void Disconnect(string reason, string[] args)

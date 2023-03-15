@@ -22,8 +22,8 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.Replication
                 {
                     comp.Bindings.RunOnNextFrameUpdate(() =>
                     {
-                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectInScene(packet.Room, packet.ScenePath, packet.ObjectID);
-                        if (obj != null && (packet.NewParentID == null || comp.Bindings.GetObjectInScene(packet.Room, packet.ScenePath, packet.NewParentID) != null))
+                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectByIDInScene(packet.Room, packet.ScenePath, packet.ObjectID);
+                        if (obj != null && (packet.NewParentID == null || comp.Bindings.GetObjectByIDInScene(packet.Room, packet.ScenePath, packet.NewParentID) != null))
                         {
                             comp.GetLogger().Trace("Reparenting object " + packet.ObjectID + " to " + (packet.NewParentID  == null ? "<root>" : packet.NewParentID) + " in scene " + packet.ScenePath + " in room " + packet.Room + "...");
                             obj.Reparent(packet.NewParentID);

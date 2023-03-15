@@ -22,7 +22,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.Replication
                 {
                     comp.Bindings.RunOnNextFrameUpdate(() =>
                     {
-                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectInScene(packet.Room, packet.ScenePath, packet.ObjectID);
+                        IReplicatingSceneObject? obj = comp.Bindings.GetObjectByIDInScene(packet.Room, packet.ScenePath, packet.ObjectID);
                         if (obj != null)
                         {
                             comp.GetLogger().Trace("Destroying object " + packet.ObjectID + " in scene " + packet.ScenePath + " of room " + packet.Room + "..");

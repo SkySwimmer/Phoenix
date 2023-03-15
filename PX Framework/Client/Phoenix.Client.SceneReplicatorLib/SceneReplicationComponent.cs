@@ -205,8 +205,8 @@ namespace Phoenix.Client.Components
             channel.RegisterHandler(new UnloadSceneHandler());
 
             // Initial sync
-            /*channel.RegisterHandler(new InitialSceneReplicationStartHandler());
-            channel.RegisterHandler(new InitialSceneReplicationCompleteHandler());*/
+            channel.RegisterHandler(new InitialSceneReplicationStartHandler());
+            channel.RegisterHandler(new InitialSceneReplicationCompleteHandler());
 
             // Subscription
             channel.RegisterHandler(new SceneReplicationSubscribeRoomHandler());
@@ -215,13 +215,11 @@ namespace Phoenix.Client.Components
             channel.RegisterHandler(new SceneReplicationDesubscribeSceneHandler());
 
             // Replication
-            /*channel.RegisterHandler(new SceneReplicationStartHandler());
-            channel.RegisterHandler(new SceneReplicationCompleteHandler());
             channel.RegisterHandler(new SpawnPrefabHandler());
             channel.RegisterHandler(new DestroyObjectHandler());
             channel.RegisterHandler(new ReparentObjectHandler());
             channel.RegisterHandler(new ObjectChangeSceneHandler());
-            channel.RegisterHandler(new ReplicateObjectHandler());*/
+            channel.RegisterHandler(new ReplicateObjectHandler());
 
             if (Bindings == null)
             {

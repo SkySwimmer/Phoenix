@@ -1,4 +1,6 @@
-﻿using Phoenix.Common.SceneReplication.Packets;
+﻿using Phoenix.Client.SceneReplicatorLib.Messages;
+using Phoenix.Common.SceneReplication.Packets;
+using static Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket;
 
 namespace Phoenix.Client.SceneReplicatorLib.Binding
 {
@@ -27,9 +29,27 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>
-        /// <param name="objectPath"></param>
+        /// <param name="objectID">Object ID string</param>
         /// <returns>IReplicatingSceneObject instance or null</returns>
-        public abstract IReplicatingSceneObject? GetObjectInScene(string room, string scenePath, string objectPath);
+        public abstract IReplicatingSceneObject? GetObjectByIDInScene(string room, string scenePath, string objectID);
+
+        /// <summary>
+        /// Retrieves the networked components of a object
+        /// </summary>
+        /// <param name="room">Replication room</param>
+        /// <param name="scenePath">Scene path</param>
+        /// <param name="objectID">Object ID string</param>
+        /// <returns>Array of IComponentMessageReceiver instances</returns>
+        public abstract IComponentMessageReceiver[] GetNetworkedComponents(string room, string scenePath, string objectID);
+
+        /// <summary>
+        /// Retrieves the object path of a object
+        /// </summary>
+        /// <param name="room">Replication room</param>
+        /// <param name="scenePath">Scene path</param>
+        /// <param name="objectID">Object ID string</param>
+        /// <returns>Object path string</returns>
+        public abstract string GetObjectPathByID(string room, string scenePath, string objectID);
 
         /// <summary>
         /// Called to spawn prefabs
@@ -67,7 +87,8 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>
-        public abstract void OnBeginInitialSync(string room, string scenePath);
+        /// <param name="objectMap">Scene object map containing object IDs</param>
+        public abstract void OnBeginInitialSync(string room, string scenePath, Dictionary<string, SceneObjectID> objectMap);
 
         /// <summary>
         /// Called when the server finishes initial scene replication

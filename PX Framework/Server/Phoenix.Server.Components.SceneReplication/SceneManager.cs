@@ -570,7 +570,7 @@ namespace Phoenix.Server.SceneReplication
                                         scan(obj.Children);
                                     }
                                 }
-                                scan(realScene.Objects);
+                                scan(objects.ToArray());
                                 _sceneObjectMaps[scene.Scene] = objMap;
                             }
                         }

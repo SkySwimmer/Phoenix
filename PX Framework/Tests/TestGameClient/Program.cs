@@ -186,17 +186,6 @@ namespace TestGameClient
             sync.Transform.Scale = new Phoenix.Common.SceneReplication.Packets.Vector3(1, 1, 1);
             client.ClientConnection.GetChannel<TestChannel>().SendPacket(sync);
 
-            // Test component message
-            ComponentMessagePacket pkt = new ComponentMessagePacket();
-            pkt.ScenePath = "Scenes/WorldScene";
-            pkt.Room = "DEFAULT";
-            Console.Write("Object ID: ");
-            pkt.ObjectID = Console.ReadLine();
-            pkt.MessengerComponentIndex = 0;
-            pkt.MessageID = 0;
-            pkt.MessagePayload = new Dictionary<string, object?>() { ["test"] = "Hello World" };
-            client.ClientConnection.GetChannel<SceneReplicationChannel>().SendPacket(pkt);
-
             // Sync script
             int r = 0;
             new Thread(() =>

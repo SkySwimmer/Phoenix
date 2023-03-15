@@ -41,6 +41,10 @@ namespace Phoenix.Server.Components.SceneReplication.Handlers
                             AbstractObjectComponent comp = obj.Components[packet.MessengerComponentIndex];
                             comp.SetupNetwork(server, packet.Room);
 
+                            // Check owning connection
+                            if ((comp.OwningConnection == null && !comp.RelaxMessageSecurity) || comp.OwningConnection != GetChannel().Connection)
+                                return true; // Invalid
+
                             // Handle debug headers
                             if (packet.HasDebugHeaders)
                             {

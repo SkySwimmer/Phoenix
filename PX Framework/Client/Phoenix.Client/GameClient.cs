@@ -10,6 +10,7 @@ using Phoenix.Common.Networking.Exceptions;
 using Phoenix.Common.Networking.Impl;
 using Phoenix.Common.Networking.Registry;
 using Phoenix.Common.Services;
+using System.Diagnostics;
 using System.Net.Sockets;
 
 namespace Phoenix.Client
@@ -43,11 +44,16 @@ namespace Phoenix.Client
                     engineLinkedGameClients.Remove(client);
                     continue;
                 }
-                try
+                if (!Debugger.IsAttached)
                 {
-                    client.ClientTick();
+                    try
+                    {
+                        client.ClientTick();
+                    }
+                    catch { }
                 }
-                catch { }
+                else
+                    client.ClientTick();
             }
         }
 
