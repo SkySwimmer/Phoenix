@@ -6,6 +6,11 @@ using Phoenix.Client.SceneReplicatorLib.Binding;
 using Phoenix.Common.SceneReplication.Packets;
 using Phoenix.Common.Tasks;
 using System.IO;
+using System.Collections.Generic;
+using Phoenix.Client.SceneReplicatorLib.Messages;
+using Phoenix.Common;
+using System.Linq;
+using Component = UnityEngine.Component;
 
 namespace Phoenix.Unity.SceneReplication
 {
@@ -15,6 +20,21 @@ namespace Phoenix.Unity.SceneReplication
     public class UnityReplicationBindings : SceneReplicationBindings
     {
         private SceneReplicationComponent component;
+        private Dictionary<string, GameObject> _objects = new Dictionary<string, GameObject>();
+
+        private class PhoenixReplicationCleanup : MonoBehaviour
+        {
+            public string ID;
+            public string Room;
+            public UnityReplicationBindings Bindings;
+
+            public void OnDestroy()
+            {
+                if (ID != null)
+                    lock(Bindings._objects)
+                        Bindings._objects.Remove(ID);
+            }
+        }
 
         /// <summary>
         /// Creates the scene replication binding instance (typically automatically called by the replication component)
@@ -129,7 +149,7 @@ namespace Phoenix.Unity.SceneReplication
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>
-        public delegate void BeginInitialSyncEventHandler(string room, string scenePath);
+        public delegate void BeginInitialSyncEventHandler(string room, string scenePath, Dictionary<string, InitialSceneReplicationStartPacket.SceneObjectID> objectMap);
 
         /// <summary>
         /// Event handler for when initial sync finishes
@@ -177,32 +197,6 @@ namespace Phoenix.Unity.SceneReplication
         {
             component.ServiceManager.GetService<TaskManager>().Oneshot(action);
         }
-
-        public override IReplicatingSceneObject GetObjectInScene(string room, string scenePath, string objectPath)
-        {
-            try
-            {
-                Scene scene = SceneManager.GetSceneByPath("Assets/" + scenePath + ".unity");
-                GameObject obj = GameObjectUtils.GetObjectInScene(scene, objectPath);
-                if (obj != null)
-                {
-                    try
-                    {
-                        ReplicatedObject rep = obj.GetComponent<ReplicatedObject>();
-                        if (rep != null)
-                            return rep;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            catch
-            {
-            }
-            return null;
-        }
-
         public override void LoadScene(string scenePath, bool additive)
         {
             // Begin loading
@@ -233,9 +227,73 @@ namespace Phoenix.Unity.SceneReplication
                 component.UnloadScene(scenePath);
             });
         }
-        public override void OnBeginInitialSync(string room, string scenePath)
+        public override void OnBeginInitialSync(string room, string scenePath, Dictionary<string, InitialSceneReplicationStartPacket.SceneObjectID> objectMap)
         {
-            OnInitialSyncStart?.Invoke(room, scenePath);
+            OnInitialSyncStart?.Invoke(room, scenePath, objectMap);
+
+            // Find all objects in the scene from the object map
+            try
+            {
+                Scene scene = SceneManager.GetSceneByPath("Assets/" + scenePath + ".unity");
+
+                // Assign ids for each object
+                AssignIds(objectMap, scene.GetRootGameObjects(), "", new Dictionary<string, int>(), room);
+            }
+            catch
+            {
+                // Unity goof
+            }
+        }
+
+        private void AssignIds(Dictionary<string, InitialSceneReplicationStartPacket.SceneObjectID> objectMap, 
+            GameObject[] gameObjects, string prefixPath, Dictionary<string, int> indexMemory, string room)
+        {
+            Phoenix.Common.Logging.Logger logger = Phoenix.Common.Logging.Logger.GetLogger("scene-replication");
+            foreach (GameObject obj in gameObjects)
+            {
+                // Scan children
+                AssignIds(objectMap, obj.GetChildren(), prefixPath + obj.name + "/", indexMemory, room);
+
+                // Build path
+                string path = prefixPath + obj.name;
+
+                // Find index
+                int index = indexMemory.GetValueOrDefault(path, 0);
+                indexMemory[path] = index + 1;
+
+                // Find ID
+                bool found = false;
+                foreach (string id in objectMap.Keys)
+                {
+                    if (objectMap[id].Path == path && objectMap[id].Index == index)
+                    {
+                        // Found the ID
+                        logger.Debug("Assigned ID " + id + " to " + path + " (index " + index + ")");
+                        found = true;
+
+                        // Save the object to memory
+                        lock(_objects)
+                            _objects[id] = obj;
+
+                        // Make sure its removed on destroy
+                        PhoenixReplicationCleanup c = obj.GetComponents<PhoenixReplicationCleanup>().Where(t => t.Room == room).FirstOrDefault();
+                        if (c == null)
+                            c = obj.AddComponent<PhoenixReplicationCleanup>();
+                        c.Bindings = this;
+                        c.ID = id;
+
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    // Error
+                    logger.Error("Could not assign network ID to " + path + " (index " + index + "), replication loading failure!");
+                    if (Game.DebugMode)
+                        logger.Error("Please verify if the client is not out of sync, if you are certain the server version matches, please re-dump the scene via the Phoenix tools in the Editor.");
+                }
+            }
         }
 
         public override void OnFinishInitialSync(string room, string scenePath)
@@ -253,12 +311,24 @@ namespace Phoenix.Unity.SceneReplication
                     GameObject prefab = GameObject.Instantiate(Resources.Load<GameObject>(packet.PrefabPath));
                     prefab.name = Path.GetFileNameWithoutExtension(packet.PrefabPath);
                     SceneManager.MoveGameObjectToScene(prefab, scene);
-                    if (packet.ParentObjectPath != null)
-                    {
-                        GameObject obj = GameObjectUtils.GetObjectInScene(scene, packet.ParentObjectPath);
-                        if (obj != null)
-                            prefab.transform.parent = obj.transform;
-                    }
+                    GameObject parent = null;
+                    if (packet.ParentObjectID != null)
+                        lock (_objects)
+                            if (_objects.ContainsKey(packet.ParentObjectID))
+                                parent = _objects[packet.ParentObjectID];
+                    if (parent != null)
+                        prefab.transform.parent = parent.transform;
+
+                    // Save the object to memory
+                    lock (_objects)
+                        _objects[packet.ObjectID] = prefab;
+
+                    // Make sure its removed on destroy
+                    PhoenixReplicationCleanup c = prefab.GetComponents<PhoenixReplicationCleanup>().Where(t => t.Room == packet.Room).FirstOrDefault();
+                    if (c == null)
+                        c = prefab.AddComponent<PhoenixReplicationCleanup>();
+                    c.Bindings = this;
+                    c.ID = packet.ObjectID;
                 }
                 catch
                 {
@@ -269,5 +339,84 @@ namespace Phoenix.Unity.SceneReplication
             }
         }
 
+
+        public override IReplicatingSceneObject GetObjectByIDInScene(string room, string scenePath, string objectID)
+        {
+            try
+            {
+                Scene scene = SceneManager.GetSceneByPath("Assets/" + scenePath + ".unity");
+                GameObject obj = null;
+                lock(_objects)
+                {
+                    if (_objects.ContainsKey(objectID))
+                        obj = _objects[objectID];
+                }
+                if (obj.scene.path == scene.path)
+                {
+                    ReplicatedObject rep = obj.GetComponent<ReplicatedObject>();
+                    if (rep != null)
+                        return rep;
+                }
+            }
+            catch
+            {
+            }
+            return null;
+        }
+
+        public override IComponentMessageReceiver[] GetNetworkedComponents(string room, string scenePath, string objectID)
+        {
+            try
+            {
+                Scene scene = SceneManager.GetSceneByPath("Assets/" + scenePath + ".unity");
+                GameObject obj = null;
+                lock (_objects)
+                {
+                    if (_objects.ContainsKey(objectID))
+                        obj = _objects[objectID];
+                }
+                if (obj.scene.path == scene.path)
+                {
+                    ReplicatedObject rep = obj.GetComponent<ReplicatedObject>();
+                    if (rep != null)
+                        return obj.GetComponents<Component>().Where(t => t is IComponentMessageReceiver).Select(t => (IComponentMessageReceiver)t).ToArray();
+                }
+            }
+            catch
+            {
+            }
+            return new IComponentMessageReceiver[0];
+        }
+
+        private string GetPath(GameObject obj)
+        {
+            if (obj.transform.parent != null)
+                return GetPath(obj.transform.parent.gameObject) + "/" + obj.name;
+            return obj.name;
+        }
+
+        public override string GetObjectPathByID(string room, string scenePath, string objectID)
+        {
+            try
+            {
+                Scene scene = SceneManager.GetSceneByPath("Assets/" + scenePath + ".unity");
+                GameObject obj = null;
+                lock (_objects)
+                {
+                    if (_objects.ContainsKey(objectID))
+                        obj = _objects[objectID];
+                }
+                if (obj.scene.path == scene.path)
+                {
+                    ReplicatedObject rep = obj.GetComponent<ReplicatedObject>();
+                    if (rep != null)
+                        return GetPath(obj);
+                }
+            }
+            catch
+            {
+            }
+            return null;
+        }
     }
 }

@@ -125,6 +125,43 @@ namespace Phoenix.SceneReplication.Editor
                 repInfo.SerializeInto(replication);
             objectData["replication"] = replication;
 
+            // Add components if present            
+            Type baseComp = null;
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                try
+                {
+                    baseComp = asm.GetType("Phoenix.Server.SceneReplication.AbstractObjectComponent");
+                    if (baseComp != null)
+                        break;
+                }
+                catch { }
+            }
+            if (baseComp != null)
+            {
+                List<Dictionary<string, object>> components = new List<Dictionary<string, object>>();
+
+                // Find components
+                foreach (NetworkedComponent comp in obj.GetComponents<NetworkedComponent>())
+                {
+                    if (baseComp.IsAssignableFrom(comp.ServerComponentType) && !comp.ServerComponentType.IsAbstract)
+                    {
+                        // Add it
+                        Dictionary<string, object> info = new Dictionary<string, object>();
+                        info["type"] = comp.ServerComponentType.FullName;
+                        if (comp.ServerComponentProperties.Count != 0)
+                            info["data"] = new Dictionary<string, object>(comp.ServerComponentProperties);
+                        components.Add(info);
+                    }
+                    else
+                        Debug.LogWarning("Could not add server component: " + comp.ServerComponentType.FullName + " (game object " + obj + "): invalid component type, requires to be an instance of server-side AbstractObjectComponent");
+                }
+
+                // Add
+                if (components.Count != 0)
+                    objectData["components"] = components;
+            }
+
             // Add children
             List<object> children = new List<object>();
             objectData["children"] = children;

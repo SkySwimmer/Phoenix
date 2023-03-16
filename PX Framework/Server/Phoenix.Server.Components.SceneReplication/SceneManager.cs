@@ -383,6 +383,16 @@ namespace Phoenix.Server.SceneReplication
                                     if (!_sceneSwitchedObjects[scene.Scene].Contains(obj))
                                         _sceneSwitchedObjects[scene.Scene].Add(obj);
                             }
+                            else
+                            {
+                                lock (_spawnedPrefabs)
+                                    if (_spawnedPrefabs[scene.Scene].ContainsKey(obj))
+                                    {
+                                        if (newScene != null && _spawnedPrefabs.ContainsKey(newScene))                                
+                                            _spawnedPrefabs[newScene][obj] = _spawnedPrefabs[scene.Scene][obj];
+                                        _spawnedPrefabs[scene.Scene].Remove(obj);
+                                    }
+                            }
 
                             // Replicate
                             foreach (Connection conn in _server.ServerConnection.GetClients())
@@ -458,6 +468,16 @@ namespace Phoenix.Server.SceneReplication
                                 lock (_editedSceneObjets)
                                     if (!_editedSceneObjets[scene.Scene].Contains(obj))
                                         _editedSceneObjets[scene.Scene].Add(obj);
+                            }
+                            else
+                            {
+                                lock (_spawnedPrefabs)
+                                    if (_spawnedPrefabs[scene.Scene].ContainsKey(obj))
+                                    {
+                                        lock (_editedSceneObjets)
+                                            if (!_editedSceneObjets[scene.Scene].Contains(obj))
+                                                _editedSceneObjets[scene.Scene].Add(obj);
+                                    }
                             }
 
                             // Replicate
@@ -580,19 +600,19 @@ namespace Phoenix.Server.SceneReplication
                         {
                             while (true)
                             {
-                                    // Tick scene
-                                    scene.Scene.Tick();
+                                // Tick scene
+                                scene.Scene.Tick();
 
-                                    // Replicate
-                                    foreach (Connection conn in _server.ServerConnection.GetClients())
+                                // Replicate
+                                foreach (Connection conn in _server.ServerConnection.GetClients())
                                 {
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null)
                                         repl.Sync();
                                 }
 
-                                    // Wait
-                                    Thread.Sleep(5);
+                                // Wait
+                                Thread.Sleep(5);
                             }
                         });
                     }

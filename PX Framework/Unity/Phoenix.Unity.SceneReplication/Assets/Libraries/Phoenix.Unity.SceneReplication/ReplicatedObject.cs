@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Phoenix Replication API Component
 /// </summary>
-public abstract class ReplicatedObject : MonoBehaviour, IReplicatingSceneObject
+public abstract class ReplicatedObject : NetworkedBehaviour, IReplicatingSceneObject
 {
     public bool SmoothReplication = false;
     public float SmoothReplicationTime = 1f;

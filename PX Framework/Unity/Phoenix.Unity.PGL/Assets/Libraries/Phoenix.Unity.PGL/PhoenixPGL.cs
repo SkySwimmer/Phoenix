@@ -437,7 +437,15 @@ namespace Phoenix.Unity.PGL
                         cl.DefaultRequestHeaders.Add("Authorization", "Bearer " + Game.SessionToken);
                         cl.DefaultRequestHeaders.Add("Product-Key", game["Product-Key"]);
                         cl.DefaultRequestHeaders.Add("Digital-Seal", game["Digital-Seal"]);
-                        string res = cl.GetAsync((API == null ? PhoenixEnvironment.DefaultAPIServer : API) + "data/files/" + game["Game-ID"] + "/" + productHash + "/" + timestamp + "/" + game["Game-ID"] + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                        string url;
+                        if (API == null)
+                            url = PhoenixEnvironment.DefaultAPIServer;
+                        else
+                            url = API;
+                        if (!url.EndsWith("/"))
+                            url += "/";
+                        string res = cl.GetAsync(url + "data/files/" + game["Game-ID"] + "/" + productHash + "/" + timestamp + "/" + game["Game-ID"] + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
                         if (res == null || res == "")
                             throw new Exception();
                         Dictionary<string, string> data = new Dictionary<string, string>();
@@ -470,7 +478,15 @@ namespace Phoenix.Unity.PGL
             game["Game-Storage-Path"] = runPath + "/gamefiles";
             game["Player-Data-Path"] = runPath + "/playerdata";
             game["Save-Data-Path"] = runPath + "/savedata";
-            game["Refresh-Endpoint"] = (API == null ? PhoenixEnvironment.DefaultAPIServer : API) + "tokens/refresh";
+
+            string urlA;
+            if (API == null)
+                urlA = PhoenixEnvironment.DefaultAPIServer;
+            else
+                urlA = API;
+            if (!urlA.EndsWith("/"))
+                urlA += "/";
+            game["Refresh-Endpoint"] = urlA + "tokens/refresh";
 #endif
 
             // Log final game descriptor
@@ -594,7 +610,15 @@ namespace Phoenix.Unity.PGL
                             try 
                             {
                                 HttpClient cl = new HttpClient();
-                                if (!cl.GetAsync(API + "servers").GetAwaiter().GetResult().IsSuccessStatusCode)
+
+                                string url;
+                                if (API == null)
+                                    url = PhoenixEnvironment.DefaultAPIServer;
+                                else
+                                    url = API;
+                                if (!url.EndsWith("/"))
+                                    url += "/";
+                                if (!cl.GetAsync(url + "servers").GetAwaiter().GetResult().IsSuccessStatusCode)
                                     throw new Exception();
                             }
                             catch
