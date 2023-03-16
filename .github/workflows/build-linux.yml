@@ -51,7 +51,7 @@ jobs:
       - name: 'Publish build artifact (template project)'
         uses: actions/upload-artifact@v3
         with:
-          name: Example Template Project
+          name: Example Template Project (Linux Host)
           path: PX Framework/Build/Project\ Template/PhoenixExample
     
       - name: Build (debug)
@@ -78,5 +78,5 @@ jobs:
       - name: 'Publish build artifact (template project, debug)'
         uses: actions/upload-artifact@v3
         with:
-          name: Example Template Project (Debug)
+          name: Example Template Project (Linux Host, Debug)
           path: PX Framework/Build/Project\ Template/PhoenixExample
