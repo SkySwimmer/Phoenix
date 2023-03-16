@@ -35,5 +35,3 @@ jobs:
         with:
           name: Linux Assemblies (net60)
           path: PX Framework/Build/Assemblies/net60
-          retention-days: 5
-        
