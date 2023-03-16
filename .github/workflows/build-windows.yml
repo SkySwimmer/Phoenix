@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Example Template Project (Win64 Host)
-          path: PX Framework/Build/Project\ Template/PhoenixExample
+          path: PX Framework/Build/Project Template/PhoenixExample
     
       - name: Build (debug)
         run: bash workflow-build.sh debug
@@ -79,4 +79,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Example Template Project (Win64 Host, Debug)
-          path: PX Framework/Build/Project\ Template/PhoenixExample
+          path: PX Framework/Build/Project Template/PhoenixExample
