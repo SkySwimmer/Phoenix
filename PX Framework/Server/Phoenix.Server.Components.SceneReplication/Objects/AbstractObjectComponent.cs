@@ -33,6 +33,17 @@ namespace Phoenix.Server.SceneReplication
         public bool RelaxMessageSecurity { get; set; } = false;
 
         /// <summary>
+        /// Retrieves the game server instance
+        /// </summary>
+        public GameServer Server
+        {
+            get
+            {
+                return _server;
+            }
+        }
+
+        /// <summary>
         /// Retrieves the owning connection of this object (assigning this will prevent other clients from receiving and sending messages to this component)
         /// </summary>
         public Connection? OwningConnection

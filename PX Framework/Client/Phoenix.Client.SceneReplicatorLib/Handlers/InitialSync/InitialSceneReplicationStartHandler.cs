@@ -41,7 +41,10 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.InitialSync
                                         () => comp.Bindings.GetObjectPathByID(packet.Room, packet.ScenePath, obj), obj, packet.ScenePath, i++, packet.Room);
                                     component.SetupMessenger(messenger);
 
-                                    // TODO: handling setup
+                                    // Add messenger instance to memory
+                                    if (component.Messengers == null)
+                                        component.Messengers = new Dictionary<string, ComponentMessenger>();
+                                    component.Messengers[packet.Room] = messenger;
                                 }
                             }
                         }

@@ -1,4 +1,5 @@
 ﻿using Phoenix.Common.SceneReplication.Messages;
+using Phoenix.Common.Tasks;
 using Phoenix.Server.SceneReplication;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,13 @@ namespace Phoenix.Tests.Server
 
         public override void Start()
         {
-            SendMessage(new TestMessage()
+            Server.ServiceManager.GetService<TaskManager>().AfterSecs(() =>
             {
-                MessagePayload = "test"
-            });
+                SendMessage(new TestMessage()
+                {
+                    MessagePayload = "test"
+                });
+            }, 3);
         }
 
         public override void Update()

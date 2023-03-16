@@ -220,6 +220,7 @@ namespace Phoenix.Client.Components
             channel.RegisterHandler(new ReparentObjectHandler());
             channel.RegisterHandler(new ObjectChangeSceneHandler());
             channel.RegisterHandler(new ReplicateObjectHandler());
+            channel.RegisterHandler(new ComponentMessagePacketHandler());
 
             if (Bindings == null)
             {

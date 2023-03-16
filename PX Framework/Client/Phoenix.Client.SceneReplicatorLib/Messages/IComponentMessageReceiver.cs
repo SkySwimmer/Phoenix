@@ -8,6 +8,11 @@ namespace Phoenix.Client.SceneReplicatorLib.Messages
     public interface IComponentMessageReceiver
     {
         /// <summary>
+        /// Messenger instances for each room
+        /// </summary>
+        public Dictionary<string, ComponentMessenger> Messengers { get; set; }
+
+        /// <summary>
         /// Handles component messages
         /// </summary>
         /// <param name="message">Message to handle</param>

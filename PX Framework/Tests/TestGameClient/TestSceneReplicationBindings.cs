@@ -35,7 +35,7 @@ namespace TestGameClient
 
         public override IReplicatingSceneObject GetObjectByIDInScene(string room, string scenePath, string objectID)
         {
-            return objects[objectID];
+            return objects.ContainsKey(objectID) ? objects[objectID] : null;
         }
 
         public override string GetObjectPathByID(string room, string scenePath, string objectID)
