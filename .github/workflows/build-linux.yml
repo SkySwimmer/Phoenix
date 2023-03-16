@@ -21,8 +21,8 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
           
-      - name: Build
-        run: bash workflow-build.sh
+      - name: Build (release)
+        run: bash workflow-build.sh release
         
       - name: 'Publish build artifact (assemblies net472)'
         uses: actions/upload-artifact@v3
@@ -47,3 +47,36 @@ jobs:
         with:
           name: XML Documentation
           path: PX Framework/Build/Documentation
+      
+      - name: 'Publish build artifact (template project)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Example Template Project
+          path: PX Framework/Build/Project\ Template/PhoenixExample
+    
+      - name: Build (debug)
+        run: bash workflow-build.sh debug
+        
+      - name: 'Publish build artifact (assemblies net472, debug)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux Assemblies (net472, debug)
+          path: PX Framework/Build/Assemblies/net472
+          
+      - name: 'Publish build artifact (assemblies net6.0, debug)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux Assemblies (net6.0, debug)
+          path: PX Framework/Build/Assemblies/net6.0
+          
+      - name: 'Publish build artifact (Unity files, debug)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Unity Support Assets (Debug)
+          path: PX Framework/Build/Unity/Complete
+          
+      - name: 'Publish build artifact (template project, debug)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Example Template Project (Debug)
+          path: PX Framework/Build/Project\ Template/PhoenixExample

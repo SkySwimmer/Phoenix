@@ -1,4 +1,8 @@
 #!/bin/bash
 
 cd PX\ Framework
-bash Scripts/buildframework-release.sh || exit 1
+echo Building framework...
+bash Scripts/buildframework-$1.sh || exit 1
+
+echo Creating templates...
+bash Scripts/createproject.sh Build/Project\ Template PhoenixExample ignore || exit 1
