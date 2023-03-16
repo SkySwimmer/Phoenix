@@ -23,3 +23,17 @@ jobs:
           
       - name: Build
         run: bash workflow-build.sh
+        
+      - name: 'Publish build artifact (assemblies net472)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux Assemblies (net472)
+          path: PX Framework/Build/Assemblies/net472
+          
+      - name: 'Publish build artifact (assemblies net60)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux Assemblies (net60)
+          path: PX Framework/Build/Assemblies/net60
+          retention-days: 5
+        
