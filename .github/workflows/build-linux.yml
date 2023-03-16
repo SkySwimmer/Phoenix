@@ -30,8 +30,20 @@ jobs:
           name: Linux Assemblies (net472)
           path: PX Framework/Build/Assemblies/net472
           
-      - name: 'Publish build artifact (assemblies net60)'
+      - name: 'Publish build artifact (assemblies net6.0)'
         uses: actions/upload-artifact@v3
         with:
-          name: Linux Assemblies (net60)
-          path: PX Framework/Build/Assemblies/net60
+          name: Linux Assemblies (net6.0)
+          path: PX Framework/Build/Assemblies/net6.0
+          
+      - name: 'Publish build artifact (Unity files)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Unity Support Assets
+          path: PX Framework/Build/Unity/Complete
+          
+      - name: 'Publish build artifact (XML documentation)'
+        uses: actions/upload-artifact@v3
+        with:
+          name: XML Documentation
+          path: PX Framework/Build/Documentation
