@@ -15,21 +15,25 @@ namespace Phoenix.Common.Networking.Impl
                 client = client.Other;
             client.SetServer(this);
             client.Other.SetServer(this);
-            clients.Add(client);
+            lock (clients)
+                clients.Add(client);
         }
 
         public override void Close(string reason, params string[] args)
         {
             if (!IsConnected())
                 throw new InvalidOperationException("Server not running");
-            foreach (IntegratedClientConnection client in clients)
+            foreach (IntegratedClientConnection client in GetClients())
                 client.Close(reason, args);
             connected = false;
         }
 
         public override Connection[] GetClients()
         {
-            return clients.Where(t => t.IsConnected()).ToArray();
+            lock (clients)
+            {
+                return clients.Where(t => t.IsConnected()).ToArray();
+            }
         }
 
         public override bool IsConnected()
@@ -46,7 +50,7 @@ namespace Phoenix.Common.Networking.Impl
 
         protected override void SendPacket(int cId, int id, AbstractNetworkPacket packet, PacketChannel channel)
         {
-            foreach (Connection client in clients)
+            foreach (Connection client in GetClients())
                 if (client.IsConnected())
                     client.GetChannel(channel).SendPacket(packet);
         }
@@ -65,10 +69,13 @@ namespace Phoenix.Common.Networking.Impl
         {
             if (!clients.Contains(client))
                 client = client.Other;
-            if (clients.Contains(client))
+            lock(clients)
             {
-                CallDisconnected(reason, args, client);
-                clients.Remove(client);
+                if (clients.Contains(client))
+                {
+                    CallDisconnected(reason, args, client);
+                    clients.Remove(client);
+                }
             }
         }
     }

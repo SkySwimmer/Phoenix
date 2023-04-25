@@ -57,134 +57,140 @@ namespace Phoenix.Common.Networking.Connections
 
         private void AcceptedTcpClient(IAsyncResult ar)
         {
-            TcpClient client = listener.EndAcceptTcpClient(ar);
-            logger.Trace("Client socket connected: " + client.Client.RemoteEndPoint);
-            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
+            try
             {
-                // Initial handshake
-                try
+                TcpClient client = listener.EndAcceptTcpClient(ar);
+                logger.Trace("Client socket connected: " + client.Client.RemoteEndPoint);
+                Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
                 {
-                    // Send hello
-                    logger.Trace("Attempting Phoenix networking handshake with protocol version " + Connections.PhoenixProtocolVersion + "...");
-                    byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.PhoenixProtocolVersion);
-                    byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.PhoenixProtocolVersion);
-                    logger.Debug("Sending HELLO messsage...");
-                    client.GetStream().Write(helloSrv);
-                    int i2 = 0;
-                    foreach (byte b in hello)
+                    // Initial handshake
+                    try
                     {
-                        int i = client.GetStream().ReadByte();
-                        if (i == -1)
+                        // Send hello
+                        logger.Trace("Attempting Phoenix networking handshake with protocol version " + Connections.PhoenixProtocolVersion + "...");
+                        byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.PhoenixProtocolVersion);
+                        byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.PhoenixProtocolVersion);
+                        logger.Debug("Sending HELLO messsage...");
+                        client.GetStream().Write(helloSrv);
+                        int i2 = 0;
+                        foreach (byte b in hello)
                         {
-                            logger.Trace("Received handshake HELLO packet is invalid");
-                            client.GetStream().WriteByte(0);
-                            client.Close();
-                            throw new IOException("Connection failed: connection lost during HELLO");
+                            int i = client.GetStream().ReadByte();
+                            if (i == -1)
+                            {
+                                logger.Trace("Received handshake HELLO packet is invalid");
+                                client.GetStream().WriteByte(0);
+                                client.Close();
+                                throw new IOException("Connection failed: connection lost during HELLO");
+                            }
+                            if (hello[i2++] != i)
+                            {
+                                logger.Trace("Received handshake HELLO packet is invalid");
+                                client.GetStream().WriteByte(0);
+                                client.Close();
+                                throw new IOException("Connection failed: invalid client response during HELLO");
+                            }
                         }
-                        if (hello[i2++] != i)
+
+                        // Read mode
+                        logger.Debug("Reading client mode...");
+                        int mode = client.GetStream().ReadByte();
+                        logger.Debug("Client mode: " + mode);
+                        if (mode != 0 && mode != 1)
                         {
-                            logger.Trace("Received handshake HELLO packet is invalid");
-                            client.GetStream().WriteByte(0);
+                            logger.Debug("Invalid connection mode!");
                             client.Close();
-                            throw new IOException("Connection failed: invalid client response during HELLO");
+                            throw new IOException("Connection failed: invalid mode");
+                        }
+                        if (mode == 0)
+                        {
+                            logger.Trace("Sending server information...");
+
+                            // Mode: server info
+                            DataWriter wr = new DataWriter(client.GetStream());
+                            if (certificate == null)
+                            {
+                                logger.Trace("  game: unknown");
+                                logger.Trace("  server id: unknown");
+                                logger.Trace("  insecure");
+
+                                wr.WriteString("unknown");
+                                wr.WriteString("unknown");
+                                wr.WriteBoolean(false);
+                            }
+                            else
+                            {
+                                logger.Trace("  game: " + certificate.GameID);
+                                logger.Trace("  server id: " + certificate.ServerID);
+                                logger.Trace("  secure");
+                                wr.WriteString(certificate.GameID);
+                                wr.WriteString(certificate.ServerID);
+                                wr.WriteBoolean(true);
+                            }
+
+                            logger.Trace("Client disconnect: " + client.Client.RemoteEndPoint);
+                            client.Close();
+                            return;
                         }
                     }
-
-                    // Read mode
-                    logger.Debug("Reading client mode...");
-                    int mode = client.GetStream().ReadByte();
-                    logger.Debug("Client mode: " + mode);
-                    if (mode != 0 && mode != 1)
+                    catch
                     {
-                        logger.Debug("Invalid connection mode!");
-                        client.Close();
-                        throw new IOException("Connection failed: invalid mode");
-                    }
-                    if (mode == 0)
-                    {
-                        logger.Trace("Sending server information...");
-
-                        // Mode: server info
-                        DataWriter wr = new DataWriter(client.GetStream());
-                        if (certificate == null)
-                        {
-                            logger.Trace("  game: unknown");
-                            logger.Trace("  server id: unknown");
-                            logger.Trace("  insecure");
-
-                            wr.WriteString("unknown");
-                            wr.WriteString("unknown");
-                            wr.WriteBoolean(false);
-                        }
-                        else
-                        {
-                            logger.Trace("  game: " + certificate.GameID);
-                            logger.Trace("  server id: " + certificate.ServerID);
-                            logger.Trace("  secure");
-                            wr.WriteString(certificate.GameID);
-                            wr.WriteString(certificate.ServerID);
-                            wr.WriteBoolean(true);
-                        }
-
-                        logger.Trace("Client disconnect: " + client.Client.RemoteEndPoint);
-                        client.Close();
                         return;
                     }
-                }
-                catch
-                {
-                    return;
-                }
 
-                // Wrap the connection around it
-                NetworkClientConnection conn = new NetworkClientConnection();
-                conn.InitServer(client, registry, certificate, () =>
-                {
-                    return AttemptCustomHandshake(conn, conn.Writer, conn.Reader);
-                });
-                conn.Connected += (t, args) =>
-                {
-                    // Connection event
-
-                    // Call connected
-                    CallConnected(t, args);
-
-                    // Add client if it is still connected
-                    if (t.IsConnected())
-                        lock(clients)
-                        {
-                            clients.Add(conn);
-                        }
-                };
-                conn.ConnectionSuccess += (t) =>
-                {
-                    CallConnectionSuccess(t);
-                };
-                conn.Disconnected += (t, r, a) =>
-                {
-                    // Disconnect event
-
-                    // Remove client
-                    lock (clients)
+                    // Wrap the connection around it
+                    NetworkClientConnection conn = new NetworkClientConnection();
+                    conn.InitServer(client, registry, certificate, () =>
                     {
-                        if (clients.Contains(t))
-                            clients.Remove(t);
+                        return AttemptCustomHandshake(conn, conn.Writer, conn.Reader);
+                    });
+                    conn.Connected += (t, args) =>
+                    {
+                        // Connection event
+
+                        // Call connected
+                        CallConnected(t, args);
+
+                        // Add client if it is still connected
+                        if (t.IsConnected())
+                            lock (clients)
+                            {
+                                clients.Add(conn);
+                            }
+                    };
+                    conn.ConnectionSuccess += (t) =>
+                    {
+                        CallConnectionSuccess(t);
+                    };
+                    conn.Disconnected += (t, r, a) =>
+                    {
+                        // Disconnect event
+
+                        // Remove client
+                        lock (clients)
+                        {
+                            if (clients.Contains(t))
+                                clients.Remove(t);
+                        }
+
+                        // Call disconnected
+                        CallDisconnected(r, a, t);
+                    };
+
+                    // Connect
+                    try
+                    {
+                        conn.Open();
                     }
-
-                    // Call disconnected
-                    CallDisconnected(r, a, t);
-                };
-
-                // Connect
-                try
-                {
-                    conn.Open();
-                }
-                catch
-                {
-                }
-            });
-            listener.BeginAcceptTcpClient(new AsyncCallback(AcceptedTcpClient), null);
+                    catch
+                    {
+                    }
+                });
+                listener.BeginAcceptTcpClient(new AsyncCallback(AcceptedTcpClient), null);
+            }
+            catch (IOException e)
+            {
+            }
         }
 
         public override void Close()

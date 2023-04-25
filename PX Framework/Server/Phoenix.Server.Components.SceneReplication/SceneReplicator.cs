@@ -21,20 +21,17 @@ namespace Phoenix.Server.SceneReplication
         private List<string> _subscribedScenes = new List<string>();
         private List<string> _scenesAwaitingSubscription = new List<string>();
 
-        internal List<AbstractNetworkPacket> _replicationPackets = new List<AbstractNetworkPacket>();
+        private List<AbstractNetworkPacket> _replicationPackets = new List<AbstractNetworkPacket>();
         private bool _replicationReady;
 
-        internal void Sync()
+        internal void SendReplicationPacket(AbstractNetworkPacket packet)
         {
             if (!_replicationReady)
-                return;
-
-            // Perform sync
-            AbstractNetworkPacket[] packets;
-            lock (_replicationPackets)
             {
-                packets = _replicationPackets.ToArray();
-                _replicationPackets.Clear();
+                // Queue
+                lock(_replicationPackets)
+                    _replicationPackets.Add(packet);
+                return;
             }
 
             // Send sync
@@ -47,8 +44,7 @@ namespace Phoenix.Server.SceneReplication
             {
                 return;
             }
-            foreach (AbstractNetworkPacket pkt in packets)
-                channel.SendPacket(pkt);
+            channel.SendPacket(packet);
         }
 
         internal SceneReplicator(Connection client, SceneManager manager)
@@ -537,6 +533,18 @@ namespace Phoenix.Server.SceneReplication
 
             // Resume main replicator
             _replicationReady = true;
+            while (_replicationPackets.Count != 0)
+            {
+                // Perform sync
+                AbstractNetworkPacket[] packets;
+                lock (_replicationPackets)
+                {
+                    packets = _replicationPackets.ToArray();
+                    _replicationPackets.Clear();
+                }
+                foreach (AbstractNetworkPacket pkt in packets)
+                    channel.SendPacket(pkt);
+            }
         }
     }
 }

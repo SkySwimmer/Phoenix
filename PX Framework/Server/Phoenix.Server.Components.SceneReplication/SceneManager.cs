@@ -4,6 +4,7 @@ using Phoenix.Common.AsyncTasks;
 using static Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket;
 using Phoenix.Common.SceneReplication.Packets;
 using Phoenix.Common.Logging;
+using System.Net.Sockets;
 
 namespace Phoenix.Server.SceneReplication
 {
@@ -313,24 +314,25 @@ namespace Phoenix.Server.SceneReplication
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
                                     {
-                                        lock (repl._replicationPackets)
+                                        repl.SendReplicationPacket(new SpawnPrefabPacket()
                                         {
-                                            repl._replicationPackets.Add(new SpawnPrefabPacket()
-                                            {
-                                                Room = room,
-                                                ScenePath = scenePath,
+                                            Room = room,
+                                            ScenePath = scenePath,
 
-                                                ObjectID = prefab.ID,
-                                                PrefabPath = path,
-                                                ParentObjectID = parent == null ? null : parent.ID
-                                            });
-                                        }
+                                            ObjectID = prefab.ID,
+                                            PrefabPath = path,
+                                            ParentObjectID = parent == null ? null : parent.ID
+                                        });
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    // Overflow or something
-                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
                                 }
                             }
                         };
@@ -355,22 +357,23 @@ namespace Phoenix.Server.SceneReplication
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
                                     {
-                                        lock (repl._replicationPackets)
+                                        repl.SendReplicationPacket(new DestroyObjectPacket()
                                         {
-                                            repl._replicationPackets.Add(new DestroyObjectPacket()
-                                            {
-                                                Room = room,
-                                                ScenePath = scenePath,
+                                            Room = room,
+                                            ScenePath = scenePath,
 
-                                                ObjectID = obj.ID
-                                            });
-                                        }
+                                            ObjectID = obj.ID
+                                        });
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    // Overflow or something
-                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
                                 }
                             }
                         };
@@ -402,23 +405,24 @@ namespace Phoenix.Server.SceneReplication
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
                                     {
-                                        lock (repl._replicationPackets)
+                                        repl.SendReplicationPacket(new ObjectChangeScenePacket()
                                         {
-                                            repl._replicationPackets.Add(new ObjectChangeScenePacket()
-                                            {
-                                                Room = room,
-                                                ScenePath = scenePath,
+                                            Room = room,
+                                            ScenePath = scenePath,
 
-                                                ObjectID = obj.ID,
-                                                NewScenePath = newScene == null ? null : newScene.Path
-                                            });
-                                        }
+                                            ObjectID = obj.ID,
+                                            NewScenePath = newScene == null ? null : newScene.Path
+                                        });
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    // Overflow or something
-                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
                                 }
                             }
                         };
@@ -440,23 +444,24 @@ namespace Phoenix.Server.SceneReplication
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
                                     {
-                                        lock (repl._replicationPackets)
+                                        repl.SendReplicationPacket(new ReparentObjectPacket()
                                         {
-                                            repl._replicationPackets.Add(new ReparentObjectPacket()
-                                            {
-                                                Room = room,
-                                                ScenePath = scenePath,
+                                            Room = room,
+                                            ScenePath = scenePath,
 
-                                                ObjectID = obj.ID,
-                                                NewParentID = newParent == null ? null : newParent.ID
-                                            });
-                                        }
+                                            ObjectID = obj.ID,
+                                            NewParentID = newParent == null ? null : newParent.ID
+                                        });
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    // Overflow or something
-                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
                                 }
                             }
                         };
@@ -488,73 +493,74 @@ namespace Phoenix.Server.SceneReplication
                                     SceneReplicator? repl = conn.GetObject<SceneReplicator>();
                                     if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
                                     {
-                                        lock (repl._replicationPackets)
+                                        switch (prop)
                                         {
-                                            switch (prop)
-                                            {
-                                                case ReplicatingProperty.NAME:
-                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
-                                                    {
-                                                        Room = room,
-                                                        ScenePath = scenePath,
-                                                        ObjectID = obj.ID,
+                                            case ReplicatingProperty.NAME:
+                                                repl.SendReplicationPacket(new ReplicateObjectPacket()
+                                                {
+                                                    Room = room,
+                                                    ScenePath = scenePath,
+                                                    ObjectID = obj.ID,
 
-                                                        HasNameChanges = true,
-                                                        Name = value.ToString()
-                                                    });
-                                                    break;
-                                                case ReplicatingProperty.IS_ACTIVE:
-                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
-                                                    {
-                                                        Room = room,
-                                                        ScenePath = scenePath,
-                                                        ObjectID = obj.ID,
+                                                    HasNameChanges = true,
+                                                    Name = value.ToString()
+                                                });
+                                                break;
+                                            case ReplicatingProperty.IS_ACTIVE:
+                                                repl.SendReplicationPacket(new ReplicateObjectPacket()
+                                                {
+                                                    Room = room,
+                                                    ScenePath = scenePath,
+                                                    ObjectID = obj.ID,
 
-                                                        HasActiveStatusChanges = true,
-                                                        Active = (bool)value
-                                                    });
-                                                    break;
-                                                case ReplicatingProperty.TRANSFORM:
-                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
-                                                    {
-                                                        Room = room,
-                                                        ScenePath = scenePath,
-                                                        ObjectID = obj.ID,
+                                                    HasActiveStatusChanges = true,
+                                                    Active = (bool)value
+                                                });
+                                                break;
+                                            case ReplicatingProperty.TRANSFORM:
+                                                repl.SendReplicationPacket(new ReplicateObjectPacket()
+                                                {
+                                                    Room = room,
+                                                    ScenePath = scenePath,
+                                                    ObjectID = obj.ID,
 
-                                                        HasTransformChanges = true,
-                                                        Transform = ((Phoenix.Server.SceneReplication.Coordinates.Transform)value).ToPacketTransform()
-                                                    });
-                                                    break;
-                                                case ReplicatingProperty.REPLICATION_DATA:
-                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
-                                                    {
-                                                        Room = room,
-                                                        ScenePath = scenePath,
-                                                        ObjectID = obj.ID,
+                                                    HasTransformChanges = true,
+                                                    Transform = ((Phoenix.Server.SceneReplication.Coordinates.Transform)value).ToPacketTransform()
+                                                });
+                                                break;
+                                            case ReplicatingProperty.REPLICATION_DATA:
+                                                repl.SendReplicationPacket(new ReplicateObjectPacket()
+                                                {
+                                                    Room = room,
+                                                    ScenePath = scenePath,
+                                                    ObjectID = obj.ID,
 
-                                                        HasDataChanges = true,
-                                                        Data = new Dictionary<string, object?>() { [key] = value }
-                                                    });
-                                                    break;
-                                                case ReplicatingProperty.REPLICATION_DATA_REMOVEKEY:
-                                                    repl._replicationPackets.Add(new ReplicateObjectPacket()
-                                                    {
-                                                        Room = room,
-                                                        ScenePath = scenePath,
-                                                        ObjectID = obj.ID,
+                                                    HasDataChanges = true,
+                                                    Data = new Dictionary<string, object?>() { [key] = value }
+                                                });
+                                                break;
+                                            case ReplicatingProperty.REPLICATION_DATA_REMOVEKEY:
+                                                repl.SendReplicationPacket(new ReplicateObjectPacket()
+                                                {
+                                                    Room = room,
+                                                    ScenePath = scenePath,
+                                                    ObjectID = obj.ID,
 
-                                                        HasDataChanges = true,
-                                                        RemovedData = new List<string>() { value.ToString() }
-                                                    });
-                                                    break;
-                                            }
+                                                    HasDataChanges = true,
+                                                    RemovedData = new List<string>() { value.ToString() }
+                                                });
+                                                break;
                                         }
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    // Overflow or something
-                                    Logger.GetLogger("scene-manager").Error("Failed to queue sync for " + conn, e);
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
                                 }
                             }
                         };
@@ -602,14 +608,6 @@ namespace Phoenix.Server.SceneReplication
                             {
                                 // Tick scene
                                 scene.Scene.Tick();
-
-                                // Replicate
-                                foreach (Connection conn in _server.ServerConnection.GetClients())
-                                {
-                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
-                                    if (repl != null)
-                                        repl.Sync();
-                                }
 
                                 // Wait
                                 Thread.Sleep(5);
