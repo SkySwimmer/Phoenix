@@ -211,7 +211,7 @@ namespace Phoenix.Server.Bootstrapper
                 {
                     logger.Debug("Adding assets of '" + mod.ID + "' to the asset manager...");
                     if (mod.Package != null)
-                        AssetManager.AddProvider(new BinaryPackageAssetProvider(mod.Package, "Assets"));
+                        AssetManager.AddProvider(new BinaryPackageAssetProvider(mod.Package, "ServerAssets"));
                 }
             }
             AssetManager.Lock();

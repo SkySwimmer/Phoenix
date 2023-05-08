@@ -29,11 +29,7 @@ namespace Phoenix.Server.Bootstrapper
 
             // Decrypt asset
             Stream data = File.OpenRead("Assets/" + assetID + ".epaf");
-            Stream dec = Program.Decrypt(data, assetID, launchPackage);
-            DataReader rd = new DataReader(dec);
-            byte[] data2 = rd.ReadAllBytes();
-            dec.Close();
-            return new MemoryStream(data2);
+            return Program.Decrypt(data, assetID, launchPackage);
         }
     }
 }

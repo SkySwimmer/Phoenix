@@ -31,11 +31,7 @@ namespace Phoenix.Server.Bootstrapper
             }
 
             // Read launch info
-            byte[] launch = DecryptLaunchInfoBinary(File.ReadAllBytes("launchinfo.bin"));
-            BinaryPackage launchPackage = new BinaryPackage(new MemoryStream(launch), "launchinfo.bin", () =>
-            {
-                return new MemoryStream(launch);
-            });
+            BinaryPackage launchPackage = LoadEncryptedLaunchBinary();
 
             // Read game info
             DataReader reader = new DataReader(Decrypt(File.OpenRead("game.epaf"), "@GAMEMANIFEST", launchPackage));
@@ -136,15 +132,12 @@ namespace Phoenix.Server.Bootstrapper
 
         public static Stream Decrypt(Stream data, string name, BinaryPackage launchPackage)
         {
-            data = new GZipStream(data, CompressionMode.Decompress);
             Aes aes = Aes.Create();
             aes.Key = ReadBytesFromEntry(launchPackage.GetEntry("Filekeys/" + name), launchPackage);
             aes.IV = ReadBytesFromEntry(launchPackage.GetEntry("Fileivs/" + name), launchPackage);
 
             // Create decryptor
-            ICryptoTransform transform = aes.CreateDecryptor();
-            Stream res = new CryptoStream(data, transform, CryptoStreamMode.Read);
-            return res;
+            return new GZipStream(new EncryptedStream(data, aes, aes.CreateDecryptor(), CryptoStreamMode.Read), CompressionMode.Decompress);
         }
 
         public static byte[] ReadBytesFromEntry(BinaryPackageEntry entry, BinaryPackage package)
@@ -156,7 +149,7 @@ namespace Phoenix.Server.Bootstrapper
             return data;
         }
 
-        private static byte[] DecryptLaunchInfoBinary(byte[] binary)
+        private static Stream LaunchBinaryDecryptionStream(Stream source)
         {
             //
             // Implement this method for better security
@@ -166,9 +159,34 @@ namespace Phoenix.Server.Bootstrapper
             // WE HIGHLY RECOMMEND TO CREATE CUSTOM PROPRIETARY METHODS FOR BEST SECURITY
             //
 
+            // The parameter 'source' contains the launch binary raw file stream from which you can read
+            // You want to return some form of decryption stream that decrypts data as it reads
+
+            // NOTE THAT IT IS REQUIRED FOR IT TO BE ABLE TO BE SEEKED THROUGH
+            // Secondly, please make sure that the source stream is closed when the stream you return is closed else a memory leak will arise
+
+            // Phoenix has hash checks for asset and component loading however you will need to do signature checks on the launch binary as else the hashses can be modified
+
             Console.Error.WriteLine("WARNING! Unencrypted launch binary file! Please fork the bootstrapper and implement this method for security, otherwise your assets will be easy to decrypt!");
             Console.Error.WriteLine("This code is kept in Program.cs at the end of the file!");
-            return binary;
+            return source;
         }
+
+        private static BinaryPackage LoadEncryptedLaunchBinary()
+        {
+            //
+            // Alternatively to the above, you can replace this loading code to use your own launch binary format with inner encryption
+            //
+
+            Stream launchSource = File.OpenRead("launchinfo.bin");
+            Stream launchData = LaunchBinaryDecryptionStream(launchSource);
+            return new BinaryPackage(launchData, "launchinfo.bin", () =>
+            {  
+                Stream launchSource = File.OpenRead("launchinfo.bin");
+                Stream launchData = LaunchBinaryDecryptionStream(launchSource);
+                return launchData;
+            });
+        }
+
     }
 }

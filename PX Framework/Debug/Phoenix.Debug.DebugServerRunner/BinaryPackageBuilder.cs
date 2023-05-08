@@ -8,7 +8,10 @@ namespace Phoenix.Debug
     /// </summary>
     public class BinaryPackageBuilder
     {
-        private class PackageEntry
+        /// <summary>
+        /// Package entry information
+        /// </summary>
+        public class PackageEntry
         {
             public string Key;
             public bool CloseStream;
@@ -16,6 +19,15 @@ namespace Phoenix.Debug
         }
 
         private Dictionary<string, PackageEntry> Entries = new Dictionary<string, PackageEntry>();
+
+        /// <summary>
+        /// Retrieves a read-only entry dictionary
+        /// </summary>
+        /// <returns>Read-only entry dictionary</returns>
+        public Dictionary<string, PackageEntry> GetCurrentEntries()
+        {
+            return new Dictionary<string, PackageEntry>(Entries);
+        }
 
         /// <summary>
         /// Adds a stream to write to the binary package
@@ -75,7 +87,7 @@ namespace Phoenix.Debug
                 pos += length;
             }
 
-            // Write payloaad
+            // Write payload
             foreach (PackageEntry ent in Entries.Values)
             {
                 ent.Data.CopyTo(output);

@@ -4,5 +4,5 @@
   "serverAssembly": "Phoenix.Tests.Server.dll",
   "manifestFile": "game.json",
   "debugConfig": "debug.json",
-  "assembliesDirectory": "bin/Debug/net6.0"
+  "assembliesDirectory": "bin/Debug/net7.0"
 }

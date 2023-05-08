@@ -12,6 +12,10 @@ namespace Phoenix.Debug.DebugServerRunner
     {
         public static void Run(ProjectManifest project, Logger logger, DebugGameDefLib.DebugGameDef game)
         {
+            // TODO: mass storage format for the assembly binary, individual encryption might be best
+            // TODO: persistent key option
+            // TODO: signatures or hash checks
+
             // Build
             logger.Level = LogLevel.INFO;
 
@@ -113,22 +117,24 @@ namespace Phoenix.Debug.DebugServerRunner
                             logger.Info("  Component ID: " + id);
                             logger.Info("  Component Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
                             logger.Info("  Component IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
-                            logger.Info("  Component Hash: " + string.Concat(hasher.ComputeHash(File.ReadAllBytes(file.FullName)).Select(x => x.ToString("x2"))));
+                            Stream s = File.OpenRead(file.FullName);
+                            logger.Info("  Component Hash: " + string.Concat(hasher.ComputeHash(s).Select(x => x.ToString("x2"))));
+                            s.Close();
                             hasher.Dispose();
 
                             // Write component
-                            logger.Debug("Writing encrypted component...");
+                            logger.Info("Encrypting and writing component...");
                             Stream outp = File.OpenWrite("Build/Release/Components/" + id + ".epcb");
                             ICryptoTransform tr = aes.CreateEncryptor(key, iv);
-                            GZipStream gzip = new GZipStream(outp, CompressionLevel.Fastest);
-                            CryptoStream cryptStream = new CryptoStream(gzip, tr, CryptoStreamMode.Write);
+                            CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
+                            GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Fastest);
                             Stream strm = file.OpenRead();
-                            strm.CopyTo(cryptStream);
+                            strm.CopyTo(gzip);
                             strm.Close();
 
                             // Close stuff
-                            cryptStream.Close();
                             gzip.Close();
+                            cryptStream.Close();
                             outp.Close();
                             logger.Info("Written to Build/Release/Components/" + id + ".epcb");
                         }
@@ -170,16 +176,16 @@ namespace Phoenix.Debug.DebugServerRunner
                 logger.Info("  Binary Package IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
 
                 // Write component
-                logger.Debug("Writing encrypted package...");
+                logger.Info("Encrypting and writing package...");
                 Stream outp = File.OpenWrite("Build/Release/assemblies.epbp");
                 ICryptoTransform tr = aes.CreateEncryptor(key, iv);
-                GZipStream gzip = new GZipStream(outp, CompressionLevel.Fastest);
-                CryptoStream cryptStream = new CryptoStream(gzip, tr, CryptoStreamMode.Write);
-                package.Write(cryptStream);
+                CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
+                GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Fastest);
+                package.Write(gzip);
 
                 // Close stuff
-                cryptStream.Close();
                 gzip.Close();
+                cryptStream.Close();
                 outp.Close();
                 logger.Info("Written to Build/Release/assemblies.epbp");
             }
@@ -216,16 +222,16 @@ namespace Phoenix.Debug.DebugServerRunner
                 hasher.Dispose();
 
                 // Write asset
-                logger.Debug("Writing encrypted asset...");
+                logger.Info("Encrypting and writing asset...");
                 Stream outp = File.OpenWrite("Build/Release/game.epaf");
                 ICryptoTransform tr = aes.CreateEncryptor(key, iv);
-                GZipStream gzip = new GZipStream(outp, CompressionLevel.Fastest);
-                CryptoStream cryptStream = new CryptoStream(gzip, tr, CryptoStreamMode.Write);
-                cryptStream.Write(data);
+                CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
+                GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Fastest);
+                gzip.Write(data);
 
                 // Close stuff
-                cryptStream.Close();
                 gzip.Close();
+                cryptStream.Close();
                 outp.Close();
                 logger.Info("Written to Build/Release/game.epaf");
             }
@@ -254,9 +260,7 @@ namespace Phoenix.Debug.DebugServerRunner
                 DataWriter writer = new DataWriter(dInfo);
                 writer.WriteInt(assemblyNames.Count);
                 foreach (string assembly in assemblyNames)
-                {
                     writer.WriteString(Path.GetFileName(assembly));
-                }
                 streams["Assemblies"] = new MemoryStream(dInfo.ToArray());
             }
 
@@ -266,9 +270,7 @@ namespace Phoenix.Debug.DebugServerRunner
                 DataWriter writer = new DataWriter(dInfo);
                 writer.WriteInt(componentAssemblies.Count);
                 foreach (string assembly in componentAssemblies)
-                {
                     writer.WriteString(Path.GetFileName(assembly));
-                }
                 streams["ComponentAssemblies"] = new MemoryStream(dInfo.ToArray());
             }
 
@@ -281,14 +283,9 @@ namespace Phoenix.Debug.DebugServerRunner
                 streams.Remove(strm.Key);
             }
 
-            // Build in memory
-            MemoryStream bin = new MemoryStream();
-            launchInfoBin.Write(bin);
-
-            // Encrypt
+            // Build and encrypt
             logger.Info("Writing launch binary...");
-            byte[] encrypted = EncryptLaunchBinary(bin.ToArray());
-            File.WriteAllBytes("Build/Release/launchinfo.bin", encrypted);
+            WriteEncryptedLaunchBinary(launchInfoBin);
             logger.Info("Written to Build/Release/launchinfo.bin");
 
             // Copy server runner
@@ -344,23 +341,25 @@ namespace Phoenix.Debug.DebugServerRunner
                     logger.Info("  Asset ID: " + id);
                     logger.Info("  Asset Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
                     logger.Info("  Asset IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
-                    logger.Info("  Asset Hash: " + string.Concat(hasher.ComputeHash(File.ReadAllBytes(file.FullName)).Select(x => x.ToString("x2"))));
+                    Stream s = File.OpenRead(file.FullName);
+                    logger.Info("  Asset Hash: " + string.Concat(hasher.ComputeHash(s).Select(x => x.ToString("x2"))));
+                    s.Close();
                     hasher.Dispose();
 
                     // Compile asset
                     Stream strm = AssetCompiler.Compile(File.OpenRead(file.FullName), pref + file.Name);
 
                     // Write asset
-                    logger.Debug("Writing encrypted asset...");
+                    logger.Info("Encrypting and writing asset...");
                     Stream outp = File.OpenWrite("Build/Release/Assets/" + id + ".epaf");
                     ICryptoTransform tr = aes.CreateEncryptor(key, iv);
-                    GZipStream gzip = new GZipStream(outp, CompressionLevel.Optimal);
-                    CryptoStream cryptStream = new CryptoStream(gzip, tr, CryptoStreamMode.Write);
-                    strm.CopyTo(cryptStream);
+                    CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
+                    GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Optimal);
+                    strm.CopyTo(gzip);
 
                     // Close stuff
-                    cryptStream.Close();
                     gzip.Close();
+                    cryptStream.Close();
                     outp.Close();
                     strm.Close();
                     logger.Info("Written to Build/Release/Assets/" + id + ".epaf");
@@ -374,7 +373,7 @@ namespace Phoenix.Debug.DebugServerRunner
             }
         }
 
-        private static byte[] EncryptLaunchBinary(byte[] binary)
+        private static Stream LaunchBinaryEncryptionStream(Stream target)
         {
             //
             // Implement this method for better security
@@ -384,6 +383,12 @@ namespace Phoenix.Debug.DebugServerRunner
             // WE HIGHLY RECOMMEND TO CREATE CUSTOM PROPRIETARY METHODS FOR BEST SECURITY
             //
 
+            // The parameter 'target' contains the output file to which you want to write
+            // You want to return some form of encryption stream that encrypts data as it writes
+
+            // Please note that the format MUST be seekable as the server reads the file multiple times and seeks through it to find payload
+            // Phoenix has hash checks for asset and component loading however you will need to do signature checks on the launch binary as else the hashses can be modified
+
             Console.Error.WriteLine();
             Console.Error.WriteLine();
             Console.Error.WriteLine();
@@ -392,7 +397,43 @@ namespace Phoenix.Debug.DebugServerRunner
             Console.Error.WriteLine();
             Console.Error.WriteLine();
             Console.Error.WriteLine();
-            return binary;
+            return target;
+        }
+
+        private static void WriteEncryptedLaunchBinary(BinaryPackageBuilder launchInfoBin)
+        {
+            //
+            // Alternatively to the above, you can replace this writing code to use your own launch binary format with inner encryption
+            // launchInfoBin.GetCurrentEntries() will return the collection of entries and their streams as well as if the streams should be closed on build
+            //
+
+            //
+            // Ordinarily the format is as following:
+            //
+            // Base format:
+            // 4 bytes - count of entries (little-endian signed integer)
+            // headers - each entry header below
+            // all entry data is added one-by-one after this, no length prefixes, no delimiters, nothing, the headers control how much should be read
+            //
+            // Entry header format:
+            // 4 bytes - length prefix of key
+            // string  - key string bytes (UTF-8)
+            // 8 bytes - start of payload
+            // 8 bytes - end of payload
+            //
+
+            //
+            // Suggested replacement format:
+            //
+            // For security we recommend constructing some form of global key that is used to encrypt individual entries in
+            // the launch binary, file-wide encryption can break as the file needs to be opened and seeked through multiple times to read keys and file ids
+            //
+
+            FileStream output = File.OpenWrite("Build/Release/launchinfo.bin");
+            Stream dest = LaunchBinaryEncryptionStream(output);
+            launchInfoBin.Write(dest);
+            dest.Close();
+            output.Close();
         }
     }
 }

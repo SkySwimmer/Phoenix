@@ -1,5 +1,5 @@
 ﻿{
-  "workingDirectory": "bin/Debug/net6.0",
+  "workingDirectory": "bin/Debug/net7.0",
   "arguments": [
     "--test",
     "test2",

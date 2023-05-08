@@ -59,7 +59,8 @@ namespace Phoenix.Unity.PGL.Mods
         /// <param name="mod">Mod file stream</param>
         /// <param name="dataDir">Data directory</param>
         public ModInfo Load(FileStream mod, string dataDir)
-        {
+        { 
+            // TODO: client mod debugging
             if (locked)
                 throw new ArgumentException("Locked");
             BinaryPackage package = new BinaryPackage(mod, Path.GetFileName(mod.Name), () => File.OpenRead(mod.Name));
@@ -87,9 +88,9 @@ namespace Phoenix.Unity.PGL.Mods
 
             // Read mod assembly into memory
             logger.Debug("Loading mod assembly...");
-            ent = package.GetEntry("assembly.bin");
+            ent = package.GetEntry("clientassembly.bin");
             if (ent == null)
-                throw new ArgumentException("Invalid mod package: " + package.Name + ": missing mod assembly file!");
+                throw new ArgumentException("Invalid mod package: " + package.Name + ": missing mod client assembly file!");
             binStrm = new GZipStream(package.GetStream(ent), CompressionMode.Decompress);
             MemoryStream data = new MemoryStream();
             binStrm.CopyTo(data);

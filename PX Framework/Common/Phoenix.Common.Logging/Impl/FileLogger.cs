@@ -32,9 +32,12 @@ namespace Phoenix.Common.Logging.Impl
         public override void Log(LogLevel level, string message)
         {
             if (Level != LogLevel.QUIET && Level >= level) {
-                string msg = "[" + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss") + "] [" + Source + "] [" + level.ToString() + "] " + GlobalMessagePrefix + message;
-                FileWriter.WriteLine(msg);
-                FileWriter.Flush();
+                lock(FileWriter)
+                {
+                    string msg = "[" + DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss") + "] [" + Source + "] [" + level.ToString() + "] " + GlobalMessagePrefix + message;
+                    FileWriter.WriteLine(msg);
+                    FileWriter.Flush();
+                }
             }
         }
 

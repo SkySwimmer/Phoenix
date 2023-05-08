@@ -53,6 +53,7 @@ namespace Phoenix.Tests.Server
             ChartChain chain = ChartChain.Create();
             Stream chart = AssetManager.GetAssetStream("test.ccf");
             chain.Load(chart);
+            chart.Close();
             chain.GlobalMemory[chain.TagsReverse["player_standing"]] = -25;
             chain.RegisterCommand(new TestChartDialogueCommand());
             chain.EntrySegment?.Run();

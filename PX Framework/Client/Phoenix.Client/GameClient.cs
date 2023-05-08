@@ -879,11 +879,11 @@ namespace Phoenix.Client
                         {
                             Logger.Warn("");
                             Logger.Warn("WARNING! The client has not been ticked yet! This is most likely due to the tick function not being called.");
-                            Logger.Warn("Please add a GameClient.ClientTick() call to your game engine's frame update event to make sure the client is ticked.");
+                            Logger.Warn("Please add a GameClient.ClientTick() call to your game engine's update event to make sure the client is ticked.");
                             Logger.Warn("");
-                            Logger.Warn("It is HIGLY recommended to use the engine's frame update event as that will synchronize the client ticker to the engine's thread.");
+                            Logger.Warn("It is HIGLY recommended to use the engine's  update event as that will synchronize the client ticker to the engine's thread.");
                             Logger.Warn("Many components and modules will use the task manager or other tick events to call UI code on the UI thread as else most engines will fail to update the UI or 3D environment.");
-                            Logger.Warn("Please read the documentation on your engine of choice for how to run code on frame update.");
+                            Logger.Warn("Please read the documentation on your engine of choice for how to run code on update.");
                             Logger.Warn("");
                         }
                         warnState++;

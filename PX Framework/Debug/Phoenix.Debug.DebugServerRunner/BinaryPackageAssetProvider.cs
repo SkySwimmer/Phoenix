@@ -25,9 +25,7 @@ namespace Phoenix.Debug.DebugServerRunner
         {
             BinaryPackageEntry? ent = package.GetEntry(prefix + "/" + asset);
             if (ent != null)
-            {
                 return new GZipStream(package.GetStream(ent), CompressionMode.Decompress);
-            }
             return null;
         }
     }

@@ -36,9 +36,9 @@ namespace Phoenix.Unity.PGL.Internal
         }
 
         /// <summary>
-        /// Schedules a task to run on the Unity thread
+        /// Schedules a task to run on Unity's FixedUpdate
         /// </summary>
-        /// <param name="action">Task to run on Unity's UI thread</param>
+        /// <param name="action">Task to run on Unity's FixedUpdate</param>
         /// <returns>Task object for checking the status</returns>
         public static Task Schedule(Action action)
         {
@@ -51,9 +51,9 @@ namespace Phoenix.Unity.PGL.Internal
         }
 
         /// <summary>
-        /// Schedules a task to run on the Unity thread and waits for it to complete (blocks the current thread)
+        /// Schedules a task to run on Unity's FixedUpdate and waits for it to complete (blocks the current thread)
         /// </summary>
-        /// <param name="action">Task to run on Unity's UI thread</param>
+        /// <param name="action">Task to run on Unity's FixedUpdate thread</param>
         public static void ScheduleAndWait(Action action)
         {
             Task tsk = new Task()
@@ -65,7 +65,7 @@ namespace Phoenix.Unity.PGL.Internal
                 Thread.Sleep(100);
         }
 
-        public void Update()
+        public void FixedUpdate()
         {
             // Tick PGL
             PhoenixPGL.Tick();

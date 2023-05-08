@@ -2,9 +2,9 @@
   "profiles": {
     "Server": {
       "commandName": "Executable",
-      "executablePath": "../../../../server-runtime/debug/bin/Debug/net6.0/Phoenix.Debug.DebugServerRunner.exe",
+      "executablePath": "../../../../server-runtime/debug/bin/Debug/net7.0/Phoenix.Debug.DebugServerRunner.exe",
       "commandLineArgs": "../../../project.json run",
-      "workingDirectory": "bin/Debug/net6.0"
+      "workingDirectory": "bin/Debug/net7.0"
     }
   }
 }

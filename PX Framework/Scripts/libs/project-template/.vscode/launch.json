@@ -10,12 +10,12 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/server-runtime/debug/bin/Debug/net6.0/Phoenix.Debug.DebugServerRunner.dll",
+            "program": "${workspaceFolder}/server-runtime/debug/bin/Debug/net7.0/Phoenix.Debug.DebugServerRunner.dll",
             "args": [
                 "../../../project.json",
 				"run"
             ],
-            "cwd": "${workspaceFolder}/Server/bin/Debug/net6.0",
+            "cwd": "${workspaceFolder}/Server/bin/Debug/net7.0",
             "console": "integratedTerminal",
             "stopAtEntry": false
         },

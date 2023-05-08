@@ -133,7 +133,7 @@ namespace Phoenix.Server
                 return null;
             }
 
-            AssetManager.AddProvider(new FileAssetProvider(modDir + "/Assets"));
+            AssetManager.AddProvider(new FileAssetProvider(modDir + "/ServerAssets"));
             ModInfo info = new ModInfo(id, version, null, modAsm);
             mods.Add(info);
             return info;

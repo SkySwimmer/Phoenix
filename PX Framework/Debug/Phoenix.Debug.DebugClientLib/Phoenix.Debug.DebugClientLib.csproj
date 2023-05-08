@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Client\Phoenix.Client\Phoenix.Client.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Logging\Phoenix.Common.Logging.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+    <ProjectReference Include="..\..\Common\Phoenix.Common.Certificates\Phoenix.Common.Certificates.csproj" />
   </ItemGroup>
 
 </Project>

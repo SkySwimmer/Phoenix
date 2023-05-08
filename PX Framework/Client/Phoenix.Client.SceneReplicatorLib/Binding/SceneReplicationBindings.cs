@@ -16,7 +16,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         public abstract string GetName();
 
         /// <summary>
-        /// Schedules an action to run on the next frame update
+        /// Schedules an action to run on the next engine update
         /// </summary>
         /// <param name="action">Action to schedule</param>
         public abstract void RunOnNextFrameUpdate(Action action);
@@ -25,7 +25,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// Called to retrieve scene objects (should return null if the object does not replicate)
         /// <br/>
         /// <br/>
-        /// Typically called from the engine's frame update.
+        /// Typically called from the engine's engine update.
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>
@@ -55,7 +55,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// Called to spawn prefabs
         /// <br/>
         /// <br/>
-        /// Typically called from the engine's frame update.
+        /// Typically called from the engine's engine update.
         /// </summary>
         /// <param name="packet">Prefab information packet</param>
         public abstract void SpawnPrefab(SpawnPrefabPacket packet);
@@ -83,7 +83,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// Called when the server is about to begin initial scene replication
         /// <br/>
         /// <br/>
-        /// WARNING! This is called from the engine's frame update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
+        /// WARNING! This is called from the engine's engine update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>
@@ -94,7 +94,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         /// Called when the server finishes initial scene replication
         /// <br/>
         /// <br/>
-        /// WARNING! This is called from the engine's frame update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
+        /// WARNING! This is called from the engine's engine update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
         /// </summary>
         /// <param name="room">Replication room</param>
         /// <param name="scenePath">Scene path</param>

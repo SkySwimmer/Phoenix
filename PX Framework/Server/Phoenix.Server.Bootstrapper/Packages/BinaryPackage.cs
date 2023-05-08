@@ -17,6 +17,21 @@
         public delegate Stream StreamProvider();
 
         /// <summary>
+        /// Internal constructor for custom handling of binary packages, requires manual init if you do this
+        /// </summary>
+        protected BinaryPackage()
+        {
+        }
+
+        protected void InitManually(Stream stream, string name, StreamProvider provider, Dictionary<string, BinaryPackageEntry> entries)
+        {
+            _provider = provider;
+            _name = name;
+            Stream = stream;
+            Entries = entries;
+        }
+
+        /// <summary>
         /// Loads a binary package
         /// </summary>
         /// <param name="stream">Binary package stream</param>
@@ -94,9 +109,11 @@
                 return Entries[k];
         }
         
-        public EntryStream GetStream(BinaryPackageEntry entry)
+        public virtual EntryStream GetStream(BinaryPackageEntry entry)
         {
-            return new EntryStream(entry.Start, entry.End, _provider());
+            Stream dele = _provider();
+            dele.Position = entry.Start;
+            return new EntryStream(entry.Start, entry.End, dele);
         }
 
         public void Close()

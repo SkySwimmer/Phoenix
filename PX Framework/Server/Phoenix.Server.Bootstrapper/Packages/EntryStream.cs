@@ -13,7 +13,6 @@
             cPos = _pos;
             _max = max;
             _delegate = target;
-            _delegate.Position = pos;
         }
 
         public override bool CanRead => true;

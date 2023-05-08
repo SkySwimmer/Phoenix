@@ -2,7 +2,7 @@
   "profiles": {
     "Phoenix.Tests.Server": {
       "commandName": "Executable",
-      "executablePath": "..\\..\\..\\..\\..\\Debug\\Phoenix.Debug.DebugServerRunner\\bin\\Debug\\net6.0\\Phoenix.Debug.DebugServerRunner.exe",
+      "executablePath": "..\\..\\..\\..\\..\\Debug\\Phoenix.Debug.DebugServerRunner\\bin\\Debug\\net7.0\\Phoenix.Debug.DebugServerRunner.exe",
       "commandLineArgs": "../../../project.json run"
     }
   }

@@ -105,7 +105,7 @@ namespace Phoenix.Unity.PGL.Mods
         public abstract void PostInit();
 
         /// <summary>
-        /// Called on each frame update
+        /// Called on each engine update
         /// </summary>
         public virtual void Tick() {}
     }

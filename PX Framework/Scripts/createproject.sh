@@ -198,7 +198,7 @@ echo '{
   "serverAssembly": "DedicatedServer.dll",
   "manifestFile": "game.json",
   "debugConfig": "debug.json",
-  "assembliesDirectory": "bin/Release/net6.0"
+  "assembliesDirectory": "bin/Release/net7.0"
 }
 ' > Server/project.json
 echo '{
@@ -209,7 +209,7 @@ echo '{
   "hasOfflineSupport":  true
 }' > Server/game.json
 echo '{
-  "workingDirectory": "bin/Debug/net6.0",
+  "workingDirectory": "bin/Debug/net7.0",
   "arguments": [],
   "logLevel":  "trace"
 }' > Server/debug.json
