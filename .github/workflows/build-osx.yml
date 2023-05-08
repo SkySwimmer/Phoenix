@@ -30,11 +30,11 @@ jobs:
           name: OSX Assemblies (net472)
           path: PX Framework/Build/Assemblies/net472
           
-      - name: 'Publish build artifact (assemblies net6.0)'
+      - name: 'Publish build artifact (assemblies net7.0)'
         uses: actions/upload-artifact@v3
         with:
-          name: OSX Assemblies (net6.0)
-          path: PX Framework/Build/Assemblies/net6.0
+          name: OSX Assemblies (net7.0)
+          path: PX Framework/Build/Assemblies/net7.0
           
       - name: 'Publish build artifact (Unity files)'
         uses: actions/upload-artifact@v3
@@ -63,11 +63,11 @@ jobs:
           name: OSX Assemblies (net472, debug)
           path: PX Framework/Build/Assemblies/net472
           
-      - name: 'Publish build artifact (assemblies net6.0, debug)'
+      - name: 'Publish build artifact (assemblies net7.0, debug)'
         uses: actions/upload-artifact@v3
         with:
-          name: OSX Assemblies (net6.0, debug)
-          path: PX Framework/Build/Assemblies/net6.0
+          name: OSX Assemblies (net7.0, debug)
+          path: PX Framework/Build/Assemblies/net7.0
           
       - name: 'Publish build artifact (Unity files, debug)'
         uses: actions/upload-artifact@v3
