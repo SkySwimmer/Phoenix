@@ -34,7 +34,18 @@ namespace Phoenix.Server.Bootstrapper
             BinaryPackage launchPackage = LoadEncryptedLaunchBinary();
 
             // Read game info
-            DataReader reader = new DataReader(Decrypt(File.OpenRead("game.epaf"), "@GAMEMANIFEST", launchPackage));
+            Stream strm = File.OpenRead("game.epaf");
+            if (!Program.VerifyHash(strm, "@GAMEMANIFEST", launchPackage))
+            {
+                strm.Close();
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("!!!");
+                Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                Console.Error.WriteLine("!!!");
+                Environment.Exit(1);
+            }
+            strm.Position = 0;
+            DataReader reader = new DataReader(Decrypt(strm, "@GAMEMANIFEST", launchPackage));
             string gameID = reader.ReadString();
             string title = reader.ReadString();
             string version = reader.ReadString();
@@ -48,13 +59,14 @@ namespace Phoenix.Server.Bootstrapper
             // Load assemblies
             Dictionary<string, Assembly> knownAssemblies = new Dictionary<string, Assembly>();
             BinaryPackage assemblies = LoadTypicalPackage(File.OpenRead("assemblies.epbp"), "@ROOT", launchPackage);
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => {
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
                 string file = new AssemblyName(args.Name).Name;
                 if (knownAssemblies.ContainsKey(file))
                     return knownAssemblies[file];
                 if (assemblies.GetEntry(file + ".dll") != null)
                 {
-                    Assembly res= Assembly.Load(ReadBytesFromEntry(assemblies.GetEntry(file + ".dll"), assemblies));
+                    Assembly res = Assembly.Load(ReadBytesFromEntry(assemblies.GetEntry(file + ".dll"), assemblies));
                     knownAssemblies[file] = res;
                     return res;
                 }
@@ -88,6 +100,16 @@ namespace Phoenix.Server.Bootstrapper
                     if (fileName == file + ".dll")
                     {
                         Stream data = File.OpenRead("Components/" + componentId + ".epcb");
+                        if (!Program.VerifyHash(data, componentId, launchPackage))
+                        {
+                            data.Close();
+                            Console.Error.WriteLine();
+                            Console.Error.WriteLine("!!!");
+                            Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                            Console.Error.WriteLine("!!!");
+                            Environment.Exit(1);
+                        }
+                        data.Position = 0;
                         Stream dec = Decrypt(data, componentId, launchPackage);
                         DataReader rd = new DataReader(dec);
                         Assembly asm = Assembly.Load(rd.ReadAllBytes());
@@ -98,6 +120,16 @@ namespace Phoenix.Server.Bootstrapper
                     else if (fileName == file + ".exe")
                     {
                         Stream data = File.OpenRead("Components/" + componentId + ".epcb");
+                        if (!Program.VerifyHash(data, componentId, launchPackage))
+                        {
+                            data.Close();
+                            Console.Error.WriteLine();
+                            Console.Error.WriteLine("!!!");
+                            Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                            Console.Error.WriteLine("!!!");
+                            Environment.Exit(1);
+                        }
+                        data.Position = 0;
                         Stream dec = Decrypt(data, componentId, launchPackage);
                         DataReader rd = new DataReader(dec);
                         Assembly asm = Assembly.Load(rd.ReadAllBytes());
@@ -115,6 +147,17 @@ namespace Phoenix.Server.Bootstrapper
 
         public static BinaryPackage LoadTypicalPackage(Stream strm, string name, BinaryPackage launchPackage)
         {
+            if (!Program.VerifyHash(strm, name, launchPackage))
+            {
+                strm.Close();
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("!!!");
+                Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                Console.Error.WriteLine("!!!");
+                Environment.Exit(1);
+                return null;
+            }
+            strm.Position = 0;
             return LoadPackage(Decrypt(strm, name, launchPackage), name);
         }
 
@@ -128,6 +171,26 @@ namespace Phoenix.Server.Bootstrapper
                 return new MemoryStream(data);
             });
             return package;
+        }
+
+        public static bool VerifyHash(Stream data, string name, BinaryPackage launchPackage)
+        {
+            using (SHA256 hasher = SHA256.Create())
+            {
+                // Generate hash
+                long pos = data.Position;
+                byte[] hash = hasher.ComputeHash(data);
+                data.Position = pos;
+
+                // Verify hash
+                byte[] checkHash = ReadBytesFromEntry(launchPackage.GetEntry("Filehashes/" + name), launchPackage);
+                if (checkHash.Length != hash.Length)
+                    return false;
+                for (int i = 0; i < checkHash.Length; i++)
+                    if (checkHash[i] != hash[i])
+                        return false;
+                return true;
+            }
         }
 
         public static Stream Decrypt(Stream data, string name, BinaryPackage launchPackage)
@@ -167,8 +230,6 @@ namespace Phoenix.Server.Bootstrapper
 
             // Phoenix has hash checks for asset and component loading however you will need to do signature checks on the launch binary as else the hashses can be modified
 
-            Console.Error.WriteLine("WARNING! Unencrypted launch binary file! Please fork the bootstrapper and implement this method for security, otherwise your assets will be easy to decrypt!");
-            Console.Error.WriteLine("This code is kept in Program.cs at the end of the file!");
             return source;
         }
 
@@ -178,15 +239,18 @@ namespace Phoenix.Server.Bootstrapper
             // Alternatively to the above, you can replace this loading code to use your own launch binary format with inner encryption
             //
 
+            // Remove the following either way
+            Console.Error.WriteLine("WARNING! Unencrypted launch binary file! Please fork the bootstrapper and implement this method for security, otherwise your assets will be easy to decrypt! Secondly, without security on the launch binary it isn't too difficult to tamper with server assets and components as the signatures will be exposed! Please implement launch binary verification!");
+            Console.Error.WriteLine("This code is kept in Program.cs at the end of the file!");
+
             Stream launchSource = File.OpenRead("launchinfo.bin");
             Stream launchData = LaunchBinaryDecryptionStream(launchSource);
             return new BinaryPackage(launchData, "launchinfo.bin", () =>
-            {  
+            {
                 Stream launchSource = File.OpenRead("launchinfo.bin");
                 Stream launchData = LaunchBinaryDecryptionStream(launchSource);
                 return launchData;
             });
         }
-
     }
 }

@@ -822,7 +822,7 @@ namespace Phoenix.Common.Networking.Impl
         {
             // Check if connected
             if (!_connected)
-                throw new IOException("Not connected");
+                return;
 
             // Create packet
             if (packet.LengthPrefixed)
@@ -844,9 +844,17 @@ namespace Phoenix.Common.Networking.Impl
 
                         try
                         {
+                            if (!_connected)
+                                return;
                             Writer.WriteInt(cId);
                             Writer.WriteInt(id);
                             Writer.WriteBytes(packetData);
+                        }
+                        catch
+                        {
+                            // Error occured, likely connection loss
+                            if (_connected)
+                                DisconnectInternal("connection.lost", new string[0]);
                         }
                         finally
                         {
@@ -869,9 +877,17 @@ namespace Phoenix.Common.Networking.Impl
 
                         try
                         {
+                            if (!_connected)
+                                return;
                             Writer.WriteInt(cId);
                             Writer.WriteInt(id);
                             packet.Write(Writer);
+                        }
+                        catch
+                        {
+                            // Error occured, likely connection loss
+                            if (_connected)
+                                DisconnectInternal("connection.lost", new string[0]);
                         }
                         finally
                         {

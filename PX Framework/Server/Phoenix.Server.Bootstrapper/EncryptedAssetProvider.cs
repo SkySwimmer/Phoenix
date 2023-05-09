@@ -1,4 +1,5 @@
-﻿using Phoenix.Server.Bootstrapper.Packages;
+﻿using Phoenix.Common.Logging;
+using Phoenix.Server.Bootstrapper.Packages;
 using System.Text;
 
 namespace Phoenix.Server.Bootstrapper
@@ -27,8 +28,21 @@ namespace Phoenix.Server.Bootstrapper
                 return null;
             string assetID = Encoding.UTF8.GetString(Program.ReadBytesFromEntry(idEntry, launchPackage));
 
-            // Decrypt asset
+            // Verify hash
             Stream data = File.OpenRead("Assets/" + assetID + ".epaf");
+            if (!Program.VerifyHash(data, assetID, launchPackage))
+            {
+                data.Close();
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("!!!");
+                Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                Console.Error.WriteLine("!!!");
+                Environment.Exit(1);
+                return null;
+            }
+
+            // Decrypt asset
+            data.Position = 0;
             return Program.Decrypt(data, assetID, launchPackage);
         }
     }

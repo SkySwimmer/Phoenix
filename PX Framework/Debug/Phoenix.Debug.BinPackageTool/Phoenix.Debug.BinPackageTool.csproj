@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>pbputil</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Phoenix.Common.IO\Phoenix.Common.IO.csproj" />
+    <ProjectReference Include="..\..\Debug\Phoenix.Debug.DebugServerRunner\Phoenix.Debug.DebugServerRunner.csproj" />
+    <ProjectReference Include="..\..\Server\Phoenix.Server.Bootstrapper\Phoenix.Server.Bootstrapper.csproj" />
+  </ItemGroup>
+
+</Project>

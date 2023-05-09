@@ -331,9 +331,7 @@ namespace Phoenix.Debug.DebugServerRunner
 
             // Wait for servers to close
             while (runningServers > 0)
-            {
                 Thread.Sleep(100);
-            }
 
             // Stop
             if (loadMods)

@@ -14,7 +14,6 @@ namespace Phoenix.Debug.DebugServerRunner
         {
             // TODO: mass storage format for the assembly binary, individual encryption might be best
             // TODO: persistent key option
-            // TODO: signatures or hash checks
 
             // Build
             logger.Level = LogLevel.INFO;
@@ -39,11 +38,12 @@ namespace Phoenix.Debug.DebugServerRunner
             // Pull all assets and build
             Dictionary<string, byte[]> keys = new Dictionary<string, byte[]>();
             Dictionary<string, byte[]> ivs = new Dictionary<string, byte[]>();
+            Dictionary<string, byte[]> hashes = new Dictionary<string, byte[]>();
             Dictionary<string, string> assetFileNames = new Dictionary<string, string>();
             Dictionary<string, string> componentFileNames = new Dictionary<string, string>();
             logger.Debug("Finding assets...");
             AssetCompiler.LogLevel = LogLevel.INFO;
-            BuildAssetsIn(assets, "", logger, keys, ivs, assetFileNames);
+            BuildAssetsIn(assets, "", logger, keys, hashes, ivs, assetFileNames);
 
             // Build components
             logger.Info("Building server components...");
@@ -64,6 +64,7 @@ namespace Phoenix.Debug.DebugServerRunner
                     return Assembly.LoadFile(Path.GetFullPath(project.assembliesDirectory + "/" + file));
                 return null;
             };
+            SHA256 hasher = SHA256.Create();
             List<string> componentAssemblies = new List<string>();
             foreach (FileInfo file in new DirectoryInfo(project.assembliesDirectory).GetFiles("*.dll"))
             {
@@ -113,17 +114,15 @@ namespace Phoenix.Debug.DebugServerRunner
                             byte[] iv = aes.IV;
                             keys[id] = key;
                             ivs[id] = (byte[])iv.Clone();
-                            SHA256 hasher = SHA256.Create();
                             logger.Info("  Component ID: " + id);
                             logger.Info("  Component Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
                             logger.Info("  Component IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
                             Stream s = File.OpenRead(file.FullName);
                             logger.Info("  Component Hash: " + string.Concat(hasher.ComputeHash(s).Select(x => x.ToString("x2"))));
                             s.Close();
-                            hasher.Dispose();
 
                             // Write component
-                            logger.Info("Encrypting and writing component...");
+                            logger.Info("  Encrypting and writing component...");
                             Stream outp = File.OpenWrite("Build/Release/Components/" + id + ".epcb");
                             ICryptoTransform tr = aes.CreateEncryptor(key, iv);
                             CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
@@ -136,6 +135,11 @@ namespace Phoenix.Debug.DebugServerRunner
                             gzip.Close();
                             cryptStream.Close();
                             outp.Close();
+                            s = File.OpenRead("Build/Release/Components/" + id + ".epcb");
+                            byte[] hash = hasher.ComputeHash(s);
+                            hashes[id] = hash;
+                            logger.Info("  BPHash: " + string.Concat(hash.Select(x => x.ToString("x2"))));
+                            s.Close();
                             logger.Info("Written to Build/Release/Components/" + id + ".epcb");
                         }
 
@@ -176,7 +180,7 @@ namespace Phoenix.Debug.DebugServerRunner
                 logger.Info("  Binary Package IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
 
                 // Write component
-                logger.Info("Encrypting and writing package...");
+                logger.Info("  Encrypting and writing package...");
                 Stream outp = File.OpenWrite("Build/Release/assemblies.epbp");
                 ICryptoTransform tr = aes.CreateEncryptor(key, iv);
                 CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
@@ -187,6 +191,11 @@ namespace Phoenix.Debug.DebugServerRunner
                 gzip.Close();
                 cryptStream.Close();
                 outp.Close();
+                Stream s = File.OpenRead("Build/Release/assemblies.epbp");
+                byte[] hash = hasher.ComputeHash(s);
+                hashes["@ROOT"] = hash;
+                logger.Info("  BPHash: " + string.Concat(hash.Select(x => x.ToString("x2"))));
+                s.Close();
                 logger.Info("Written to Build/Release/assemblies.epbp");
             }
 
@@ -214,15 +223,12 @@ namespace Phoenix.Debug.DebugServerRunner
                 writer.WriteString(project.serverClass); // Server type
                 writer.WriteString(project.serverAssembly.Replace(".dll", "").Replace(".exe", "")); // Server assembly
                 byte[] data = man.ToArray();
-
-                SHA256 hasher = SHA256.Create();
                 logger.Info("  Asset Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
                 logger.Info("  Asset IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
                 logger.Info("  Asset Hash: " + string.Concat(hasher.ComputeHash(data).Select(x => x.ToString("x2"))));
-                hasher.Dispose();
 
                 // Write asset
-                logger.Info("Encrypting and writing asset...");
+                logger.Info("  Encrypting and writing asset...");
                 Stream outp = File.OpenWrite("Build/Release/game.epaf");
                 ICryptoTransform tr = aes.CreateEncryptor(key, iv);
                 CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
@@ -233,6 +239,11 @@ namespace Phoenix.Debug.DebugServerRunner
                 gzip.Close();
                 cryptStream.Close();
                 outp.Close();
+                Stream s = File.OpenRead("Build/Release/game.epaf");
+                byte[] hash = hasher.ComputeHash(s);
+                hashes["@GAMEMANIFEST"] = hash;
+                logger.Info("  BPHash: " + string.Concat(hash.Select(x => x.ToString("x2"))));
+                s.Close();
                 logger.Info("Written to Build/Release/game.epaf");
             }
 
@@ -245,6 +256,8 @@ namespace Phoenix.Debug.DebugServerRunner
                 streams["Filekeys/" + file] = new MemoryStream(key);
             foreach ((string file, byte[] iv) in ivs)
                 streams["Fileivs/" + file] = new MemoryStream(iv);
+            foreach ((string file, byte[] hash) in hashes)
+                streams["Filehashes/" + file] = new MemoryStream(hash);
             
             // Add asset file ids
             foreach ((string id, string file) in assetFileNames)
@@ -311,7 +324,7 @@ namespace Phoenix.Debug.DebugServerRunner
             }
         }
 
-        private static void BuildAssetsIn(string folder, string pref, Logger logger, Dictionary<string, byte[]> keys, Dictionary<string, byte[]> ivs, Dictionary<string, string> assetFileNames)
+        private static void BuildAssetsIn(string folder, string pref, Logger logger, Dictionary<string, byte[]> keys, Dictionary<string, byte[]> hashes, Dictionary<string, byte[]> ivs, Dictionary<string, string> assetFileNames)
         {
             // Find assets
             foreach (FileInfo file in new DirectoryInfo(folder).GetFiles())
@@ -344,13 +357,14 @@ namespace Phoenix.Debug.DebugServerRunner
                     Stream s = File.OpenRead(file.FullName);
                     logger.Info("  Asset Hash: " + string.Concat(hasher.ComputeHash(s).Select(x => x.ToString("x2"))));
                     s.Close();
-                    hasher.Dispose();
 
                     // Compile asset
+                    Logger.GlobalMessagePrefix += "  ";
                     Stream strm = AssetCompiler.Compile(File.OpenRead(file.FullName), pref + file.Name);
+                    Logger.GlobalMessagePrefix = Logger.GlobalMessagePrefix.Remove(Logger.GlobalMessagePrefix.Length - 2);
 
                     // Write asset
-                    logger.Info("Encrypting and writing asset...");
+                    logger.Info("  Encrypting and writing asset...");
                     Stream outp = File.OpenWrite("Build/Release/Assets/" + id + ".epaf");
                     ICryptoTransform tr = aes.CreateEncryptor(key, iv);
                     CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
@@ -362,6 +376,13 @@ namespace Phoenix.Debug.DebugServerRunner
                     cryptStream.Close();
                     outp.Close();
                     strm.Close();
+
+                    // Hash
+                    s = File.OpenRead("Build/Release/Assets/" + id + ".epaf");
+                    byte[] hash = hasher.ComputeHash(s);
+                    hashes[id] = hash;
+                    logger.Info("  BPHash: " + string.Concat(hash.Select(x => x.ToString("x2"))));
+                    s.Close();
                     logger.Info("Written to Build/Release/Assets/" + id + ".epaf");
                 }
             }
@@ -369,7 +390,7 @@ namespace Phoenix.Debug.DebugServerRunner
             {
                 // Recurse into subdirectories
                 logger.Debug("Finding assets in " + pref + dir.Name + "...");
-                BuildAssetsIn(dir.FullName, pref + dir.Name + "/", logger, keys, ivs, assetFileNames);
+                BuildAssetsIn(dir.FullName, pref + dir.Name + "/", logger, keys, hashes, ivs, assetFileNames);
             }
         }
 

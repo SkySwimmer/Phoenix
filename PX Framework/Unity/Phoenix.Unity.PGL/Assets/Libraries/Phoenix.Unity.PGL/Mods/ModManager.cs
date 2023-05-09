@@ -95,6 +95,37 @@ namespace Phoenix.Unity.PGL.Mods
             MemoryStream data = new MemoryStream();
             binStrm.CopyTo(data);
             Assembly modAsm = Assembly.Load(data.ToArray());
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                AssemblyName nm = new AssemblyName(args.Name);
+                if (nm.FullName == modAsm.GetName().FullName)
+                    return modAsm;
+                else
+                {
+                    // Check dependencies
+                    lock (assemblyCache)
+                    {
+                        if (assemblyCache.ContainsKey(args.Name))
+                            return assemblyCache[args.Name];
+                    }
+
+                    // Find in package
+                    BinaryPackageEntry? ent = package.GetEntry("clientdependencies/" + nm.Name + ".dll");
+                    if (ent != null)
+                    {
+                        // Load assembly
+                        GZipStream binStrm = new GZipStream(package.GetStream(ent), CompressionMode.Decompress);
+                        MemoryStream data = new MemoryStream();
+                        binStrm.CopyTo(data);
+                        Assembly asm = Assembly.Load(data.ToArray());
+                        lock (assemblyCache)
+                            assemblyCache[args.Name] = asm;
+                        binStrm.Close();
+                        return asm;
+                    }
+                }
+                return null;
+            };
             binStrm.Close();
             try
             {

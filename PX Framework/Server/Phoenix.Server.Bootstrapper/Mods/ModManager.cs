@@ -13,6 +13,7 @@ namespace Phoenix.Server
     {
         private bool locked;
         private List<ModInfo> mods = new List<ModInfo>();
+        private static Dictionary<string, Assembly> assemblyCache = new Dictionary<string, Assembly>();
         private Logger logger = Logger.GetLogger("Mod Manager");
 
         /// <summary>
@@ -72,6 +73,37 @@ namespace Phoenix.Server
             MemoryStream data = new MemoryStream();
             binStrm.CopyTo(data);
             Assembly modAsm = Assembly.Load(data.ToArray());
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                AssemblyName nm = new AssemblyName(args.Name);
+                if (nm.FullName == modAsm.GetName().FullName)
+                    return modAsm;
+                else
+                {
+                    // Check dependencies
+                    lock (assemblyCache)
+                    {
+                        if (assemblyCache.ContainsKey(args.Name))
+                            return assemblyCache[args.Name];
+                    }
+
+                    // Find in package
+                    BinaryPackageEntry? ent = package.GetEntry("dependencies/" + nm.Name + ".dll");
+                    if (ent != null)
+                    {
+                        // Load assembly
+                        GZipStream binStrm = new GZipStream(package.GetStream(ent), CompressionMode.Decompress);
+                        MemoryStream data = new MemoryStream();
+                        binStrm.CopyTo(data);
+                        Assembly asm = Assembly.Load(data.ToArray());
+                        lock (assemblyCache)
+                            assemblyCache[args.Name] = asm;
+                        binStrm.Close();
+                        return asm;
+                    }
+                }
+                return null;
+            };
             binStrm.Close();
             try
             {
@@ -122,6 +154,32 @@ namespace Phoenix.Server
                 return null;
             }
             Assembly modAsm = Assembly.LoadFile(modDir + "/" + manifest.modAssemblyDir + "/" + manifest.modAssemblyName);
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+            {
+                AssemblyName nm = new AssemblyName(args.Name);
+                if (nm.FullName == modAsm.GetName().FullName)
+                    return modAsm;
+                else
+                {
+                    // Check dependencies
+                    lock (assemblyCache)
+                    {
+                        if (assemblyCache.ContainsKey(args.Name))
+                            return assemblyCache[args.Name];
+                    }
+
+                    // Find other file
+                    if (File.Exists(modDir + "/" + manifest.modAssemblyDir + "/" + nm.Name + ".dll"))
+                    {
+                        // Load assembly
+                        Assembly asm = Assembly.LoadFile(modDir + "/" + manifest.modAssemblyDir + "/" + nm.Name + ".dll");
+                        lock (assemblyCache)
+                            assemblyCache[args.Name] = asm;
+                        return asm;
+                    }
+                }
+                return null;
+            };
             try
             {
                 logger.Debug("Loaded " + modAsm.GetTypes().Length + " types.");
@@ -158,5 +216,4 @@ namespace Phoenix.Server
             return mods.ToArray();
         }
     }
-
 }

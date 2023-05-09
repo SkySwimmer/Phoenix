@@ -19,7 +19,8 @@
 
                 // Wait for a task
                 AsyncTask? tsk = null;
-                for (int i = 0; i < 30000; i++)
+                long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                while ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - start) < 30000)
                 {
                     tsk = AsyncTaskManager.ObtainNext();
                     if (tsk != null)

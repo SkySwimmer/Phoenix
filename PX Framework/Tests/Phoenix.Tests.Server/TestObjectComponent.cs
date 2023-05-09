@@ -20,10 +20,14 @@ namespace Phoenix.Tests.Server
         {
             Server.ServiceManager.GetService<TaskManager>().AfterSecs(() =>
             {
-                SendMessage(new TestMessage()
+                try
                 {
-                    MessagePayload = "test"
-                });
+                    SendMessage(new TestMessage()
+                    {
+                        MessagePayload = "test"
+                    });
+                }
+                catch { }
             }, 3);
         }
 
