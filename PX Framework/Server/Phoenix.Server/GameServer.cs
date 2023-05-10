@@ -38,6 +38,7 @@ namespace Phoenix.Server
         private string _ip = "0.0.0.0";
         private int _port = 16719;
         private int _protocol = -1;
+        private string _gameVersion;
         private string _gameID;
         private bool _retrievingConfig = false;
 
@@ -393,10 +394,12 @@ namespace Phoenix.Server
             {
                 Logger.Warn("Game ID not defined! Please add a Game information implementation!");
                 _gameID = "generic";
+                _gameVersion = "unknown";
             }
             else
             {
                 _gameID = Game.GameID;
+                _gameVersion = Game.Version;
                 Logger.Info("");
                 string msg = "   " + Game.Title + " Server, Version " + Game.Version + "/" + _protocol + "/" + Connections.PhoenixProtocolVersion + "   ";
                 string line = "";
@@ -533,16 +536,18 @@ namespace Phoenix.Server
 
                 // Send game ID
                 Logger.Trace("Performing Phoenix Game Handshake on connection: " + srvConn);
-                Logger.Trace("Sending game ID: " + _gameID + ", protocol version " + _protocol + " to " + srvConn);
+                Logger.Trace("Sending game ID: " + _gameID + ", protocol version " + _protocol + ", game version " + _gameVersion + " to " + srvConn);
                 args.ClientOutput.WriteString(_gameID);
 
                 // Send protocol
                 args.ClientOutput.WriteInt(_protocol);
+                args.ClientOutput.WriteString(_gameVersion);
 
                 // Read ID and protocol
                 string cGID = args.ClientInput.ReadString();
                 int cProtocol = args.ClientInput.ReadInt();
-                Logger.Trace("Received game ID: " + cGID + ", protocol version " + cProtocol);
+                string cVer = args.ClientInput.ReadString();
+                Logger.Trace("Received game ID: " + cGID + ", protocol version " + cProtocol + ", game version " + cVer);
                 Logger.Trace("Verifying handshake...");
                 if (_gameID != cGID)
                 {

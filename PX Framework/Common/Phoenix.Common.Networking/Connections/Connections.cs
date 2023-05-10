@@ -16,7 +16,7 @@ namespace Phoenix.Common.Networking.Connections
         /// <summary>
         /// The basic low-level protocol version of Phoenix itself
         /// </summary>
-        public const int PhoenixProtocolVersion = 2;
+        public const int PhoenixProtocolVersion = 3;
 
         /// <summary>
         /// Creates a integrated connection bundle
@@ -72,6 +72,7 @@ namespace Phoenix.Common.Networking.Connections
             byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
             byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
             client.GetStream().Write(hello);
+            
             int i2 = 0;
             foreach (byte b in helloSrv)
             {

@@ -168,6 +168,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Debug.BinPackageToo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Debug.BinManifestTool", "Debug\Phoenix.Debug.BinManifestTool\Phoenix.Debug.BinManifestTool.csproj", "{D4495A3D-03C2-4261-B1A0-DEA6D3FA782E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Common.Language", "Common\Phoenix.Common.Language\Phoenix.Common.Language.csproj", "{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -466,6 +468,10 @@ Global
 		{D4495A3D-03C2-4261-B1A0-DEA6D3FA782E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4495A3D-03C2-4261-B1A0-DEA6D3FA782E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4495A3D-03C2-4261-B1A0-DEA6D3FA782E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -545,6 +551,7 @@ Global
 		{EADBEEC4-36A9-47EB-9E78-32F05A9610A8} = {9C6FA396-3317-4905-9541-66BF39706F01}
 		{9E81DBF9-577E-4839-808A-3221E944B481} = {5743A9B3-88D5-48B2-BE58-A6A7E584C9F4}
 		{D4495A3D-03C2-4261-B1A0-DEA6D3FA782E} = {5743A9B3-88D5-48B2-BE58-A6A7E584C9F4}
+		{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0} = {578114D7-EBFE-4659-9B58-519E6A197F37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D3D76799-920D-4A10-B73E-7D2BC88F6DF7}

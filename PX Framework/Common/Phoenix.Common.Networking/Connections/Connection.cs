@@ -78,11 +78,14 @@ namespace Phoenix.Common.Networking.Connections
     /// </summary>
     public abstract class Connection
     {
-        // TODO: disconnect reason memory
-
         private List<object> objects = new List<object>();
         private Dictionary<PacketChannel, PacketHandler> channels = new Dictionary<PacketChannel, PacketHandler>();
         private Logger logger;
+
+        /// <summary>
+        /// Disconnect reason parameters
+        /// </summary>
+        public DisconnectParams? DisconnectReason { get; protected set; } = null;
 
         /// <summary>
         /// Event for custom handshakes
@@ -322,6 +325,7 @@ namespace Phoenix.Common.Networking.Connections
         protected void CallDisconnected(string reason, string[] args)
         {
             Disconnected?.Invoke(this, reason, args);
+            DisconnectReason = new DisconnectParams(reason, args);
         }
 
         /// <summary>
@@ -348,6 +352,7 @@ namespace Phoenix.Common.Networking.Connections
         protected void CallDisconnected(string reason, string[] args, Connection conn)
         {
             Disconnected?.Invoke(conn, reason, args);
+            conn.DisconnectReason = new DisconnectParams(reason, args);
         }
 
     }

@@ -37,7 +37,7 @@ namespace Phoenix.Client
                 }
                 catch { }
             }
-            foreach(GameClient client in clients)
+            foreach (GameClient client in clients)
             {
                 if (client == null)
                 {
@@ -68,6 +68,7 @@ namespace Phoenix.Client
         private bool Connected;
 
         private int _protocol = -1;
+        private string _gameVersion = "";
         private string? _gameID;
 
         /// <summary>
@@ -93,6 +94,27 @@ namespace Phoenix.Client
             get
             {
                 return RegistryLocked;
+            }
+        }
+
+        private DisconnectParams? _overrideReason;
+
+        /// <summary>
+        /// Disconnect reason parameters
+        /// </summary>
+        public DisconnectParams? DisconnectReason
+        {
+            get
+            {
+                if (_overrideReason != null)
+                    return _overrideReason;
+                if (Client == null)
+                    return null;
+                return Client.DisconnectReason;
+            }
+            private set
+            {
+                _overrideReason = value;
             }
         }
 
@@ -374,7 +396,8 @@ namespace Phoenix.Client
                 throw new InvalidOperationException("Already initialized");
             if (RegistryLocked)
                 throw new InvalidOperationException("Already initializing");
-            
+            _overrideReason = null;
+
             // Packet registry
             if (Registry == null)
                 throw new ArgumentException("No packet registry");
@@ -386,10 +409,12 @@ namespace Phoenix.Client
             {
                 Logger.Warn("Game ID not defined! Please add a Game information implementation!");
                 _gameID = "generic";
+                _gameVersion = "unknown";
             }
             else
             {
                 _gameID = Game.GameID;
+                _gameVersion = Game.Version;
                 Logger.Info("");
                 string msg = "   " + Game.Title + " Client, Version " + Game.Version + "/" + _protocol + "/" + Connections.PhoenixProtocolVersion + "   ";
                 string line = "";
@@ -409,7 +434,7 @@ namespace Phoenix.Client
             }
 
             // Lock
-            Logger.Trace("Locking registry...");    
+            Logger.Trace("Locking registry...");
             RegistryLocked = true;
 
             // Load client components
@@ -566,6 +591,7 @@ namespace Phoenix.Client
                 throw new InvalidOperationException("Client is already connected");
             clientConnectionAuthFailure = false;
             handledHandshakeFailure = false;
+            _overrideReason = null;
 
             // Prepare client
             Logger.Info("Preparing to connect to server...");
@@ -590,6 +616,7 @@ namespace Phoenix.Client
             if (conn.IsConnected())
             {
                 Logger.Error("Connection already open!");
+                DisconnectReason = new DisconnectParams("connect.error.alreadyopen", new string[0]);
                 OnStartFailure?.Invoke(conn, ClientStartFailureType.CONNECTION_ALREADY_OPEN);
                 throw new InvalidOperationException("Connection already open");
             }
@@ -598,18 +625,21 @@ namespace Phoenix.Client
 
             // Events
             Logger.Trace("Attaching events...");
-            ConnectionEventHandler connectedHandler = (conn, args) => {
+            ConnectionEventHandler connectedHandler = (conn, args) =>
+            {
                 // (Late) program handshake
                 Logger.Debug("Late handshake connection: " + conn);
                 OnLateHandshake?.Invoke(conn, args);
             };
-            CustomHandshakeProvider customHandshakeHandler = (conn, args) => {
+            CustomHandshakeProvider customHandshakeHandler = (conn, args) =>
+            {
                 // Program handshake
                 if (args.HasFailed())
                 {
                     // Uhhhh problem
                     Logger.Error("Unexpected handshake traffic!");
                     handledHandshakeFailure = true;
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.unexpectedtraffic", new string[0]);
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_UNEXPECTED_TRAFFIC);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_UNEXPECTED_TRAFFIC, this));
                     return;
@@ -621,11 +651,12 @@ namespace Phoenix.Client
 
                 // Send game ID
                 Logger.Trace("Performing Phoenix Game Handshake on connection: " + conn);
-                Logger.Trace("Sending game ID: " + _gameID + ", protocol version " + _protocol + " to " + conn);
+                Logger.Trace("Sending game ID: " + _gameID + ", protocol version " + _protocol + ", game version " + _gameVersion + " to " + conn);
                 args.ClientOutput.WriteString(_gameID);
 
                 // Send protocol
                 args.ClientOutput.WriteInt(_protocol);
+                args.ClientOutput.WriteString(_gameVersion);
 
                 // Send connection details
                 IClientConnectionProvider.ConnectionInfo info = provider.ProvideInfo();
@@ -634,33 +665,37 @@ namespace Phoenix.Client
                 args.ClientOutput.WriteInt(info.Port);
 
                 // Read ID and protocol
-                string cGID = args.ClientInput.ReadString();
-                int cProtocol = args.ClientInput.ReadInt();
-                Logger.Trace("Received game ID: " + cGID + ", protocol version " + cProtocol);
+                string rGID = args.ClientInput.ReadString();
+                int rProtocol = args.ClientInput.ReadInt();
+                string rVer = args.ClientInput.ReadString();
+                Logger.Trace("Received game ID: " + rGID + ", protocol version " + rProtocol + ", game version " + rVer);
                 Logger.Trace("Verifying handshake...");
-                if (_gameID != cGID)
+                if (_gameID != rGID)
                 {
                     // Fail
                     Logger.Error("Game ID mismatch!");
                     args.FailHandshake();
                     handledHandshakeFailure = true;
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.gamemismatch", new string[] { rGID, _gameID });
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_GAME_MISMATCH);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_GAME_MISMATCH, this));
                     return;
                 }
-                else if (_protocol != cProtocol)
+                else if (_protocol != rProtocol)
                 {
                     // Fail
                     Logger.Error("Game version mismatch!");
                     args.FailHandshake();
                     handledHandshakeFailure = true;
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.versionmismatch", new string[] { rVer, _gameVersion });
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_VERSION_MISMATCH);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_VERSION_MISMATCH, this));
                     return;
                 }
                 Logger.Trace("Handshake success!");
             };
-            ConnectionSuccessEventHandler connectionSuccessHandler = (conn) => {
+            ConnectionSuccessEventHandler connectionSuccessHandler = (conn) =>
+            {
                 // Connection established
                 Connected = true;
                 OnConnected?.Invoke(conn);
@@ -668,7 +703,8 @@ namespace Phoenix.Client
                 engineLinkedGameClients.Add(this);
             };
             ConnectionDisconnectEventHandler clientDisconnectHandler = null;
-            clientDisconnectHandler = (conn, reason, args) => {
+            clientDisconnectHandler = (conn, reason, args) =>
+            {
                 // Disconnected
                 Logger.Info("Game client connection has been terminated!");
                 EventBus.Dispatch(new ClientDisconnectedEvent(this, new ClientDisconnectedEventArgs(reason, args)));
@@ -711,7 +747,7 @@ namespace Phoenix.Client
 
             // Attempt to connect
             Logger.Info("Attempting server connection...");
-            
+
             // Call events
             OnStart?.Invoke(conn);
             EventBus.Dispatch(new ClientStartupEvent(this));
@@ -740,6 +776,8 @@ namespace Phoenix.Client
                     }
                     Logger.Info("Connection ended.");
 
+                    if (DisconnectReason == null || DisconnectReason.Reason == "disconnect.generic")
+                        DisconnectReason = new DisconnectParams("disconnect.loginfailure.authfailure", new string[0]);
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.AUTHENTICATION_FAILURE);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.AUTHENTICATION_FAILURE, this));
                     throw;
@@ -762,6 +800,7 @@ namespace Phoenix.Client
                 if (e is SocketException)
                 {
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.CONNECT_FAILED);
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.unreachable", new string[0]);
                 }
                 else if (e is PhoenixConnectException)
                 {
@@ -769,24 +808,29 @@ namespace Phoenix.Client
                     {
                         case ErrorType.NONPHOENIX:
                             OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_NONPHOENIX);
+                            DisconnectReason = new DisconnectParams("connect.error.connectfailure.nonphoenix", new string[0]);
                             EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_NONPHOENIX, this));
                             break;
                         case ErrorType.INVALID_CERTIFICATE:
                             OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_INVALID_CERTIFICATE);
+                            DisconnectReason = new DisconnectParams("connect.error.connectfailure.invalidcertificate", new string[0]);
                             EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_INVALID_CERTIFICATE, this));
                             break;
                         case ErrorType.ENCRYPTION_KEY_REJECTED:
                             OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_ENCRYPTION_FAILURE);
+                            DisconnectReason = new DisconnectParams("connect.error.connectfailure.encrypterror", new string[0]);
                             EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_ENCRYPTION_FAILURE, this));
                             break;
                         case ErrorType.ENCRYPTION_FAILURE:
                             OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_ENCRYPTION_FAILURE);
+                            DisconnectReason = new DisconnectParams("connect.error.connectfailure.encrypterror", new string[0]);
                             EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_ENCRYPTION_FAILURE, this));
                             break;
                         case ErrorType.PROGRAM_HANDSHAKE_FAILURE:
                             if (!handledHandshakeFailure)
                             {
                                 OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_UNEXPECTED_TRAFFIC);
+                                DisconnectReason = new DisconnectParams("connect.error.connectfailure.unexpectedtraffic", new string[0]);
                                 EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.HANDSHAKE_FAILURE_UNEXPECTED_TRAFFIC, this));
                             }
                             break;
@@ -795,11 +839,13 @@ namespace Phoenix.Client
                 else if (e is IOException)
                 {
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.CONNECT_FAILED);
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.unreachable", new string[0]);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.CONNECT_FAILED, this));
                 }
                 else
                 {
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.UNKOWN_ERROR);
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.inernalerror", new string[0]);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.UNKOWN_ERROR, this));
                 }
                 conn.CustomHandshakes -= customHandshakeHandler;
@@ -830,6 +876,8 @@ namespace Phoenix.Client
                     }
                     Logger.Info("Connection ended.");
 
+                    if (DisconnectReason == null || DisconnectReason.Reason == "disconnect.generic")
+                        DisconnectReason = new DisconnectParams("disconnect.loginfailure.authfailure", new string[0]);
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.AUTHENTICATION_FAILURE);
                     EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.AUTHENTICATION_FAILURE, this));
                     throw new IOException("Authentication failure");
@@ -849,6 +897,8 @@ namespace Phoenix.Client
                 }
                 Logger.Info("Connection ended.");
 
+                if (DisconnectReason == null || DisconnectReason.Reason == "disconnect.generic")
+                    DisconnectReason = new DisconnectParams("connect.error.connectfailure.endedearly", new string[0]);
                 OnStartFailure?.Invoke(conn, ClientStartFailureType.ENDED_TOO_EARLY);
                 EventBus.Dispatch(new ClientStartupFailureEvent(ClientStartFailureType.ENDED_TOO_EARLY, this));
                 throw new IOException("Server terminated client connection before competion");
@@ -868,7 +918,8 @@ namespace Phoenix.Client
             Logger.Info("Connected successfully to server");
 
             // Start TPS counter
-            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() => {
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
+            {
                 int warnState = 0;
                 bool hasTicked = false;
                 while (IsConnected())
@@ -907,7 +958,7 @@ namespace Phoenix.Client
         {
             if (!Connected)
                 throw new InvalidOperationException("Client is not connected");
-            engineLinkedGameClients.Remove(this); 
+            engineLinkedGameClients.Remove(this);
 
             Logger.Info("Stopping client...");
             IClientConnectionProvider? provider = null;
