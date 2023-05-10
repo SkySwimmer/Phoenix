@@ -255,7 +255,6 @@ namespace Phoenix.Client
             // Auto-connect
             if (AutoConnect)
             {
-
                 client.ClientLogger.Info("Connecting to server...");
                 try
                 {
@@ -263,7 +262,7 @@ namespace Phoenix.Client
                 }
                 catch
                 {
-                    return new GameClientBuildResult() { FailureCode = GameClientBuildFailureCode.AUTO_CONNECT_FAILURE };
+                    return new GameClientBuildResult() { FailureCode = GameClientBuildFailureCode.AUTO_CONNECT_FAILURE, Client = client };
                 }
             }
 

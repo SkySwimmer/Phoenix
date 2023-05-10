@@ -599,7 +599,15 @@ namespace Phoenix.Common.Networking.Impl
                 // Connection ended
                 logger.Trace("Connection closed by remote from post-handshake");
                 if (_connected)
-                    Close("connection.lost");
+                    try
+                    {
+                        Close("connection.lost");
+                    }
+                    catch
+                    {
+                        if (!_connected)
+                            DisconnectInternal("connection.lost", new string[0]);
+                    }
                 else
                     DisconnectInternal("connection.lost", new string[0]);
                 return;
@@ -724,7 +732,15 @@ namespace Phoenix.Common.Networking.Impl
                     catch
                     {
                         if (_connected)
-                            Close("connection.lost");
+                            try
+                            {
+                                Close("connection.lost");
+                            }
+                            catch
+                            {
+                                if (!_connected)
+                                    DisconnectInternal("connection.lost", new string[0]);
+                            }
                         else
                             DisconnectInternal("connection.lost", new string[0]);
                     }
