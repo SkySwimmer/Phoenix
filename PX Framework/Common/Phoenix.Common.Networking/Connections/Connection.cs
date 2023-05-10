@@ -78,6 +78,8 @@ namespace Phoenix.Common.Networking.Connections
     /// </summary>
     public abstract class Connection
     {
+        // TODO: disconnect reason memory
+
         private List<object> objects = new List<object>();
         private Dictionary<PacketChannel, PacketHandler> channels = new Dictionary<PacketChannel, PacketHandler>();
         private Logger logger;
