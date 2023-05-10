@@ -24,14 +24,14 @@ Phoenix is a work-in-progress collection of libraries designed to implement netw
 ## What engines does it work with?
 Currently, client-side it only works with Unity. Phoenix is written in C#, Godot support should be theoretically possible but is currently not in development.
 
-Server-side, we use our own runtime, specifically designed for Phoenix (written with .NET 6.0). It provides asset encryption and, if you want it, mod loading on the server. Client-side too has mod loading, its only enabled if you specify that.
+Server-side, we use our own runtime, specifically designed for Phoenix (written with .NET 7.0). It provides asset encryption and, if you want it, mod loading on the server. Client-side too has mod loading, its only enabled if you specify that.
 
 <br/>
 
 # Using Phoenix
 
 ## Building Phoenix
-Phoenix is build with .NET 6.0, we have included some scripts to aid with building and project creation.
+Phoenix is build with .NET 7.0, we have included some scripts to aid with building and project creation.
 
 After cloning the project, in bash (git bash on windows), run the following commands to build the project:
 ```bash
