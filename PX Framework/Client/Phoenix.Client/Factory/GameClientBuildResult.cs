@@ -22,7 +22,7 @@
         {
             get
             {
-                return FailureCode != GameClientBuildFailureCode.NONE;
+                return FailureCode == GameClientBuildFailureCode.NONE;
             }
         }
     }
