@@ -168,21 +168,19 @@ namespace Phoenix.Server.Bootstrapper
                 logger.Info("Loading mods...");
 
                 // Load command line mods
-                if (properties.ContainsKey("debug-add-mod") && Game.DebugMode)
+                if (properties.ContainsKey("debug.add.mod") && Game.DebugMode)
                 {
                     // Add UNBUILT mods to the server
                     // This is for mod development, does not load packages but instead files
 
                     // Find mod
-                    string modDir = properties["debug-add-mod"];
+                    string modDir = properties["debug.add.mod"];
                     if (File.Exists(modDir + "/modinfo.json"))
                     {
                         logger.Debug("Loading debug mod: " + modDir);
                         DebugModManifest? manifest = JsonConvert.DeserializeObject<DebugModManifest>(File.ReadAllText(modDir + "/modinfo.json"));
                         if (manifest != null)
-                        {
                             manager.LoadDebug(modDir, manifest);
-                        }
                     }
                 }
 

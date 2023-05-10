@@ -88,7 +88,7 @@ namespace Phoenix.Server
                     }
 
                     // Find in package
-                    BinaryPackageEntry? ent = package.GetEntry("dependencies/" + nm.Name + ".dll");
+                    BinaryPackageEntry? ent = package.GetEntry("Dependencies/" + nm.Name + ".dll");
                     if (ent != null)
                     {
                         // Load assembly

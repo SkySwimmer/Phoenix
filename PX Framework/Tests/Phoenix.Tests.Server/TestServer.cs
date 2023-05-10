@@ -34,8 +34,6 @@ namespace Phoenix.Tests.Server
             GameServer testServer = new GameServer("test");
             testServer.AddComponentPackage(new CorePackage());
             testServer.AddComponent(new TestComponent());
-            if (Game.DebugMode)
-                testServer.AddComponent(new NetworkServerComponent());
             testServer.AddComponent(new ServerListPublisherComponent());
             testServer.AddComponent(new PlayerManagerComponent());
             testServer.AddComponent(new AuthenticationManagerComponent());
