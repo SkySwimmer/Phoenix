@@ -205,8 +205,9 @@ namespace Phoenix.Server.Components
                     PlayerJoinResult res = manager.AddPlayer(ev.Client, response.accountID, response.displayName);
                     if (res.IsSuccess)
                     {
+                        // Connect success
                         ev.KeepConnectionOpen();
-                        ev.EventArgs.ClientOutput.WriteBoolean(true); // Connect success
+                        ev.EventArgs.ClientOutput.WriteBoolean(true); 
                     }
                 }
             }

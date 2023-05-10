@@ -67,6 +67,7 @@ namespace Phoenix.Server.Players
                 {
                     // Disconnect
                     Logger.GetLogger("player-manager").Info("Player login failure: " + displayName + " could not log in: server is full.");
+                    plr.Disconnect("disconnect.loginfailure.fullserver");
                     return new PlayerJoinResult(plr, PlayerJoinResultStatus.SERVER_FULL);
                 }
             }
