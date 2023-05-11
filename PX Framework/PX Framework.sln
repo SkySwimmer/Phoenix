@@ -170,7 +170,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Debug.BinManifestTo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Common.Language", "Common\Phoenix.Common.Language\Phoenix.Common.Language.csproj", "{FF60AEC9-6A78-42C1-BB1A-FBEF93F236D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix.Unity", "Unity\Phoenix.Unity.csproj", "{D99E1F91-8ABF-4341-9984-A6DC145F2A1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity", "Unity\Unity.csproj", "{D99E1F91-8ABF-4341-9984-A6DC145F2A1E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

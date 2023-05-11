@@ -313,7 +313,7 @@ namespace Phoenix.Unity.PGL
 
                     // Decode
                     string gameData = Encoding.UTF8.GetString(data);
-                    foreach (string line in gameData.Split("\n"))
+                    foreach (string line in gameData.Split('\n'))
                     {
                         if (line == "")
                             continue;
@@ -650,7 +650,7 @@ namespace Phoenix.Unity.PGL
                         }
 
                         // Parse token
-                        string[] parts = tkn.Split(".");
+                        string[] parts = tkn.Split('.');
                         string payloadJson = Encoding.UTF8.GetString(Base64Url.Decode(parts[1]));
                         JObject payload = JsonConvert.DeserializeObject<JObject>(payloadJson);
                         if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (15 * 60) >= payload.GetValue("exp").ToObject<long>())

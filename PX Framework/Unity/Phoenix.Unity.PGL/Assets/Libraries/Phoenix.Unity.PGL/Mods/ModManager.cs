@@ -20,6 +20,7 @@ namespace Phoenix.Unity.PGL.Mods
     {
         private bool locked;
         private List<ModInfo> mods = new List<ModInfo>();
+        private static Dictionary<string, Assembly> assemblyCache = new Dictionary<string, Assembly>();
         private Logger logger = Logger.GetLogger("Mod Manager");
 
         /// <summary>
