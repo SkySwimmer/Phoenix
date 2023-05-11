@@ -81,34 +81,6 @@
       <HintPath>targetlibs\Phoenix.Server.ComponentLib.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Phoenix.Server.Components.AuthenticationManager">
-      <HintPath>targetlibs\Phoenix.Server.Components.AuthenticationManager.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.CertificateRefresher">
-      <HintPath>targetlibs\Phoenix.Server.Components.CertificateRefresher.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.ConfigManager">
-      <HintPath>targetlibs\Phoenix.Server.Components.ConfigManager.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.PlayerManager">
-      <HintPath>targetlibs\Phoenix.Server.Components.PlayerManager.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.SceneReplication">
-      <HintPath>targetlibs\Phoenix.Server.Components.SceneReplication.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.ServerlistPublisher">
-      <HintPath>targetlibs\Phoenix.Server.Components.ServerlistPublisher.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Phoenix.Server.Components.TaskManager">
-      <HintPath>targetlibs\Phoenix.Server.Components.TaskManager.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>
