@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client.ComponentLib</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.Components.Component">
+            <summary>
+            Component interface
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.Component.ID">
+            <summary>
+            Component ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.Component.Aliases">
+            <summary>
+            Component alias IDs
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.InitLoadRules">
+            <summary>
+            Internal
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.Component.LoadRules">
+            <summary>
+            Component load rules
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.DependsOn(System.String)">
+            <summary>
+            Adds a dependency definition
+            </summary>
+            <param name="component">Dependency component ID</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.OptDependsOn(System.String)">
+            <summary>
+            Adds a optional dependency definition
+            </summary>
+            <param name="component">Dependency component ID</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.LoadBefore(System.String)">
+            <summary>
+            Adds a load-before definition (this component will be loaded before the target component)
+            </summary>
+            <param name="component">Dependency component ID</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.ConflictsWith(System.String)">
+            <summary>
+            Adds a conflict definition
+            </summary>
+            <param name="component">Dependency component ID</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.GetLogger">
+            <summary>
+            Retrieves the component logger
+            </summary>
+            <returns>Component logger instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.Define">
+            <summary>
+            Called immediately after the component is registered, use this for dependencies and other rules
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.PreInit">
+            <summary>
+            Called when the component is loaded
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.Init">
+            <summary>
+            Called when initializing the component (happens during client connection, may be called more than once)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.PostInit">
+            <summary>
+            Called after the client starts (happens during client connection, may be called more than once)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.DeInit">
+            <summary>
+            Called when the client stops (happens on disconnect, may be called more than once)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Component.Tick">
+            <summary>
+            Called on each client tick
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Components.IComponentPackage">
+            <summary>
+            Component package interface
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.IComponentPackage.ID">
+            <summary>
+            Package ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.IComponentPackage.Components">
+            <summary>
+            Components in the package
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Components.Rules.ComponentLoadRuleType">
+            <summary>
+            Component load rule types
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Components.Rules.ComponentLoadRuleType.DEPENDENCY">
+            <summary>
+            Dependency rule, requires the target component
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Components.Rules.ComponentLoadRuleType.OPTDEPEND">
+            <summary>
+            Optional dependency rule, loads before the other component if present
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Components.Rules.ComponentLoadRuleType.LOADAFTER">
+            <summary>
+            Load-after rule, loads the invoking component before the target component
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Components.Rules.ComponentLoadRuleType.CONFLICT">
+            <summary>
+            Component that will conflict with the invoking component if it is loaded, crashing the client with a warning
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Components.Rules.ComponentLoadRule">
+            <summary>
+            Component loading rule
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.Rules.ComponentLoadRule.#ctor(System.String,Phoenix.Client.Components.Rules.ComponentLoadRuleType)">
+            <summary>
+            Instantiates the load rule
+            </summary>
+            <param name="target">Target component</param>
+            <param name="type">Load rule</param>
+        </member>
+        <member name="P:Phoenix.Client.Components.Rules.ComponentLoadRule.Target">
+            <summary>
+            Target component ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.Rules.ComponentLoadRule.Type">
+            <summary>
+            Component rule type
+            </summary>
+        </member>
+    </members>
+</doc>

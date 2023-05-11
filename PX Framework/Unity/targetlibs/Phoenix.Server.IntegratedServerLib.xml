@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Server.IntegratedServerLib</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Server.IntegratedServerLib.IntegratedServerComponent">
+            <summary>
+            Integrated server component
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.IntegratedServerLib.IntegratedServerComponent.#ctor(Phoenix.Common.Networking.Impl.IntegratedServerConnection)">
+            <summary>
+            Creates the integrated server component
+            </summary>
+            <param name="integratedServer">Integrated server connection</param>
+        </member>
+    </members>
+</doc>

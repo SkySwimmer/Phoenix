@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client.IntegratedServerBootstrapper</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.IntegratedServerBootstrapper.MemoryConfigManagerComponent">
+            <summary>
+            Simple config manager component that works from memory and doesnt save to disk
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer">
+            <summary>
+            Abstract class for Phoenix integrated servers
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.CreateConnection(Phoenix.Common.Networking.Registry.ChannelRegistry)">
+            <summary>
+            Creates a integrated client connection
+            </summary>
+            <param name="channels">Cannel registry</param>
+            <returns>IntegratedClientConnection instance</returns>
+        </member>
+        <member name="P:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.ServerConnection">
+            <summary>
+            Retrieves the server connection made for the integrated server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.GameServer">
+            <summary>
+            Retrieves the game server instance
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.Init">
+            <summary>
+            Initializes the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.CreateClientFactory(Phoenix.Common.Networking.Registry.ChannelRegistry)">
+            <summary>
+            Creates client factories set up for connecting to the integrated server
+            </summary>
+            <param name="registry">Channel registry</param>
+            <returns>GameClientFactory instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.AddToClientFactory(Phoenix.Client.GameClientFactory)">
+            <summary>
+            Modifies an existing client factory for connecting to the integrated server
+            </summary>
+            <returns>GameClientFactory instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.StartServer">
+            <summary>
+            Starts the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.StopServer">
+            <summary>
+            Stops the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.Prepare">
+            <summary>
+            Called to prepare the integrated server container, called before all game servers are loaded
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.SetupServer">
+            <summary>
+            Called to set up the game server
+            </summary>
+        </member>
+    </members>
+</doc>

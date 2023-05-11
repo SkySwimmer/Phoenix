@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Server.AssetManager</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Server.AssetManager">
+            <summary>
+            Phoenix Server Asset Manager
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.AddProvider(Phoenix.Server.IAssetProvider)">
+            <summary>
+            Adds asset providers
+            </summary>
+            <param name="provider">Asset provider to add</param>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.Lock">
+            <summary>
+            Locks the asset manager
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.GetAssetsIn(System.String)">
+            <summary>
+            Retrieves an array of asset names from a asset folder
+            </summary>
+            <param name="asset">Asset folder path</param>
+            <returns>Array of asset names</returns>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.GetAssetReader(System.String,Phoenix.Server.AssetScanOrder)">
+            <summary>
+            Retrieves an asset data reader
+            </summary>
+            <param name="asset">Asset path</param>
+            <param name="order">Asset scanning order</param>
+            <returns>Asset data reader instance (closeable)</returns>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.GetAssetString(System.String,Phoenix.Server.AssetScanOrder,System.Text.Encoding)">
+            <summary>
+            Retrieves a string asset
+            </summary>
+            <param name="asset">Asset path</param>
+            <param name="order">Asset scanning order</param>
+            <param name="encoding">Asset encoding (default is UTF-8)</param>
+            <returns>Asset string</returns>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.GetAssetBytes(System.String,Phoenix.Server.AssetScanOrder)">
+            <summary>
+            Retrieves assets as byte arrays
+            </summary>
+            <param name="asset">Asset path</param>
+            <param name="order">Asset scanning order</param>
+            <returns>Asset bytes</returns>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.GetAssetStream(System.String,Phoenix.Server.AssetScanOrder)">
+            <summary>
+            Retrieves an asset stream
+            </summary>
+            <param name="asset">Asset path</param>
+            <param name="order">Asset scanning order</param>
+            <returns>Asset stream instance</returns>
+        </member>
+        <member name="M:Phoenix.Server.AssetManager.AssetExists(System.String)">
+            <summary>
+            Checks if an asset exists
+            </summary>
+            <param name="asset">Asset path</param>
+            <returns>True if found, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Server.CloseableDataReader">
+            <summary>
+            Closeable data reader
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.IAssetProvider">
+            <summary>
+            Asset provider interface for the Phoenix server asset manager
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.IAssetProvider.GetAssetStream(System.String)">
+            <summary>
+            Retrieves an asset stream
+            </summary>
+            <param name="asset">Asset path</param>
+            <returns>Stream instance or null</returns>
+        </member>
+        <member name="M:Phoenix.Server.IAssetProvider.GetAssetsIn(System.String)">
+            <summary>
+            Retrieves an array of assets in a folder
+            </summary>
+            <param name="folder">Asset folder path</param>
+            <returns>Array of asset names</returns>
+        </member>
+    </members>
+</doc>

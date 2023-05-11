@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ChartZ.Engine</name>
+    </assembly>
+    <members>
+        <member name="T:ChartZ.Engine.ChartChain">
+            <summary>
+            Chart chain object
+            </summary>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.Create">
+            <summary>
+            Creates a new chart chain
+            </summary>
+            <returns>ChartChain instance</returns>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.NewInstance">
+            <summary>
+            Creates a new chart chain instance
+            </summary>
+            <returns>ChartChain instance</returns>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.RegisterCommand(ChartZ.Engine.ChartCommand)">
+            <summary>
+            Registers a new chart command
+            </summary>
+            <param name="cmd">Command object</param>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.Clone">
+            <summary>
+            Clones this chart chain and links global memory
+            </summary>
+            <returns>Cloned chart chain</returns>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.Load(System.String)">
+            <summary>
+            Loads a chart json
+            </summary>
+            <param name="chart">Chart json</param>
+        </member>
+        <member name="M:ChartZ.Engine.ChartChain.Load(System.IO.Stream)">
+            <summary>
+            Loads a chart from a binary stream
+            </summary>
+            <param name="chart">Chart stream</param>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.LocalMemory">
+            <summary>
+            Retrieves local memory
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.GlobalMemory">
+            <summary>
+            Retrieves global memory
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.Tags">
+            <summary>
+            Retrieves tag memory
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.TagsReverse">
+            <summary>
+            Retrieves reverse tag memory
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.Segments">
+            <summary>
+            Retrieves chart segments
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartChain.EntrySegment">
+            <summary>
+            Retrieves the entry segment or null
+            </summary>
+        </member>
+        <member name="T:ChartZ.Engine.ChartCommand">
+            <summary>
+            Chart command
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartCommand.CommandID">
+            <summary>
+            Defines the command ID string
+            </summary>
+        </member>
+        <member name="M:ChartZ.Engine.ChartCommand.Handle(ChartZ.Engine.ChartChain,ChartZ.Engine.ChartSegment)">
+            <summary>
+            Handles the command
+            </summary>
+            <param name="chain">Chart chain</param>
+            <param name="segment">Command segment</param>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="T:ChartZ.Engine.ChartCondition">
+            <summary>
+            Chart condition
+            </summary>
+        </member>
+        <member name="T:ChartZ.Engine.ConditionModeType">
+            <summary>
+            Condition mode type
+            </summary>
+        </member>
+        <member name="T:ChartZ.Engine.ConditionType">
+            <summary>
+            Condition type
+            </summary>
+        </member>
+        <member name="T:ChartZ.Engine.ChartSegment">
+            <summary>
+            Chart segment
+            </summary>
+        </member>
+        <member name="M:ChartZ.Engine.ChartSegment.#ctor(ChartZ.Engine.ChartChain,System.Int32,System.Int32[],System.Int32,System.Int32,System.Collections.Generic.List{ChartZ.Engine.ChartCondition},System.Int32,System.Int32[])">
+            <summary>
+            Instantiates the segment object
+            </summary>
+            <param name="parent">Parent chain</param>
+            <param name="command">Command ID</param>
+            <param name="payload">Payload IDs</param>
+            <param name="header">Header ID</param>
+            <param name="type">Type ID</param>
+            <param name="conditions">Condition objects</param>
+            <param name="jump">Jump ID</param>
+            <param name="branches">Branch IDs</param>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Command">
+            <summary>
+            Retrieves the command ID
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Type">
+            <summary>
+            Retrieves the type ID or null if not set
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Header">
+            <summary>
+            Retrieves the header or null if not set
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Jump">
+            <summary>
+            Retrieves the jump target segment or null if not set
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Payload">
+            <summary>
+            Retrieves command payload
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Branches">
+            <summary>
+            Retrieves the branches
+            </summary>
+        </member>
+        <member name="P:ChartZ.Engine.ChartSegment.Conditions">
+            <summary>
+            Retrieves command conditions
+            </summary>
+        </member>
+        <member name="M:ChartZ.Engine.ChartSegment.Run(System.Int32)">
+            <summary>
+            Runs the chart object
+            </summary>
+        </member>
+    </members>
+</doc>

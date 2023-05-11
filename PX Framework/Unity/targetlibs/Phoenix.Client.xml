@@ -1,0 +1,525 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.ClientComponent">
+            <summary>
+            Component type more based around the basic game client
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.ClientComponent.Client">
+            <summary>
+            Retrieves the game client
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.ClientComponent.ServiceManager">
+            <summary>
+            Retrieves the service manager
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.ClientComponent.EventBus">
+            <summary>
+            Retrieves the event bus
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.ClientStartFailureType">
+            <summary>
+            Client startup failure type enum
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.AbstractClientEvent">
+            <summary>
+            Abstract server event
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.AbstractClientEvent.Client">
+            <summary>
+            Retrieves the game client
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientConnectedEvent">
+            <summary>
+            Client connected event - Called when the connection is established
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientDisconnectCompleteEvent">
+            <summary>
+            Client disconnect completion event - Called when the client is fully stopped and cleaned up
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.ClientDisconnectCompleteEvent.Arguments">
+            <summary>
+            Retrieves the disconnect event arguments
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.ClientDisconnectedEventArgs.ReasonKey">
+            <summary>
+            Retrieves the disconnect reason key
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.ClientDisconnectedEventArgs.ReasonArguments">
+            <summary>
+            Retrieves the disconnect reason arguments
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientDisconnectedEvent">
+            <summary>
+            Client disconnected event - Called when the client disconnects
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.ClientDisconnectedEvent.Arguments">
+            <summary>
+            Retrieves the disconnect event arguments
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientStartupEvent">
+            <summary>
+            Client startup event - Called early in the startup process
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientStartupFailureEvent">
+            <summary>
+            Client startup failure event
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Events.ClientStartupFailureEvent.ErrorType">
+            <summary>
+            Error type
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Events.ClientStartupPrepareEvent">
+            <summary>
+            Client startup preparation event
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Factory.GameClientBuildFailureCode">
+            <summary>
+            Client build failure code
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Factory.GameClientBuildResult">
+            <summary>
+            Client build result
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Factory.GameClientBuildResult.Client">
+            <summary>
+            Game client that was created, may be null in case the build failed
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Factory.GameClientBuildResult.FailureCode">
+            <summary>
+            Build failure code
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Factory.GameClientBuildResult.IsSuccess">
+            <summary>
+            Checks if the client was successfully made
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Factory.GameClientBuildResult.DisconnectReason">
+            <summary>
+            Retrieves the disconnect reason parameters, returns null if not present
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.InsecureModeHandler">
+            <summary>
+            Handles insecure mode servers
+            </summary>
+            <returns>True if the connection may proceed, false to cancel it</returns>
+        </member>
+        <member name="T:Phoenix.Client.InsecureModeCallback">
+            <summary>
+            Call this in case the server is in insecure mode. Should it return false, return null from the client connection provider
+            </summary>
+            <returns>True if the connection should be made, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Client.ClientConstructor">
+            <summary>
+            Simple constructor delegate
+            </summary>
+            <returns>Connection instance</returns>
+        </member>
+        <member name="T:Phoenix.Client.ClientConnectionProvider">
+            <summary>
+            Creates the client connection
+            </summary>
+            <param name="insecureModeCallback">Callback to use in case the server being connected to is in insecure mode</param>
+            <param name="connectionInfo">Output connection info (a dummy by default, highly recommended to set)</param>
+            <returns>ClientConstructor instance or null to fail the connection</returns>
+        </member>
+        <member name="T:Phoenix.Client.GameClientFactory">
+            <summary>
+            Game Client Builder
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.WarnMissingAuthenticator">
+            <summary>
+            Controls if the factory should print a warning message in case there is no authenticator present
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.InsecureModeHandler">
+            <summary>
+            Handles insecure mode servers
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.AllowInsecureMode">
+            <summary>
+            Controls if insecure-mode servers should be allowed to connect to
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithAllowInsecureMode(System.Boolean)">
+            <summary>
+            Controls if insecure-mode servers should be allowed to connect to
+            </summary>
+            <param name="allow">True to allow insecure-mode servers, false otherwise</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithAllowInsecureMode(System.Boolean,Phoenix.Client.InsecureModeHandler)">
+            <summary>
+            Controls if insecure-mode servers should be allowed to connect to
+            </summary>
+            <param name="allow">True to allow insecure-mode servers, false otherwise</param>
+            <param name="handler">Handler called to handle insecure-mode servers for an extra layer of confirmation</param>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.ConnectionProvider">
+            <summary>
+            Client connection provider (required)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithConnectionProvider(Phoenix.Client.ClientConnectionProvider)">
+            <summary>
+            Sets the connection provider (<b>note: its recommended to use a connection provider library's extension methods</b>)
+            </summary>
+            <param name="connectionProvider">Connection provider</param>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.ChannelRegistry">
+            <summary>
+            Packet channel registry
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.ProtocolVersion">
+            <summary>
+            Defines the protocol version
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.AutoInit">
+            <summary>
+            Defines if the client should be initialized on build
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.GameClientFactory.AutoConnect">
+            <summary>
+            Defines if the client should connect on build
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithAutoInit(System.Boolean)">
+            <summary>
+            Defines if the client should be initialized on build
+            </summary>
+            <param name="autoInit">True to automatically initialize the client, false otherwise</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithAutoConnect(System.Boolean)">
+            <summary>
+            Defines if the client should connect on build
+            </summary>
+            <param name="autoConnect">True to automatically connect on build, false otherwise</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithProtocolVersion(System.Int32)">
+            <summary>
+            Adds a protocol version (recommended)
+            </summary>
+            <param name="protocolVersion">Game protocol version</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithChannelRegistry(Phoenix.Common.Networking.Registry.ChannelRegistry)">
+            <summary>
+            Adds a channel registry (required)
+            </summary>
+            <param name="registry">Channel registry to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithComponent(Phoenix.Client.Components.Component)">
+            <summary>
+            Adds components
+            </summary>
+            <param name="component">Component to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithAuthenticator(Phoenix.Client.Providers.AuthenticationComponent)">
+            <summary>
+            Adds authenticators (highly recommended)
+            </summary>
+            <param name="component">Authenticator to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.WithComponentPacakge(Phoenix.Client.Components.IComponentPackage)">
+            <summary>
+            Adds component packages
+            </summary>
+            <param name="package">Component package to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClientFactory.Build(System.String)">
+            <summary>
+            Builds the client
+            </summary>
+            <param name="logId">Client logger ID</param>
+            <returns>GameClientBuildResult object</returns>
+        </member>
+        <member name="T:Phoenix.Client.GameClient">
+            <summary>
+            Phoenix Game Client
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.GlobalTick">
+            <summary>
+            Ticks all clients presently running
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.TickEventHandler">
+            <summary>
+            Basic tick event handler
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnTick">
+            <summary>
+            Called on each client tick
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnPostTick">
+            <summary>
+            Called at the end of each client tick
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.IsInitialized">
+            <summary>
+            Checks if the client is initialized
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.DisconnectReason">
+            <summary>
+            Disconnect reason parameters
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.ClientStartHandler">
+            <summary>
+            Client start event handler
+            </summary>
+            <param name="connection">Client connection</param>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.ClientStartFailureHandler">
+            <summary>
+            Client start failure event handler
+            </summary>
+            <param name="connection">Client connection</param>
+            <param name="failure">Failure type</param>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.ClientLateHandshakeHandler">
+            <summary>
+            Client late handshake event handler
+            </summary>
+            <param name="connection">Client connection</param>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.ClientConnectedHandler">
+            <summary>
+            Client start success event handler
+            </summary>
+            <param name="connection">Client connection</param>
+        </member>
+        <member name="T:Phoenix.Client.GameClient.ClientDisconnectHandler">
+            <summary>
+            Client disconnect event handler
+            </summary>
+            <param name="connection">Client connection</param>
+            <param name="reason">Disconnect reason</param>
+            <param name="args">Disconnect reason arguments</param>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnStart">
+            <summary>
+            Client startup event - Called early in the startup process
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnStartFailure">
+            <summary>
+            Client startup failure event - Called when startup fails
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnLateHandshake">
+            <summary>
+            Client late handshake event - Called when the connection has been established and allows for non-packet traffic, called just before the packet handlers are started
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnConnected">
+            <summary>
+            Client startup success event
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.GameClient.OnDisconnected">
+            <summary>
+            Client disconnect event
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.#ctor(System.String)">
+            <summary>
+            Instantiates a new game client
+            </summary>
+            <param name="logId">Logger ID</param>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ChannelRegistry">
+            <summary>
+            The channel registry of this client
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ClientConnection">
+            <summary>
+            Retrieves the client connection
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ProtocolVersion">
+            <summary>
+            Defines the protocol version
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.GetComponent``1">
+            <summary>
+            Retrieves a component instance by type
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.GetComponent(System.Type)">
+            <summary>
+            Retrieves a component instance by type
+            </summary>
+            <param name="type">Component type</param>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.GetComponent(System.String)">
+            <summary>
+            Retrieves a component instance by ID
+            </summary>
+            <param name="id">Component ID</param>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.IsComponentLoaded(System.String)">
+            <summary>
+            Checks if a component is loaded
+            </summary>
+            <param name="id">Component ID</param>
+            <returns>True if loaded, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.GetComponents">
+            <summary>
+            Retrieves all components
+            </summary>
+            <returns>Array of Component instances</returns>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ServiceManager">
+            <summary>
+            Client service manager
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ClientEventBus">
+            <summary>
+            The client event bus
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.ClientLogger">
+            <summary>
+            Retrieves the client logger
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.AddComponent(Phoenix.Client.Components.Component)">
+            <summary>
+            Adds a component to the client
+            </summary>
+            <param name="component">Component to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.AddComponentPackage(Phoenix.Client.Components.IComponentPackage)">
+            <summary>
+            Adds a component package to the client
+            </summary>
+            <param name="package">Component package to add</param>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.Init">
+            <summary>
+            Initializes the client
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.GameClient.TPS">
+            <summary>
+            Retrieves the current TPS (ticks per second)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.ClientTick">
+            <summary>
+            Ticks the client
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.IsConnected">
+            <summary>
+            Checks if the client is connected
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.Connect">
+            <summary>
+            Starts the client connection
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.GameClient.Disconnect">
+            <summary>
+            Disconnects the client
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Providers.AuthenticationComponent">
+            <summary>
+            Authentication component
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Providers.AuthenticationComponent.ThrowAuthenticationFailure(Phoenix.Common.Networking.Connections.DisconnectParams)">
+            <summary>
+            Fails the connection attempt with an authentication error
+            </summary>
+            <param name="disconnectParams">Disconnect reason</param>
+        </member>
+        <member name="T:Phoenix.Client.Providers.IClientConnectionProvider">
+            <summary>
+            Client connection provider
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Providers.IClientConnectionProvider.Provide">
+            <summary>
+            Provides the client connection
+            </summary>
+            <returns>Connection instance</returns>
+        </member>
+        <member name="M:Phoenix.Client.Providers.IClientConnectionProvider.StartGameClient">
+            <summary>
+            Called to start the client
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Providers.IClientConnectionProvider.StopGameClient">
+            <summary>
+            Called to stop the client
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Providers.IClientConnectionProvider.ProvideInfo">
+            <summary>
+            Called to provide connection info
+            </summary>
+            <returns>ConnectionInfo instance</returns>
+        </member>
+        <member name="T:Phoenix.Client.Providers.IClientConnectionProvider.ConnectionInfo">
+            <summary>
+            Simple container for a IP and Port
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Providers.IClientConnectionProvider.ConnectionInfo.ServerAddress">
+            <summary>
+            Retrieves the IP the client used to connect to the server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Providers.IClientConnectionProvider.ConnectionInfo.Port">
+            <summary>
+            Retrieves the port the client used to connect with the server
+            </summary>
+        </member>
+    </members>
+</doc>

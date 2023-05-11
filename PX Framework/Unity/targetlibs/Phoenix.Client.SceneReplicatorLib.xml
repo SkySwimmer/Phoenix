@@ -1,0 +1,303 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client.SceneReplicatorLib</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.SceneReplicatorLib.Binding.IReplicatingSceneObject">
+            <summary>
+            Replicating scene object interface
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.IReplicatingSceneObject.Destroy">
+            <summary>
+            Called to destroy the object
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.IReplicatingSceneObject.Replicate(Phoenix.Common.SceneReplication.Packets.ReplicateObjectPacket)">
+            <summary>
+            Called to apply replicated changes
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="packet">Packet containing the changes</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.IReplicatingSceneObject.Reparent(System.String)">
+            <summary>
+            Called to change the parent object
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="newParent">New parent object path or null if it should be reparented to the root</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.IReplicatingSceneObject.ChangeScene(System.String)">
+            <summary>
+            Called to change the object scene
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="newScene">New scene path</param>
+        </member>
+        <member name="T:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings">
+            <summary>
+            Abstract class for Scene Replication Binding Libraries
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.GetName">
+            <summary>
+            Retrieves the binding library name
+            </summary>
+            <returns>Binding library name</returns>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.RunOnNextFrameUpdate(System.Action)">
+            <summary>
+            Schedules an action to run on the next engine update
+            </summary>
+            <param name="action">Action to schedule</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.GetObjectByIDInScene(System.String,System.String,System.String)">
+            <summary>
+            Called to retrieve scene objects (should return null if the object does not replicate)
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="room">Replication room</param>
+            <param name="scenePath">Scene path</param>
+            <param name="objectID">Object ID string</param>
+            <returns>IReplicatingSceneObject instance or null</returns>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.GetNetworkedComponents(System.String,System.String,System.String)">
+            <summary>
+            Retrieves the networked components of a object
+            </summary>
+            <param name="room">Replication room</param>
+            <param name="scenePath">Scene path</param>
+            <param name="objectID">Object ID string</param>
+            <returns>Array of IComponentMessageReceiver instances</returns>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.GetObjectPathByID(System.String,System.String,System.String)">
+            <summary>
+            Retrieves the object path of a object
+            </summary>
+            <param name="room">Replication room</param>
+            <param name="scenePath">Scene path</param>
+            <param name="objectID">Object ID string</param>
+            <returns>Object path string</returns>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.SpawnPrefab(Phoenix.Common.SceneReplication.Packets.SpawnPrefabPacket)">
+            <summary>
+            Called to spawn prefabs
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="packet">Prefab information packet</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.LoadScene(System.String,System.Boolean)">
+            <summary>
+            Called to load a scene
+            <br/>
+            <br/>
+            WARNING! This is called synchronously on the client thread! After performing component interactions please do the actual loading on a different thread.
+            </summary>
+            <param name="scenePath">Scene path</param>
+            <param name="additive">True if the server requests 'additive' loading (keeping other scenes open), false if the server requests 'single' scene loading (closing other scenes)</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.UnloadScene(System.String)">
+            <summary>
+            Called to unload a scene
+            <br/>
+            <br/>
+            WARNING! This is called synchronously on the client thread! After performing component interactions please do the actual unloading process on a different thread.
+            </summary>
+            <param name="scenePath">Scene path</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.OnBeginInitialSync(System.String,System.String,System.Collections.Generic.Dictionary{System.String,Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket.SceneObjectID})">
+            <summary>
+            Called when the server is about to begin initial scene replication
+            <br/>
+            <br/>
+            WARNING! This is called from the engine's engine update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
+            </summary>
+            <param name="room">Replication room</param>
+            <param name="scenePath">Scene path</param>
+            <param name="objectMap">Scene object map containing object IDs</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.OnFinishInitialSync(System.String,System.String)">
+            <summary>
+            Called when the server finishes initial scene replication
+            <br/>
+            <br/>
+            WARNING! This is called from the engine's engine update! Please perform event dispatching on another thread as blocking will cause lag spikes in the game!
+            </summary>
+            <param name="room">Replication room</param>
+            <param name="scenePath">Scene path</param>
+        </member>
+        <member name="T:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger">
+            <summary>
+            Component message helper - used to send component messages
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.Room">
+            <summary>
+            Retrieves the room ID the messenger is attached to
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.ObjectID">
+            <summary>
+            Retrieves the object ID of the networked object attached to the messenger, note that you usually wont need this as the server side of the component already knows the object by reading the server-side SceneObject field.
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.RegisterMessage(Phoenix.Common.SceneReplication.Messages.IComponentMessage)">
+            <summary>
+            Registers component messages
+            </summary>
+            <param name="message">Component message to register</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.SendRequestMessage``2(``0,System.Func{``1,System.Boolean})">
+            <summary>
+            Sends messages to clients and attaches a response handler
+            </summary>
+            <typeparam name="T">Message type</typeparam>
+            <typeparam name="TResp">Response message type</typeparam>
+            <param name="message">Message instance</param>
+            <param name="responseHandler">Response handler (returns true if successful, false otherwise, keeps receiving messages until it returns true, which is when its removed)</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.SendRequestMessage``2(``0)">
+            <summary>
+            Sends messages to clients and waits for responses up to 5 seconds before timing out with an IOException
+            </summary>
+            <typeparam name="T">Message type</typeparam>
+            <typeparam name="TResp">Response message type</typeparam>
+            <param name="message">Message instance</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.SendRequestMessage``2(``0,System.Int32)">
+            <summary>
+            Sends messages to clients and waits for responses up to the specified timeout limit before timing out with an IOException
+            </summary>
+            <typeparam name="T">Message type</typeparam>
+            <typeparam name="TResp">Response message type</typeparam>
+            <param name="message">Message instance</param>
+            <param name="timeout">Timeout limit in seconds, -1 for indefinite wait</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.SendRequestMessage``2(``0,System.Int32,System.Func{``1,System.Boolean})">
+            <summary>
+            Sends messages to clients and waits for responses up to the specified timeout limit before timing out with an IOException
+            </summary>
+            <typeparam name="T">Message type</typeparam>
+            <typeparam name="TResp">Response message type</typeparam>
+            <param name="message">Message instance</param>
+            <param name="timeout">Timeout limit in seconds, -1 for indefinite wait</param>
+            <param name="validityCheck">Function run to check validity of a message</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger.SendMessage``1(``0)">
+            <summary>
+            Sends messages to clients
+            </summary>
+            <typeparam name="T">Message type</typeparam>
+            <param name="message">Message instance</param>
+        </member>
+        <member name="T:Phoenix.Client.SceneReplicatorLib.Messages.IComponentMessageReceiver">
+            <summary>
+            Interface for handling component messages on the client
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.SceneReplicatorLib.Messages.IComponentMessageReceiver.Messengers">
+            <summary>
+            Messenger instances for each room
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.IComponentMessageReceiver.HandleMessage(Phoenix.Common.SceneReplication.Messages.IComponentMessage,Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger)">
+            <summary>
+            Handles component messages
+            </summary>
+            <param name="message">Message to handle</param>
+            <param name="messenger">Messenger that received the message, attached to a specific room, use this to reply</param>
+        </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Messages.IComponentMessageReceiver.SetupMessenger(Phoenix.Client.SceneReplicatorLib.Messages.ComponentMessenger)">
+            <summary>
+            Called when replication is set up and passes the messenger instance to the component, here you can register your messages
+            </summary>
+            <param name="messenger">Component messenger instance</param>
+        </member>
+        <member name="T:Phoenix.Client.Components.SceneReplicationComponent">
+            <summary>
+            Client-side Scene Replication Component - Controls the scene replication system (<b>note: this requires a engine-specific binding library</b>)
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Components.SceneReplicationComponent.Bindings">
+            <summary>
+            Retrieves the active binding library (may return null)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.BeginLoadingScene(System.String)">
+            <summary>
+            Marks the given scene path as loading so that subscription events wont fail and instead will wait for loading to finish
+            </summary>
+            <param name="scene">Scene path</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.CancelLoadingScene(System.String)">
+            <summary>
+            Cancels scene loading, marking all in-progress subscription events for this scene as failed
+            </summary>
+            <param name="scene">Scene path</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.FinishLoadingScene(System.String)">
+            <summary>
+            Marks the given scene as loaded, marking all in-progress subscription events for this scene as successful
+            </summary>
+            <param name="scene">Scene path</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.UnloadScene(System.String)">
+            <summary>
+            Unloads scenes from memory, this will mark any subscription events to this scene as failed
+            </summary>
+            <param name="scene">Scene path</param>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.IsSceneLoaded(System.String)">
+            <summary>
+            Checks if a scene is known to be loaded
+            </summary>
+            <param name="scene">Scene path</param>
+            <returns>True if loaded, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.IsSceneLoading(System.String)">
+            <summary>
+            Checks if a scene is known to be presently loading
+            </summary>
+            <param name="scene">Scene path</param>
+            <returns>True if the scene is loading, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.IsSubscribedToRoom(System.String)">
+            <summary>
+            Checks if the client is subscribed to a specific room
+            </summary>
+            <param name="room">Room ID</param>
+            <returns>True if subscribed, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Client.Components.SceneReplicationComponent.IsSubscribedToScene(System.String)">
+            <summary>
+            Checks if the client is subscribed to a specific scee
+            </summary>
+            <param name="scene">Scene path</param>
+            <returns>True if subscribed, false otherwise</returns>
+        </member>
+        <member name="P:Phoenix.Client.Components.SceneReplicationComponent.SubscribedScenes">
+            <summary>
+            Retrieves the scenes the client is subscribed to
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Components.SceneReplicationComponent.SubscribedRooms">
+            <summary>
+            Retrieves the rooms the client is subscribed to
+            </summary>
+        </member>
+    </members>
+</doc>

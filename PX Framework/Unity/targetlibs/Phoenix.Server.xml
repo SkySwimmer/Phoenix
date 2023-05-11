@@ -1,0 +1,618 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Server</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Server.Configuration.AbstractConfigurationEntry`1">
+            <summary>
+            Configuration entry
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Configuration.AbstractConfigurationEntry`1.Key">
+            <summary>
+            Entry key
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Configuration.AbstractConfigurationEntry`1.Value">
+            <summary>
+            Entry value
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Configuration.AbstractConfigurationSegment">
+            <summary>
+            Abstract configuration segment
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetEntry``1(System.String)">
+            <summary>
+            Retrieves configuration entries
+            </summary>
+            <typeparam name="T">Entry type</typeparam>
+            <param name="key">Entry key</param>
+            <returns>Configuration entry</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.CreateEntry``1(System.String)">
+            <summary>
+            Creates configuration entries
+            </summary>
+            <typeparam name="T">Entry type</typeparam>
+            <param name="key">Entry key</param>
+            <returns>New configuration entry</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.HasEntry(System.String)">
+            <summary>
+            Checks if a key is present in the configuration
+            </summary>
+            <param name="key">Entry key</param>
+            <returns>True if present, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.IsRightType``1(System.String)">
+            <summary>
+            Checks if a entry is of the right type
+            </summary>
+            <param name="key">Entry key</param>
+            <typeparam name="T">Entry type</typeparam>
+            <returns>True if the type matches, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetOrCreateEntry``1(System.String)">
+            <summary>
+            Retrieves entries by key, creates if not present
+            </summary>
+            <typeparam name="T">Entry type</typeparam>
+            <param name="key">Entry key</param>
+            <returns>Configuration entry</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.CreateSegment(System.String)">
+            <summary>
+            Creates configuration segments
+            </summary>
+            <param name="key">Entry key</param>
+            <returns>AbstractConfigurationSegment instance</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetSegment(System.String,Phoenix.Server.Configuration.AbstractConfigurationSegment)">
+            <summary>
+            Retrieves configuration segments
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>AbstractConfigurationSegment instance or null</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetString(System.String,System.String)">
+            <summary>
+            Retrieves a string entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>String value or null</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetString(System.String,System.String)">
+            <summary>
+            Assigns a string entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetBool(System.String,System.Boolean)">
+            <summary>
+            Retrieves a bool entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Bool value or false</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetBool(System.String,System.Boolean)">
+            <summary>
+            Assigns a bool entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetInteger(System.String,System.Int32)">
+            <summary>
+            Retrieves a int entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Integer value or -1</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetInteger(System.String,System.Int32)">
+            <summary>
+            Assigns a int entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetFloat(System.String,System.Single)">
+            <summary>
+            Retrieves a float entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Float value or -1</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetFloat(System.String,System.Single)">
+            <summary>
+            Assigns a float entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetDouble(System.String,System.Double)">
+            <summary>
+            Retrieves a double entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Double value or -1</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetDouble(System.String,System.Double)">
+            <summary>
+            Assigns a double entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetLong(System.String,System.Int64)">
+            <summary>
+            Retrieves a long entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Long value or -1</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetLong(System.String,System.Int64)">
+            <summary>
+            Assigns a long entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetShort(System.String,System.Int16)">
+            <summary>
+            Retrieves a short entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Short value or -1</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetShort(System.String,System.Int16)">
+            <summary>
+            Assigns a short entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetStringArray(System.String,System.String[])">
+            <summary>
+            Retrieves a string array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>String array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetStringArray(System.String,System.String[])">
+            <summary>
+            Assigns a string array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetIntegerArray(System.String,System.Int32[])">
+            <summary>
+            Retrieves a integer array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Integer array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetIntegerArray(System.String,System.Int32[])">
+            <summary>
+            Assigns a integer array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetFloatArray(System.String,System.Single[])">
+            <summary>
+            Retrieves a float array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Float array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetFloatArray(System.String,System.Single[])">
+            <summary>
+            Assigns a float array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetLongArray(System.String,System.Int64[])">
+            <summary>
+            Retrieves a long array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Long array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetLongArray(System.String,System.Int64[])">
+            <summary>
+            Assigns a long array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetDoubleArray(System.String,System.Double[])">
+            <summary>
+            Retrieves a double array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Double array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetDoubleArray(System.String,System.Double[])">
+            <summary>
+            Assigns a double array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.GetShortArray(System.String,System.Int16[])">
+            <summary>
+            Retrieves a short array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="def">Default return value</param>
+            <returns>Short array</returns>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.AbstractConfigurationSegment.SetShortArray(System.String,System.Int16[])">
+            <summary>
+            Assigns a short array entry
+            </summary>
+            <param name="key">Configuration key</param>
+            <param name="value">New value</param>
+        </member>
+        <member name="T:Phoenix.Server.Configuration.IConfigurationManager">
+            <summary>
+            Configuration management interface
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.Configuration.IConfigurationManager.GetConfiguration(System.String)">
+            <summary>
+            Retrieves confiurations by name
+            </summary>
+            <param name="name">Configuration name</param>
+            <returns>AbstractConfigurationSegment instance</returns>
+        </member>
+        <member name="T:Phoenix.Server.ConnectionInfo">
+            <summary>
+            Simple container for a IP and Port, used by Phoenix for holding information on how the client connected (like what hostname or ip and port they used to reach the server, useful for wildcard domains)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ConnectionInfo.ServerAddress">
+            <summary>
+            Retrieves the IP the client used to connect to the server (untranslated, this is what the client had in the IP box or received from the server list)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ConnectionInfo.Port">
+            <summary>
+            Retrieves the port the client used to connect with the server (unmapped, straight from the server IP/port box or server list)
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.AbstractServerEvent">
+            <summary>
+            Abstract server event
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.AbstractServerEvent.Server">
+            <summary>
+            Retrieves the game server
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ClientConnectedEvent">
+            <summary>
+            Client Connected Event - Called when a client connects to the server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientConnectedEvent.EventArgs">
+            <summary>
+            Retrieves the connection event args
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientConnectedEvent.ShouldKeepConnectionOpen">
+            <summary>
+            Defines whether or not the client should remain open on event completion
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.Events.ClientConnectedEvent.KeepConnectionOpen">
+            <summary>
+            Prevents the server from closing the client when the event finishes
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientConnectedEvent.Client">
+            <summary>
+            Retrieves the client that connected
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ClientConnectSuccessEvent">
+            <summary>
+            Client Connection Success Event - Called when a client connects to the server, after the connection packet handlers are started
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientConnectSuccessEvent.Client">
+            <summary>
+            Retrieves the client that connected
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientDisconnectedEventArgs.ReasonKey">
+            <summary>
+            Retrieves the disconnect reason key
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientDisconnectedEventArgs.ReasonArguments">
+            <summary>
+            Retrieves the disconnect reason arguments
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ClientDisconnectedEvent">
+            <summary>
+            Client Disconnected Event - Called when a client disconnects from the server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientDisconnectedEvent.Arguments">
+            <summary>
+            Retrieves the disconnect event arguments
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.Events.ClientDisconnectedEvent.Client">
+            <summary>
+            Retrieves the client that connected
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.PrepareServerEvent">
+            <summary>
+            Prepare Server Event - Called when the server is being prepared for startup
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ServerStartupCompletedEvent">
+            <summary>
+            Server Startup Completion Event
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ServerStartupEvent">
+            <summary>
+            Start Server Event - Called when the server is starting
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ServerStopEvent">
+            <summary>
+            Server Stop Event - Called when the server is shutting down
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.Events.ServerStoppedEvent">
+            <summary>
+            Server Stopped Event - Called when the server is shut down
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.GameServer">
+            <summary>
+            Phoenix Game Server
+            </summary>
+        </member>
+        <member name="F:Phoenix.Server.GameServer.ConfigurationOverrides">
+            <summary>
+            Server configuration overrides (usually commandline-assigned configuaration options)
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.GameServer.TickEventHandler">
+            <summary>
+            Basic tick event handler
+            </summary>
+        </member>
+        <member name="E:Phoenix.Server.GameServer.OnTick">
+            <summary>
+            Called on each server tick
+            </summary>
+        </member>
+        <member name="E:Phoenix.Server.GameServer.OnPostTick">
+            <summary>
+            Called at the end of each server tick
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.HasConfigManager">
+            <summary>
+            Checks if a configuration manager is present
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.GetConfiguration(System.String)">
+            <summary>
+            Retrieves configurations by name
+            </summary>
+            <param name="name">Configuration name</param>
+            <returns>AbstractConfigurationSegment instance</returns>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.DataPrefix">
+            <summary>
+            Server data prefix
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.Port">
+            <summary>
+            Server port
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.Address">
+            <summary>
+            Server Address
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ChannelRegistry">
+            <summary>
+            The channel registry of this server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ServerConnection">
+            <summary>
+            Retrieves the server connection
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ProtocolVersion">
+            <summary>
+            Defines the protocol version
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.GetComponent``1">
+            <summary>
+            Retrieves a component instance by type
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.GetComponent(System.Type)">
+            <summary>
+            Retrieves a component instance by type
+            </summary>
+            <param name="type">Component type</param>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.GetComponent(System.String)">
+            <summary>
+            Retrieves a component instance by ID
+            </summary>
+            <param name="id">Component ID</param>
+            <returns>Component instance</returns>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.IsComponentLoaded(System.String)">
+            <summary>
+            Checks if a component is loaded
+            </summary>
+            <param name="id">Component ID</param>
+            <returns>True if loaded, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.GetComponents">
+            <summary>
+            Retrieves all components
+            </summary>
+            <returns>Array of Component instances</returns>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ServiceManager">
+            <summary>
+            Server service manager
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ServerEventBus">
+            <summary>
+            The server event bus
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.ServerLogger">
+            <summary>
+            Retrieves the server logger
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.#ctor(System.String)">
+            <summary>
+            Instantiates a new game server
+            </summary>
+            <param name="logId">Logger ID</param>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.AddComponent(Phoenix.Server.Components.Component)">
+            <summary>
+            Adds a component to the server
+            </summary>
+            <param name="component">Component to add</param>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.AddComponentPackage(Phoenix.Server.Components.IComponentPackage)">
+            <summary>
+            Adds a component package to the server
+            </summary>
+            <param name="package">Component package to add</param>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.Init">
+            <summary>
+            Initializes the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.StartServer">
+            <summary>
+            Starts the server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.TPS">
+            <summary>
+            Retrieves the current TPS (ticks per second)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.GameServer.IsInitialized">
+            <summary>
+            Checks if the server is initialized
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.ServerLoop">
+            <summary>
+            Runs the server tick loop
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.StopServer">
+            <summary>
+            Stops the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.GameServer.IsRunning">
+            <summary>
+            Checks if the server is running
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.ServerComponent">
+            <summary>
+            Component type more based around the basic game server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ServerComponent.ConfigurationKey">
+            <summary>
+            Defines the configuration key
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ServerComponent.Server">
+            <summary>
+            Retrieves the game server
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ServerComponent.ServiceManager">
+            <summary>
+            Retrieves the service manager
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ServerComponent.EventBus">
+            <summary>
+            Retrieves the event bus
+            </summary>
+        </member>
+        <member name="P:Phoenix.Server.ServerComponent.Configuration">
+            <summary>
+            Component configuration
+            </summary>
+        </member>
+        <member name="T:Phoenix.Server.ServerImplementations.IServerProvider">
+            <summary>
+            Interface for custom server implementations
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.ServerImplementations.IServerProvider.ProvideServer">
+            <summary>
+            Called to create a server object
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.ServerImplementations.IServerProvider.StartGameServer">
+            <summary>
+            Called to start the server
+            </summary>
+        </member>
+        <member name="M:Phoenix.Server.ServerImplementations.IServerProvider.StopGameServer">
+            <summary>
+            Called to stop the server
+            </summary>
+        </member>
+    </members>
+</doc>

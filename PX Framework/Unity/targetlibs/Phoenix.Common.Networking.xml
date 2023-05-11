@@ -1,0 +1,594 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Networking</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.Networking.Channels.PacketChannel">
+            <summary>
+            Packet channel interface
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.RegisterPacket(Phoenix.Common.Networking.Packets.AbstractNetworkPacket)">
+            <summary>
+            Registers a network packet
+            </summary>
+            <param name="packetType">Packet to register</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.RegisterHandler``1(Phoenix.Common.Networking.Packets.PacketHandler{``0})">
+            <summary>
+            Registers a packet handler
+            </summary>
+            <typeparam name="T">Handler type</typeparam>
+            <param name="handler">Packet handler to register</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.InitializeChannel(Phoenix.Common.Networking.Channels.PacketChannel,Phoenix.Common.Networking.Internal.ConnectionContext)">
+            <summary>
+            Initializes the channel (INTERNAL)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.SendPacket(Phoenix.Common.Networking.Packets.AbstractNetworkPacket)">
+            <summary>
+            Sends a packet
+            </summary>
+            <param name="packet">Packet to send</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.SendPacketAndWaitForResponse``1(Phoenix.Common.Networking.Packets.AbstractNetworkPacket,System.Int32)">
+            <summary>
+            Sends a packet and waits for a response
+            </summary>
+            <param name="packet">Packet to send</param>
+            <param name="timeout">Wait timeout</param>
+            <typeparam name="T">Response type</typeparam>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.GetPacketDefinition(System.Int32)">
+            <summary>
+            Retrieves packet definitions<br/>
+            <br/>
+            WARNING! This does NOT create a new instance of packets, it will return the registry entry. <b>This is not intended for creating packets, create packet instances directly or use packet.Instantiate() to create a instance.</b>
+            </summary>
+            <param name="packetID">Packet ID</param>
+            <returns>AbstractNetworkPacket instance or null</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.GetHandlerDefinition``1">
+            <summary>
+            Retrieves packet hander definitions<br/>
+            <br/>
+            WARNING! This does NOT create a new instance of packet handlers, it will return the registry entry.
+            </summary>
+            <typeparam name="T">Packet handler type</typeparam>
+            <returns>PacketHandler instance or null</returns>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Channels.PacketChannel.Side">
+            <summary>
+            Retrieves which side the channel is running from
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Channels.PacketChannel.Connection">
+            <summary>
+            Retrieves the network connection this channel is attached to
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.Instantiate">
+            <summary>
+            Creates a new instance of the packet channel
+            </summary>
+            <returns>New PacketChannel instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Channels.PacketChannel.MakeRegistry">
+            <summary>
+            Used to build the packet registry
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.CustomHandshakeProvider">
+            <summary>
+            Custom handshake utility
+            </summary>
+            <param name="connection">Connection object</param>
+            <param name="args">Event arguments</param>
+            <returns>True if the handshake succeeded, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionEventHandler">
+            <summary>
+            Connection event handler
+            </summary>
+            <param name="connection">Connection object</param>
+            <param name="args">Connection event args</param>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionSuccessEventHandler">
+            <summary>
+            Connection success event handler
+            </summary>
+            <param name="connection">Connection object</param>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionDisconnectEventHandler">
+            <summary>
+            Disconnect event handler
+            </summary>
+            <param name="connection">Connection object</param>
+            <param name="reason">Disconnect reason</param>
+            <param name="args">Disconnect reason arguments</param>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionEventArgs">
+            <summary>
+            'Connected' event object
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.ConnectionEventArgs.ClientInput">
+            <summary>
+            Client input reader
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.ConnectionEventArgs.ClientOutput">
+            <summary>
+            Client output writer
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.Connection">
+            <summary>
+            Basic connection class (use the Connections helper type to create connections)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.Connection.DisconnectReason">
+            <summary>
+            Disconnect reason parameters
+            </summary>
+        </member>
+        <member name="E:Phoenix.Common.Networking.Connections.Connection.CustomHandshakes">
+            <summary>
+            Event for custom handshakes
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.AttemptCustomHandshake(Phoenix.Common.Networking.Connections.Connection,Phoenix.Common.IO.DataWriter,Phoenix.Common.IO.DataReader)">
+            <summary>
+            Attempts a custom handshake
+            </summary>
+            <param name="connection">Connection object</param>
+            <param name="clientOutput">Client output stream</param>
+            <param name="clientInput">Client input stream</param>
+            <returns>True if the handshake succeeded, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.GetObject``1">
+            <summary>
+            Retrieves connection objects
+            </summary>
+            <typeparam name="T">Object type</typeparam>
+            <returns>Object instance or default (typically null)</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.AddObject``1(``0)">
+            <summary>
+            Adds connection objects
+            </summary>
+            <typeparam name="T">Object type</typeparam>
+            <param name="obj">Object to add</param>
+        </member>
+        <member name="E:Phoenix.Common.Networking.Connections.Connection.Connected">
+            <summary>
+            Event that is called when the connection is established
+            </summary>
+        </member>
+        <member name="E:Phoenix.Common.Networking.Connections.Connection.ConnectionSuccess">
+            <summary>
+            Event that is called when the packet handlers are started and the connection is safe to read from and write to
+            </summary>
+        </member>
+        <member name="E:Phoenix.Common.Networking.Connections.Connection.Disconnected">
+            <summary>
+            Event that is called on disconnect
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.Connection.Side">
+            <summary>
+            Retrieves the connection side
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.SendPacket(System.Int32,System.Int32,Phoenix.Common.Networking.Packets.AbstractNetworkPacket,Phoenix.Common.Networking.Channels.PacketChannel)">
+            <summary>
+            Sends a packet
+            </summary>
+            <param name="cId">Channel ID</param>
+            <param name="id">Packet ID</param>
+            <param name="packet">Packet to send</param>
+            <param name="channel">Packet channel</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.Close(System.String,System.String[])">
+            <summary>
+            Ends the connection
+            </summary>
+            <param name="reason">Disconnect reason message</param>
+            <param name="args">Message parameters</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.Open">
+            <summary>
+            Called to connect to the remote endpoint
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.IsConnected">
+            <summary>
+            Checks if the connection is still open
+            </summary>
+            <returns>True if connected, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.GetRemoteAddress">
+            <summary>
+            Retrieves the remote address
+            </summary>
+            <returns>Remote client address</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.Close(System.String)">
+            <summary>
+            Ends the connection
+            </summary>
+            <param name="reason">Disconnect reason message</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.Close">
+            <summary>
+            Ends the connection
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.GetChannel``1">
+            <summary>
+            Retrieves a packet channel
+            </summary>
+            <typeparam name="T">Channel type</typeparam>
+            <returns>PacketChannel instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.GetChannel(System.Int32)">
+            <summary>
+            Retrieves a packet channel
+            </summary>
+            <param name="cId">Channel ID</param>
+            <returns>PacketChannel instance or null</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.GetChannel(Phoenix.Common.Networking.Channels.PacketChannel)">
+            <summary>
+            Retrieves a packet channel
+            </summary>
+            <param name="type">Channel to find the instance of</param>
+            <returns>PacketChannel instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.RegisterChannel(Phoenix.Common.Networking.Channels.PacketChannel)">
+            <summary>
+            Registers a packet channel in this connection
+            </summary>
+            <param name="channel">Packet channel to register</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.HandlePacket(System.Int32,System.Int32,Phoenix.Common.IO.DataReader)">
+            <summary>
+            Handles a packet
+            </summary>
+            <param name="cID">Channel ID</param>
+            <param name="pID">Packet ID</param>
+            <param name="reader">Packet payload reader</param>
+            <returns>True if handled, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallConnected(Phoenix.Common.Networking.Connections.ConnectionEventArgs)">
+            <summary>
+            Calls the connection established event
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallConnectionSuccess">
+            <summary>
+            Calls the connection success event
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallDisconnected(System.String,System.String[])">
+            <summary>
+            Calls the connection disconnect event
+            <param name="reason">Disconnect reason</param>
+            <param name="args">Disconnect reason arguments</param>
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallConnected(Phoenix.Common.Networking.Connections.Connection,Phoenix.Common.Networking.Connections.ConnectionEventArgs)">
+            <summary>
+            Calls the connection established event
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallConnectionSuccess(Phoenix.Common.Networking.Connections.Connection)">
+            <summary>
+            Calls the connection success event
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connection.CallDisconnected(System.String,System.String[],Phoenix.Common.Networking.Connections.Connection)">
+            <summary>
+            Calls the connection disconnect event
+            <param name="reason">Disconnect reason</param>
+            <param name="args">Disconnect reason arguments</param>
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionBundle">
+            <summary>
+            Simple bundle of a client and server connection
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.ConnectionBundle.Client">
+            <summary>
+            Retrieves the client connection
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.ConnectionBundle.Server">
+            <summary>
+            Retrieves the server connection
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.Connections">
+            <summary>
+            Used to create connections
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Connections.Connections.PhoenixProtocolVersion">
+            <summary>
+            The basic low-level protocol version of Phoenix itself
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.CreateIntegratedConnections(Phoenix.Common.Networking.Registry.ChannelRegistry)">
+            <summary>
+            Creates a integrated connection bundle
+            </summary>
+            <param name="channels">Channel registry</param>
+            <returns>ConnectionBundle instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.CreateNetworkClient(System.String,System.Int32,Phoenix.Common.Networking.Registry.ChannelRegistry,Phoenix.Common.Certificates.PXClientsideCertificate)">
+            <summary>
+            Creates a network client connection
+            </summary>
+            <param name="ip">Server IP</param>
+            <param name="port">Server port</param>
+            <param name="channels">Channel registry</param>
+            <param name="certificate">Phoenix certificate</param>
+            <returns>Connection instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.DownloadServerInfo(System.String,System.Int32)">
+            <summary>
+            Retrieves the server and game ID of a server (for certificate downloading)
+            </summary>
+            <param name="ip">Server IP</param>
+            <param name="port">Server port</param>
+            <returns>ServerInfo object</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.DownloadServerID(System.String,System.Int32)">
+            <summary>
+            Retrieves the ID of a server (for certificate downloading)
+            </summary>
+            <param name="ip">Server IP</param>
+            <param name="port">Server port</param>
+            <returns>Server ID string</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.DownloadServerGameID(System.String,System.Int32)">
+            <summary>
+            Retrieves the game ID of a server
+            </summary>
+            <param name="ip">Server IP</param>
+            <param name="port">Server port</param>
+            <returns>Game ID string</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.CreateNetworkServer(System.Net.IPAddress,System.Int32,Phoenix.Common.Networking.Registry.ChannelRegistry,Phoenix.Common.Certificates.PXServerCertificate)">
+            <summary>
+            Creates a network server
+            </summary>
+            <param name="address">Server address</param>
+            <param name="port">Server port</param>
+            <param name="channels">Channel registry</param>
+            <param name="certificate">Server certificate</param>
+            <returns>New ServerConnection instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.Connections.CreateNetworkServer(System.Int32,Phoenix.Common.Networking.Registry.ChannelRegistry,Phoenix.Common.Certificates.PXServerCertificate)">
+            <summary>
+            Creates a network server
+            </summary>
+            <param name="port">Server port</param>
+            <param name="channels">Channel registry</param>
+            <param name="certificate">Server certificate</param>
+            <returns>New ServerConnection instance</returns>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ConnectionSide">
+            <summary>
+            Connection side enum
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Connections.ConnectionSide.CLIENT">
+            <summary>
+            Client-sided connection
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Connections.ConnectionSide.SERVER">
+            <summary>
+            Server-sided connection
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.DisconnectParams">
+            <summary>
+            Disconnect information
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.DisconnectParams.Reason">
+            <summary>
+            Disconnect reason key
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.DisconnectParams.ReasonParameters">
+            <summary>
+            Disconnect reason parameters
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.DisconnectParams.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.HandshakeEventArgs">
+            <summary>
+            Handshake event object
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.HandshakeEventArgs.ClientInput">
+            <summary>
+            Client input reader
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Connections.HandshakeEventArgs.ClientOutput">
+            <summary>
+            Client output writer
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.HandshakeEventArgs.HasFailed">
+            <summary>
+            Checks if the handshake has failed
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.HandshakeEventArgs.FailHandshake">
+            <summary>
+            Call this to fail the handshake
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Connections.ServerConnection">
+            <summary>
+            Abstract server connection type
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Connections.ServerConnection.GetClients">
+            <summary>
+            Retrieves all clients connected to this server
+            </summary>
+            <returns>Array of client connections</returns>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Exceptions.PhoenixConnectException">
+            <summary>
+            Phoenix Connection Exception
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Exceptions.PhoenixConnectException.ErrorType">
+            <summary>
+            Retrieves the error type
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.NONPHOENIX">
+            <summary>
+            The client connected to a non-phoenix server or a outdated protocol
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.INVALID_CERTIFICATE">
+            <summary>
+            Invalid server certificate (client-side error)
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.REJECTED_CERTIFICATE">
+            <summary>
+            Client rejected server certificate (server-side error)
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.ENCRYPTION_KEY_REJECTED">
+            <summary>
+            Encryption key was rejected by the server (client-side error)
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.ENCRYPTION_FAILURE">
+            <summary>
+            An encrypted connection could not be established
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Networking.Exceptions.ErrorType.PROGRAM_HANDSHAKE_FAILURE">
+            <summary>
+            Program-specific handshake failure
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Internal.InternalPacketHandler.CanHandle(Phoenix.Common.Networking.Packets.AbstractNetworkPacket)">
+            <summary>
+            Checks if this packet handler can handle the given packet
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Internal.InternalPacketHandler.Handle(Phoenix.Common.Networking.Packets.AbstractNetworkPacket,Phoenix.Common.Networking.Channels.PacketChannel)">
+            <summary>
+            Handles the packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Packets.AbstractNetworkPacket">
+            <summary>
+            Packet interface
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Packets.AbstractNetworkPacket.LengthPrefixed">
+            <summary>
+            Defines if the packet is length-prefixed or not.<br/>
+            <br/>
+            WARNING! While setting this to false allows you to send more than 2 gigabyte in a packet, it will not have any buffering or safties!<br/>
+            Make sure that all bytes that are sent are also read, else stream corruption will occur!<br/>
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Packets.AbstractNetworkPacket.Synchronized">
+            <summary>
+            Defines if the packet is synchronized while handling
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.AbstractNetworkPacket.Instantiate">
+            <summary>
+            Creates a new packet instance
+            </summary>
+            <returns>New AbstractNetworkPacket instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.AbstractNetworkPacket.Parse(Phoenix.Common.IO.DataReader)">
+            <summary>
+            Parses the packet
+            </summary>
+            <param name="reader">Input data reader</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.AbstractNetworkPacket.Write(Phoenix.Common.IO.DataWriter)">
+            <summary>
+            Builds the packet
+            </summary>
+            <param name="writer">Output data writer</param>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Packets.PacketHandler`1">
+            <summary>
+            Packet handler abstract
+            </summary>
+            <typeparam name="T">Packet type</typeparam>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.PacketHandler`1.CreateInstance">
+            <summary>
+            Creates a new instance of this packet handler
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.PacketHandler`1.GetChannel">
+            <summary>
+            Retrieves the packet channel
+            </summary>
+            <returns>PacketChannel instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.PacketHandler`1.CanHandle(`0)">
+            <summary>
+            Checks if this packet handler can handle the given packet
+            </summary>
+            <param name="packet">Packet to check</param>
+            <returns>True if the packet can be handled by this handler, false otherwise</returns>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Packets.PacketHandler`1.Handle(`0)">
+            <summary>
+            Handles the packet
+            </summary>
+            <param name="packet">Packet to handle</param>
+            <returns>True if the packet was handled, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Common.Networking.Registry.ChannelRegistry">
+            <summary>
+            Packet and channel registry
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Registry.ChannelRegistry.Register(Phoenix.Common.Networking.Channels.PacketChannel)">
+            <summary>
+            Registers a packet channel
+            </summary>
+            <param name="channel">Channel to register</param>
+        </member>
+        <member name="M:Phoenix.Common.Networking.Registry.ChannelRegistry.GetChannel``1">
+            <summary>
+            Retrieves packet channels
+            </summary>
+            <typeparam name="T">Channel type</typeparam>
+            <returns>Channel instance</returns>
+        </member>
+        <member name="P:Phoenix.Common.Networking.Registry.ChannelRegistry.Channels">
+            <summary>
+            Retrieves all registered channels
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ChartZ.Compiler</name>
+    </assembly>
+    <members>
+        <member name="M:ChartZ.Compiler.Program.Main(System.String[])">
+            <summary>
+            Main method
+            </summary>
+        </member>
+        <member name="M:ChartZ.Compiler.Program.Compile(System.String[],System.String,System.IO.Stream)">
+            <summary>
+            Compiles a given file
+            </summary>
+            <param name="commands">Commands to run</param>
+        </member>
+    </members>
+</doc>

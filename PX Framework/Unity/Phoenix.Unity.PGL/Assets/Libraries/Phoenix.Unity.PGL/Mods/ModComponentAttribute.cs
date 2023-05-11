@@ -1,4 +1,6 @@
-﻿namespace Phoenix.Client
+﻿using System;
+
+namespace Phoenix.Client
 {
     /// <summary>
     /// Marks this type as a mod component

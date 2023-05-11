@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Services</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.Services.ServiceManager">
+            <summary>
+            Service Manager
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Services.ServiceManager.GetService``1">
+            <summary>
+            Retrieves a service by type
+            </summary>
+            <typeparam name="T">Service type</typeparam>
+            <returns>Service instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Services.ServiceManager.RegisterService(Phoenix.Common.Services.IService)">
+            <summary>
+            Registers a service
+            </summary>
+            <param name="service">Service to register</param>
+        </member>
+        <member name="T:Phoenix.Common.Services.IService">
+            <summary>
+            Service interface
+            </summary>
+        </member>
+    </members>
+</doc>

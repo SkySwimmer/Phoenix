@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Certificates</name>
+    </assembly>
+    <members>
+        <member name="M:Phoenix.Common.Certificates.PXClientsideCertificate.Download(System.String,System.String,System.String)">
+            <summary>
+            Downloads a certificate from a Phoenix server
+            </summary>
+            <param name="phoenixServer">Phoenix Server URL</param>
+            <param name="gameID">Game ID</param>
+            <param name="serverID">Server ID</param>
+            <returns>PXClientsideCertificate instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXClientsideCertificate.FromReader(Phoenix.Common.IO.DataReader)">
+            <summary>
+            Creates a PXClientsideCertificate instance from a data reader
+            </summary>
+            <param name="reader">Input reader</param>
+            <returns>PXClientsideCertificate instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXClientsideCertificate.FromProperties(System.String,System.String,System.String[],System.Int64,System.Int64,Org.BouncyCastle.Crypto.AsymmetricKeyParameter)">
+            <summary>
+            Creates a PXClientsideCertificate instance from a set of properties
+            </summary>
+            <returns>PXClientsideCertificate instance</returns>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.GameID">
+            <summary>
+            Retrieves the game ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.ServerID">
+            <summary>
+            Retrieves the server ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.GenerationTimestamp">
+            <summary>
+            Retrieves the certificate generation timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.ExpiryTimestamp">
+            <summary>
+            Retrieves the certificate expiry timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.Addresses">
+            <summary>
+            Retrieves an array of valid server addresses
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXClientsideCertificate.PublicKey">
+            <summary>
+            Retrieves the public key
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Certificates.PXServerCertificate">
+            <summary>
+            Phoenix Server Certificate
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXServerCertificate.FromCertificateProperties(System.String,System.String,System.Int64,System.Int64,Org.BouncyCastle.Crypto.AsymmetricKeyParameter)">
+            <summary>
+            Creates a PXServerCertificate instance from certificate properties
+            </summary>
+            <returns>PXServerCertificate instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXServerCertificate.FromReader(Phoenix.Common.IO.DataReader)">
+            <summary>
+            Creates a PXServerCertificate instance from a data reader
+            </summary>
+            <param name="reader">Reader to read from</param>
+            <returns>PXServerCertificate instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXServerCertificate.FromJson(System.String,System.String)">
+            <summary>
+            Creates a PXServerCertificate instance from a PX API JSON-encoded server identity object
+            </summary>
+            <param name="gameId">Game ID</param>
+            <param name="json">JSON-encoded server identity</param>
+            <returns>PXServerCertificate instance</returns>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificate.GameID">
+            <summary>
+            Retrieves the game ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificate.ServerID">
+            <summary>
+            Retrieves the server ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificate.GenerationTimestamp">
+            <summary>
+            Retrieves the certificate generation timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificate.ExpiryTimestamp">
+            <summary>
+            Retrieves the certificate expiry timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificate.PrivateKey">
+            <summary>
+            Retrieves the certificate private key
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXServerCertificate.WriteCertificateTo(Phoenix.Common.IO.DataWriter)">
+            <summary>
+            Writes the certificate to a client
+            </summary>
+            <param name="writer">Output writer</param>
+        </member>
+        <member name="M:Phoenix.Common.Certificates.PXServerCertificatePayload.FromReader(Phoenix.Common.IO.DataReader)">
+            <summary>
+            Creates a PXServerCertificatePayload instance from a data reader
+            </summary>
+            <param name="reader">Input reader</param>
+            <returns>PXServerCertificatePayload instance</returns>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.GameID">
+            <summary>
+            Retrieves the game ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.ServerID">
+            <summary>
+            Retrieves the server ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.GenerationTimestamp">
+            <summary>
+            Retrieves the certificate generation timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.ExpiryTimestamp">
+            <summary>
+            Retrieves the certificate expiry timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.ServerTime">
+            <summary>
+            Retrieves the server timestamp (miliseconds)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.Signature">
+            <summary>
+            Retrieves the signature of the certificate
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Certificates.PXServerCertificatePayload.Certificate">
+            <summary>
+            Retrieves the encoded certificate (without signature)
+            </summary>
+        </member>
+    </members>
+</doc>

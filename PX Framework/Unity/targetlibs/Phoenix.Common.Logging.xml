@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Logging</name>
+    </assembly>
+    <members>
+        <member name="M:Phoenix.Common.Logging.Logger.GetLogger(System.String)">
+            <summary>
+            Creates a new logger instance
+            </summary>
+            <param name="name">Logger name</param>
+            <returns>New Logger instance</returns>
+        </member>
+        <member name="F:Phoenix.Common.Logging.Logger.GlobalLogLevel">
+            <summary>
+            Defines the global log level
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Logging.Logger.Level">
+            <summary>
+            Defines the log level
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Log(Phoenix.Common.Logging.LogLevel,System.String)">
+            <summary>
+            Prints a message to the log
+            </summary>
+            <param name="level">Log level</param>
+            <param name="message">Log message</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Log(Phoenix.Common.Logging.LogLevel,System.String,System.Exception)">
+            <summary>
+            Prints a message to the log
+            </summary>
+            <param name="level">Log level</param>
+            <param name="message">Log message</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Debug(System.String)">
+            <summary>
+            Logs a new debug message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Debug(System.String,System.Exception)">
+            <summary>
+            Logs a new debug message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Trace(System.String)">
+            <summary>
+            Logs a new trace message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Trace(System.String,System.Exception)">
+            <summary>
+            Logs a new trace message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Info(System.String)">
+            <summary>
+            Logs a new info message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Info(System.String,System.Exception)">
+            <summary>
+            Logs a new info message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Warn(System.String)">
+            <summary>
+            Logs a new warning message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Warn(System.String,System.Exception)">
+            <summary>
+            Logs a new warning message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Error(System.String)">
+            <summary>
+            Logs a new error message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Error(System.String,System.Exception)">
+            <summary>
+            Logs a new error message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Fatal(System.String)">
+            <summary>
+            Logs a new atal error message
+            </summary>
+            <param name="message">Message to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.Logger.Fatal(System.String,System.Exception)">
+            <summary>
+            Logs a new fatal error message
+            </summary>
+            <param name="message">Message to log</param>
+            <param name="exception">Exception to log</param>
+        </member>
+        <member name="M:Phoenix.Common.Logging.ILoggerImplementationProvider.CreateInstance(System.String)">
+            <summary>
+            Creates a logger instance
+            </summary>
+            <param name="name">Logger name</param>
+            <returns>New Logger instance</returns>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.QUIET">
+            <summary>
+            No messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.FATAL">
+            <summary>
+            Fatal error log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.ERROR">
+            <summary>
+            Error log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.WARN">
+            <summary>
+            Warning log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.INFO">
+            <summary>
+            Info log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.TRACE">
+            <summary>
+            Trace log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.DEBUG">
+            <summary>
+            Debug log messages
+            </summary>
+        </member>
+        <member name="F:Phoenix.Common.Logging.LogLevel.GLOBAL">
+            <summary>
+            Use global logging
+            </summary>
+        </member>
+    </members>
+</doc>

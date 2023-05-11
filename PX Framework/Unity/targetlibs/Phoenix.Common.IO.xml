@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.IO</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.IO.DataReader">
+            <summary>
+            Binary data reader (big-endian)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.GetStream">
+            <summary>
+            Retrieves the source input byte stream
+            </summary>
+            <returns>Stream instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadRawByte">
+            <summary>
+            Reads a single byte
+            </summary>
+            <returns>Byte value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadNBytes(System.Int32)">
+            <summary>
+            Reads an amount of bytes
+            </summary>
+            <param name="count">Byte count to read</param>
+            <returns></returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadAllBytes">
+            <summary>
+            Reads all remaining bytes
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadInt">
+            <summary>
+            Reads a single integer
+            </summary>
+            <returns>Integer value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadShort">
+            <summary>
+            Reads a single short integer
+            </summary>
+            <returns>Short value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadLong">
+            <summary>
+            Reads a single long integer
+            </summary>
+            <returns>Long value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadFloat">
+            <summary>
+            Reads a single floating-point
+            </summary>
+            <returns>Float value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadDouble">
+            <summary>
+            Reads a single double-precision floating-point
+            </summary>
+            <returns>Double value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadBoolean">
+            <summary>
+            Reads a single boolean
+            </summary>
+            <returns>Bool value</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadBytes">
+            <summary>
+            Reads a length-prefixed byte array
+            </summary>
+            <returns>Array of bytes</returns>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataReader.ReadString">
+            <summary>
+            Reads a single string
+            </summary>
+            <returns>String valie</returns>
+        </member>
+        <member name="T:Phoenix.Common.IO.DataWriter">
+            <summary>
+            Binary data writer (big-endian)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteRawByte(System.Byte)">
+            <summary>
+            Writes a single byte
+            </summary>
+            <param name="value">Byte to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteRawBytes(System.Byte[])">
+            <summary>
+            Writes an array of bytes
+            </summary>
+            <param name="value">Bytes to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteInt(System.Int32)">
+            <summary>
+            Writes a single integer
+            </summary>
+            <param name="value">Integer to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteShort(System.Int16)">
+            <summary>
+            Writes a single short integer
+            </summary>
+            <param name="value">Short to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteLong(System.Int64)">
+            <summary>
+            Writes a single long integer
+            </summary>
+            <param name="value">Long to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteFloat(System.Single)">
+            <summary>
+            Writes a single float
+            </summary>
+            <param name="value">Float to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteDouble(System.Double)">
+            <summary>
+            Writes a single double-precision floating-point
+            </summary>
+            <param name="value">Double to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a single boolean
+            </summary>
+            <param name="value">Boolean to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteBytes(System.Byte[])">
+            <summary>
+            Writes an array of bytes (length-prefixed)
+            </summary>
+            <param name="value">Bytes to write</param>
+        </member>
+        <member name="M:Phoenix.Common.IO.DataWriter.WriteString(System.String)">
+            <summary>
+            Writes a single string
+            </summary>
+            <param name="value">String to write</param>
+        </member>
+    </members>
+</doc>

@@ -2,12 +2,113 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Client\Phoenix.Client\Phoenix.Client.csproj" />
-    <ProjectReference Include="..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	<PackageReference Include="UnityEngine.Modules" Version="2022.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ChartZ.Compiler">
+      <HintPath>targetlibs\ChartZ.Compiler.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ChartZ.Engine">
+      <HintPath>targetlibs\ChartZ.Engine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Client">
+      <HintPath>targetlibs\Phoenix.Client.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Client.ComponentLib">
+      <HintPath>targetlibs\Phoenix.Client.ComponentLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Client.IntegratedServerBootstrapper">
+      <HintPath>targetlibs\Phoenix.Client.IntegratedServerBootstrapper.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common">
+      <HintPath>targetlibs\Phoenix.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Certificates">
+      <HintPath>targetlibs\Phoenix.Common.Certificates.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Events">
+      <HintPath>targetlibs\Phoenix.Common.Events.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.IO">
+      <HintPath>targetlibs\Phoenix.Common.IO.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Logging">
+      <HintPath>targetlibs\Phoenix.Common.Logging.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Networking">
+      <HintPath>targetlibs\Phoenix.Common.Networking.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.SceneReplication">
+      <HintPath>targetlibs\Phoenix.Common.SceneReplication.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Services">
+      <HintPath>targetlibs\Phoenix.Common.Services.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Common.Tasks">
+      <HintPath>targetlibs\Phoenix.Common.Tasks.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server">
+      <HintPath>targetlibs\Phoenix.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.AssetManager">
+      <HintPath>targetlibs\Phoenix.Server.AssetManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.ComponentLib">
+      <HintPath>targetlibs\Phoenix.Server.ComponentLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.AuthenticationManager">
+      <HintPath>targetlibs\Phoenix.Server.Components.AuthenticationManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.CertificateRefresher">
+      <HintPath>targetlibs\Phoenix.Server.Components.CertificateRefresher.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.ConfigManager">
+      <HintPath>targetlibs\Phoenix.Server.Components.ConfigManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.PlayerManager">
+      <HintPath>targetlibs\Phoenix.Server.Components.PlayerManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.SceneReplication">
+      <HintPath>targetlibs\Phoenix.Server.Components.SceneReplication.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.ServerlistPublisher">
+      <HintPath>targetlibs\Phoenix.Server.Components.ServerlistPublisher.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Phoenix.Server.Components.TaskManager">
+      <HintPath>targetlibs\Phoenix.Server.Components.TaskManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

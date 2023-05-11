@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.SceneReplication</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.SceneReplication.Messages.IComponentMessage">
+            <summary>
+            Component message interface
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.SceneReplication.Messages.IComponentMessage.MessageID">
+            <summary>
+            Message ID string
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.SceneReplication.Messages.IComponentMessage.CreateInstance">
+            <summary>
+            Creates a instance of this componetn message
+            </summary>
+            <returns>New IComponentMessage instance</returns>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Messages.ComponentMessageSender">
+            <summary>
+            Simple message sender delegate, used to send reply messages
+            </summary>
+            <param name="msg">Message to send</param>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Messages.MessageHandlerAttribute">
+            <summary>
+            Marks methods in components as a message handler, handler methods should have two parameters, namely the IComponentMessage instance it should handle (this compares types) and the ComponentMessageSender instance to send replies through, on the client the second parameter can be replaced with a ComponentMessenger to receive the messenger instance of the room.
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationCompletePacket">
+            <summary>
+            Initial scene replication completion packet - Called after a room finishes replicating after subscribing to it
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.InitialSceneReplicationStartPacket">
+            <summary>
+            Initial scene replication start packet - Called after a room is subscribed to
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.ComponentMessagePacket">
+            <summary>
+            Component message packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.DestroyObjectPacket">
+            <summary>
+            Object Destroy Packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.ObjectChangeScenePacket">
+            <summary>
+            Object Scene Change Packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.ReparentObjectPacket">
+            <summary>
+            Reparent Object Packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.ReplicateObjectPacket">
+            <summary>
+            Object Replication Packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.SpawnPrefabPacket">
+            <summary>
+            Spawn Prefab Packet - Called when a prefab is spawned
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.SceneReplicationDesubscribeRoomPacket">
+            <summary>
+            Scene Replication Desubscribe Room Packet - Called when a room is desubscribed
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.SceneReplicationDesubscribeScenePacket">
+            <summary>
+            Scene Replication Desubscribe Scene Packet - Called when a scene is desubscribed
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.SceneReplicationSubscribeRoomPacket">
+            <summary>
+            Scene replication room subscription packet - Called when the server subscribes the client to a room (does not need a response)
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.SceneReplicationSubscribeScenePacket">
+            <summary>
+            Scene replication scene subscription packet - Called when the server subscribes the client to a room and awaits a response.<br/>
+            The server requires it to be sent back with success on true or false when the scene is ready or should it fail to load
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.LoadScenePacket">
+            <summary>
+            Scene loading packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.UnloadScenePacket">
+            <summary>
+            Scene unloading packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.SceneReplicationChannel">
+            <summary>
+            Scene Replication Packet Channel
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.SceneSubscribeHandler">
+            <summary>
+            Scene subscribe packet handler, mostly intended as an internal handler for the server to process responses
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.SceneSubscribeHandler.PacketHandler">
+            <summary>
+            Packet handler
+            </summary>
+            <param name="packet">Packet to handle</param>
+            <returns>True if handled, false otherwise</returns>
+        </member>
+        <member name="F:Phoenix.Common.SceneReplication.SceneSubscribeHandler.Handler">
+            <summary>
+            The actual packet handler, assign this to receive the packet
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Data.SerializingObjects">
+            <summary>
+            Helper class for interacting with SerializingObject instances
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.SceneReplication.Data.SerializingObjects.SerializeObject``1(``0)">
+            <summary>
+            Serializes objects
+            </summary>
+            <typeparam name="T">Object type</typeparam>
+            <param name="inst">Object to serialize</param>
+            <returns>Dictionary of the serialized object</returns>
+        </member>
+        <member name="M:Phoenix.Common.SceneReplication.Data.SerializingObjects.DeserializeObject``1(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Deserializes objects (requires a parameterless constructor, reflective)
+            </summary>
+            <typeparam name="T">Object type</typeparam>
+            <param name="payload">Object payload</param>
+            <returns>Deserialized object instance</returns>
+        </member>
+        <member name="T:Phoenix.Common.SceneReplication.Data.SerializingObject">
+            <summary>
+            Serializing object interface (use SerializingObjects for quick access)
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.SceneReplication.Data.SerializingObject.Deserialize(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Deserializes data (use SerializingObjects for easy access to sub-objects, you can put dictionaries as values for sub-objects)
+            </summary>
+            <param name="data">Data map</param>
+        </member>
+        <member name="M:Phoenix.Common.SceneReplication.Data.SerializingObject.Serialize(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Serializes the object
+            </summary>
+            <param name="data">Output data map</param>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Events</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.Events.EventBus">
+            <summary>
+            The event bus - a system to listen to and dispatch events
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Events.EventBus.Dispatch(Phoenix.Common.Events.IEvent)">
+            <summary>
+            Dispatches a event
+            </summary>
+            <param name="ev">Event to dispatch</param>
+        </member>
+        <member name="M:Phoenix.Common.Events.EventBus.AttachAll(Phoenix.Common.Events.IEventListenerContainer)">
+            <summary>
+            Attaches all listeners in a event listener container
+            </summary>
+            <param name="container">IEventListenerContainer instance</param>
+        </member>
+        <member name="T:Phoenix.Common.Events.IEvent">
+            <summary>
+            Event interface
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Events.IEvent.ShouldContinue">
+            <summary>
+            Checks if the event should continue execution
+            </summary>
+            <returns>True if the event should continue, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Common.Events.IEventListenerContainer">
+            <summary>
+            Empty interface for registering event listeners contained in a class
+            </summary>
+        </member>
+    </members>
+</doc>

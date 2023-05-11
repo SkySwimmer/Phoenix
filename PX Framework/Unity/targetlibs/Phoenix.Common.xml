@@ -1,0 +1,176 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.AsyncTasks.AsyncTask">
+            <summary>
+            Async Task Container
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.AsyncTasks.AsyncTask.#ctor(System.Action)">
+            <summary>
+            Creates a task container
+            </summary>
+            <param name="action">Action assigned to the container</param>
+        </member>
+        <member name="P:Phoenix.Common.AsyncTasks.AsyncTask.HasRun">
+            <summary>
+            Checks if the task has been run already
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.AsyncTasks.AsyncTask.Block">
+            <summary>
+            Waits for the task to finish running
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.AsyncTasks.AsyncTaskManager">
+            <summary>
+            Async Task Manager - Used to reliably run asynchronous tasks
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(System.Action)">
+            <summary>
+            Runs a action asynchronously
+            </summary>
+            <param name="action">Action to run</param>
+            <returns>AsyncTask</returns>
+        </member>
+        <member name="T:Phoenix.Common.PhoenixEnvironment">
+            <summary>
+            Phoenix Environment Settings
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.PhoenixEnvironment.DefaultAPIServer">
+            <summary>
+            Default API server
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Game">
+            <summary>
+            Phoenix Game Information Container
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.Title">
+            <summary>
+            Game title
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.GameID">
+            <summary>
+            Game ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.Version">
+            <summary>
+            Current game version
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.DevelopmentStage">
+            <summary>
+            Current game development stage
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.SessionToken">
+            <summary>
+            Game session token (for contacting the login servers)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.OfflineSupport">
+            <summary>
+            Offline support, true if enabled, false if unsupported
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.IsOffline">
+            <summary>
+            Shows if the device is currently offline
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.PlayerData">
+            <summary>
+            Player data folder
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.SaveData">
+            <summary>
+            Save data folder
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.AssetsFolder">
+            <summary>
+            Assets folder
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.GameFiles">
+            <summary>
+            Game file folder
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Game.DebugMode">
+            <summary>
+            Defines if the application is in debug mode
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Game.GetTitle">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetGameID">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetVersion">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetDevelopmentStage">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetSessionToken">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.HasOfflineSupport">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.IsCurrentlyOffline">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetPlayerData">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetSaveData">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetAssetsFolder">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.GetGameFiles">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+        <member name="M:Phoenix.Common.Game.IsDebugMode">
+            <summary>
+            Internal
+            </summary> 
+        </member>
+    </members>
+</doc>

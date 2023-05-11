@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client.IntegratedClientLib</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.PhoenixIntegratedGameClientTools.PassIntegratedServer">
+            <summary>
+            Simple method to pass a integrated server connection
+            </summary>
+            <param name="integratedServerConnection">Integrated server connection</param>
+        </member>
+        <member name="M:Phoenix.Client.PhoenixIntegratedGameClientTools.WithIntegratedClient(Phoenix.Client.GameClientFactory,Phoenix.Client.PhoenixIntegratedGameClientTools.PassIntegratedServer)">
+            <summary>
+            Creates a integrated client
+            </summary>
+            <param name="fac">Client factory</param>
+            <param name="integratedServerOutput">Integrated server output</param>
+        </member>
+        <member name="M:Phoenix.Client.PhoenixIntegratedGameClientTools.WithIntegratedClient(Phoenix.Client.GameClientFactory,System.Func{Phoenix.Common.Networking.Impl.IntegratedClientConnection})">
+            <summary>
+            Adds a integrated client
+            </summary>
+            <param name="fac">Client factory</param>
+            <param name="clientConnectionConstr">Client connection constructor</param>
+        </member>
+    </members>
+</doc>
