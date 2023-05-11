@@ -8,5 +8,7 @@
         public string debugConfig;
         public string serverAssembly;
         public string assembliesDirectory;
+
+        public bool preserveKeys = false;
     }
 }

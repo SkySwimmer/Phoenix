@@ -12,8 +12,6 @@ namespace Phoenix.Debug.DebugServerRunner
     {
         public static void Run(ProjectManifest project, Logger logger, DebugGameDefLib.DebugGameDef game)
         {
-            // TODO: persistent key option
-
             // Build
             logger.Level = LogLevel.INFO;
 
@@ -42,6 +40,32 @@ namespace Phoenix.Debug.DebugServerRunner
             Dictionary<string, byte[]> hashes = new Dictionary<string, byte[]>();
             Dictionary<string, string> assetFileNames = new Dictionary<string, string>();
             Dictionary<string, string> componentFileNames = new Dictionary<string, string>();
+            Dictionary<string, string> assemblyMap = new Dictionary<string, string>();
+            if (project.preserveKeys && File.Exists("Build/keycache.bin"))
+            {
+                // Load keys
+                logger.Info("Loading key cache into memory...");
+                logger.Info("Beware that while this enables file diffs this decreases security! Disable preserveKeys in the project manifest to disable this feature!");
+                logger.Info("Also note that removed files will still be in memory, delete the keycache file to clear the cache.");
+                Stream strm = File.OpenRead("Build/keycache.bin");
+                DataReader rd = new DataReader(strm);
+                int l = rd.ReadInt();
+                for (int i = 0; i < l; i++)
+                    keys[rd.ReadString()] = rd.ReadBytes();
+                l = rd.ReadInt();
+                for (int i = 0; i < l; i++)
+                    ivs[rd.ReadString()] = rd.ReadBytes();
+                l = rd.ReadInt();
+                for (int i = 0; i < l; i++)
+                    assetFileNames[rd.ReadString()] = rd.ReadString();
+                l = rd.ReadInt();
+                for (int i = 0; i < l; i++)
+                    componentFileNames[rd.ReadString()] = rd.ReadString();
+                l = rd.ReadInt();
+                for (int i = 0; i < l; i++)
+                    assemblyMap[rd.ReadString()] = rd.ReadString();
+                strm.Close();
+            }
             logger.Debug("Finding assets...");
             AssetCompiler.LogLevel = LogLevel.INFO;
             BuildAssetsIn(assets, "", logger, keys, hashes, ivs, assetFileNames);
@@ -104,14 +128,23 @@ namespace Phoenix.Debug.DebugServerRunner
                         
                         // Create component ID
                         string id = Guid.NewGuid().ToString().ToLower();
-                        while (componentFileNames.ContainsKey(id))
-                            id = Guid.NewGuid().ToString().ToLower();
-                        componentFileNames[id] = file.Name;
+                        if (!componentFileNames.ContainsValue(file.Name))
+                        {
+                            while (componentFileNames.ContainsKey(id))
+                                id = Guid.NewGuid().ToString().ToLower();
+                            componentFileNames[id] = file.Name;
+                        }
+                        else
+                            id = componentFileNames.First(t => t.Value == file.Name).Key;
 
                         // Setup encryption
                         logger.Debug("Creating AES encryption Key and IV...");
                         using (Aes aes = Aes.Create())
                         {
+                            if (keys.ContainsKey(id))
+                                aes.Key = keys[id];
+                            if (ivs.ContainsKey(id))
+                                aes.IV = ivs[id];
                             byte[] key = aes.Key;
                             byte[] iv = aes.IV;
                             keys[id] = key;
@@ -154,9 +187,8 @@ namespace Phoenix.Debug.DebugServerRunner
             logger.Info("Compiling assemblies.mpbp...");
             logger.Info("Compiling server assemblies...");
             logger.Debug("Finding assemblies...");
-            BinaryPackageBuilder package = new BinaryPackageBuilder();
             List<string> assemblyNames = new List<string>();
-            Dictionary<string, string> assemblyMap = new Dictionary<string, string>();
+            BinaryPackageBuilder package = new BinaryPackageBuilder();
             foreach (FileInfo file in new DirectoryInfo(project.assembliesDirectory).GetFiles("*.dll"))
             {
                 if (!componentAssemblies.Contains(file.FullName))
@@ -165,13 +197,22 @@ namespace Phoenix.Debug.DebugServerRunner
 
                     // Create component ID
                     string id = Guid.NewGuid().ToString().ToLower();
-                    while (assemblyMap.ContainsKey(id))
-                        id = Guid.NewGuid().ToString().ToLower();
-                    assemblyMap[id] = file.Name;
+                    if (!assemblyMap.ContainsValue(file.Name))
+                        {
+                            while (assemblyMap.ContainsKey(id))
+                                id = Guid.NewGuid().ToString().ToLower();
+                            assemblyMap[id] = file.Name;
+                        }
+                        else
+                            id = assemblyMap.First(t => t.Value == file.Name).Key;
 
                     // Encrypt and write
                     using (Aes aes = Aes.Create())
                     {
+                        if (keys.ContainsKey("@ASM-" + id))
+                            aes.Key = keys["@ASM-" + id];
+                        if (ivs.ContainsKey("@ASM-" + id))
+                            aes.IV = ivs["@ASM-" + id];
                         byte[] key = aes.Key;
                         byte[] iv = aes.IV;
                         keys["@ASM-" + id] = key;
@@ -226,6 +267,10 @@ namespace Phoenix.Debug.DebugServerRunner
 
                 // Gen keys
                 logger.Debug("  Creating AES encryption Key and IV...");
+                if (keys.ContainsKey("@ASM-@ROOT"))
+                    aes.Key = keys["@ASM-@ROOT"];
+                if (ivs.ContainsKey("@ASM-@ROOT"))
+                    aes.IV = ivs["@ASM-@ROOT"];
                 byte[] key = aes.Key;
                 byte[] iv = aes.IV;
                 keys["@ASM-@ROOT"] = key;
@@ -273,6 +318,10 @@ namespace Phoenix.Debug.DebugServerRunner
             logger.Debug("Creating AES encryption Key and IV...");
             using (Aes aes = Aes.Create())
             {
+                if (keys.ContainsKey("@GAMEMANIFEST"))
+                    aes.Key = keys["@GAMEMANIFEST"];
+                if (ivs.ContainsKey("@GAMEMANIFEST"))
+                    aes.IV = ivs["@GAMEMANIFEST"];
                 byte[] key = aes.Key;
                 byte[] iv = aes.IV;
                 keys["@GAMEMANIFEST"] = key;
@@ -378,6 +427,47 @@ namespace Phoenix.Debug.DebugServerRunner
             File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.dll", "Build/Release/Phoenix.Server.Bootstrapper.dll", true);
             File.Copy(AssemblyDirectory + "/Phoenix.Server.Bootstrapper.runtimeconfig.json", "Build/Release/Phoenix.Server.Bootstrapper.runtimeconfig.json", true);
             logger.Info("Done!");
+
+            // Cache
+            if (project.preserveKeys)
+            {
+                logger.Info("Writing key cache...");
+                logger.Info("Beware that while this enables file diffs this decreases security! Disable preserveKeys in the project manifest to disable this feature!");
+                logger.Info("Also note that removed files will still be in memory, delete the keycache file to clear the cache.");
+                Stream strm = File.OpenWrite("Build/keycache.bin");
+                DataWriter wr = new DataWriter(strm);
+                wr.WriteInt(keys.Count);
+                foreach ((string k, byte[] v) in keys)
+                {
+                    wr.WriteString(k);
+                    wr.WriteBytes(v);
+                }
+                wr.WriteInt(ivs.Count);
+                foreach ((string k, byte[] v) in ivs)
+                {
+                    wr.WriteString(k);
+                    wr.WriteBytes(v);
+                }
+                wr.WriteInt(assetFileNames.Count);
+                foreach ((string k, string v) in assetFileNames)
+                {
+                    wr.WriteString(k);
+                    wr.WriteString(v);
+                }
+                wr.WriteInt(componentFileNames.Count);
+                foreach ((string k, string v) in componentFileNames)
+                {
+                    wr.WriteString(k);
+                    wr.WriteString(v);
+                }
+                wr.WriteInt(assemblyMap.Count);
+                foreach ((string k, string v) in assemblyMap)
+                {
+                    wr.WriteString(k);
+                    wr.WriteString(v);
+                }
+                strm.Close();
+            }
         }
 
         // From stackoverflow: https://stackoverflow.com/a/283917
@@ -406,14 +496,23 @@ namespace Phoenix.Debug.DebugServerRunner
 
                 // Create asset ID
                 string id = Guid.NewGuid().ToString().ToLower();
-                while (assetFileNames.ContainsKey(id))
-                    id = Guid.NewGuid().ToString().ToLower();
-                assetFileNames[id] = pref + file.Name;
+                if (!assetFileNames.ContainsValue(pref + file.Name))
+                {
+                    while (assetFileNames.ContainsKey(id))
+                        id = Guid.NewGuid().ToString().ToLower();
+                    assetFileNames[id] = pref + file.Name;
+                }
+                else
+                    id = assetFileNames.First(t => t.Value == pref + file.Name).Key;
 
                 // Setup encryption
                 logger.Debug("Creating AES encryption Key and IV...");
                 using (Aes aes = Aes.Create())
                 {
+                    if (keys.ContainsKey(id))
+                        aes.Key = keys[id];
+                    if (ivs.ContainsKey(id))
+                        aes.IV = ivs[id];
                     byte[] key = aes.Key;
                     byte[] iv = aes.IV;
                     keys[id] = key;
