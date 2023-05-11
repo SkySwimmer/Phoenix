@@ -41,7 +41,6 @@ namespace PGL_Launcher
             this.label1.Location = new System.Drawing.Point(0, 216);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(61, 13);
-            this.label1.Font = new System.Drawing.Font("Arial", 10);
             this.label1.TabIndex = 0;
             this.label1.Text = "Preparing...";
             // 

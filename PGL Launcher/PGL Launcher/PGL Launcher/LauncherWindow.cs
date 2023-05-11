@@ -324,222 +324,226 @@ namespace PGL_Launcher
                         }
                     }
 
-                    // Download success, compare versions and compile a list of files to download
-                    Dictionary<string, string> files = new Dictionary<string, string>();
-                    GameVersionManifest manifest = JsonConvert.DeserializeObject<GameVersionManifest>(versionInfo);
-                    foreach (string key in manifest.changedFiles.Keys)
+                    // Update check
+                    if (versionInfo != null)
                     {
-                        if (!files.ContainsKey(key))
-                            files[key] = manifest.changedFiles[key];
-                    }
-                    GameVersionManifest cman = manifest;
-                    while (cman.previousVersion != null || Program.GameProperties.ContainsKey("LastGameVersion") && cman.previousVersion == Program.GameProperties["LastGameVersion"])
-                    {
-                        // Find all other versions we need to get the files from
-                        string newDoc = DownloadUtils.DownloadString(game["Game-Files-Endpoint"] + "/" + platform + "/versions/" + cman.previousVersion + ".json", "GET", null, new Dictionary<string, string>()
-                        {
-                            ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
-                            ["Product-Key"] = Program.GameProperties["ProductKey"]
-                        });
-                        if (newDoc == null)
-                            break;
-                        cman = JsonConvert.DeserializeObject<GameVersionManifest>(newDoc);
-                        foreach (string key in cman.changedFiles.Keys)
+                        // Download success, compare versions and compile a list of files to download
+                        Dictionary<string, string> files = new Dictionary<string, string>();
+                        GameVersionManifest manifest = JsonConvert.DeserializeObject<GameVersionManifest>(versionInfo);
+                        foreach (string key in manifest.changedFiles.Keys)
                         {
                             if (!files.ContainsKey(key))
-                                files[key] = cman.changedFiles[key];
+                                files[key] = manifest.changedFiles[key];
                         }
-                    }
-
-
-                    // File verification
-                    Dictionary<string, string> localFiles = new Dictionary<string, string>();
-
-                    // Log
-                    Invoke(new Action(() =>
-                    {
-                        label1.Text = "Verifying game files...";
-                    }));
-
-                    // Load local manifest
-                    if (File.Exists(Program.GAME_DIRECTORY + "/installation.files.info"))
-                    {
-                        // Find all files (ignore those missing on disk)
-                        foreach (string line in File.ReadAllLines(Program.GAME_DIRECTORY + "/installation.files.info"))
+                        GameVersionManifest cman = manifest;
+                        while (cman.previousVersion != null || Program.GameProperties.ContainsKey("LastGameVersion") && cman.previousVersion == Program.GameProperties["LastGameVersion"])
                         {
-                            if (!line.Contains("="))
-                                continue;
-                            string key = line.Remove(line.LastIndexOf("="));
-                            string value = line.Substring(line.LastIndexOf("=") + 1);
-                            if (File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + key))
+                            // Find all other versions we need to get the files from
+                            string newDoc = DownloadUtils.DownloadString(game["Game-Files-Endpoint"] + "/" + platform + "/versions/" + cman.previousVersion + ".json", "GET", null, new Dictionary<string, string>()
                             {
-                                // File is saved
-                                localFiles[key] = value;
+                                ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
+                                ["Product-Key"] = Program.GameProperties["ProductKey"]
+                            });
+                            if (newDoc == null)
+                                break;
+                            cman = JsonConvert.DeserializeObject<GameVersionManifest>(newDoc);
+                            foreach (string key in cman.changedFiles.Keys)
+                            {
+                                if (!files.ContainsKey(key))
+                                    files[key] = cman.changedFiles[key];
                             }
                         }
-                    }
 
-                    // Loop through update files
-                    bool changed = false;
-                    int val = 0;
-                    foreach (string file in files.Keys)
-                    {
-                        if (files[file] == "DELETE")
+
+                        // File verification
+                        Dictionary<string, string> localFiles = new Dictionary<string, string>();
+
+                        // Log
+                        Invoke(new Action(() =>
                         {
-                            // Delete
-                            if (localFiles.ContainsKey(file))
+                            label1.Text = "Verifying game files...";
+                        }));
+
+                        // Load local manifest
+                        if (File.Exists(Program.GAME_DIRECTORY + "/installation.files.info"))
+                        {
+                            // Find all files (ignore those missing on disk)
+                            foreach (string line in File.ReadAllLines(Program.GAME_DIRECTORY + "/installation.files.info"))
                             {
-                                if (!changed)
+                                if (!line.Contains("="))
+                                    continue;
+                                string key = line.Remove(line.LastIndexOf("="));
+                                string value = line.Substring(line.LastIndexOf("=") + 1);
+                                if (File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + key))
                                 {
-                                    // Log and set progress bar
-                                    Invoke(new Action(() =>
-                                    {
-                                        label1.Text = "Updating game files...";
-                                        progressBar1.Maximum = files.Count * 100;
-                                        progressBar1.Value = val;
-                                        progressBar1.Style = ProgressBarStyle.Continuous;
-                                    }));
-                                    changed = true;
+                                    // File is saved
+                                    localFiles[key] = value;
                                 }
-                                localFiles.Remove(file);
-                                if (File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + file))
-                                    File.Delete(Program.GAME_DIRECTORY + "/gamefiles/" + file);
-                                // Set progress bar
-                                Invoke(new Action(() =>
-                                {
-                                    val += 100;
-                                    progressBar1.Value = val;
-                                }));
                             }
-                            else
+                        }
+
+                        // Loop through update files
+                        bool changed = false;
+                        int val = 0;
+                        foreach (string file in files.Keys)
+                        {
+                            if (files[file] == "DELETE")
                             {
-                                val += 100;
-                                if (changed)
+                                // Delete
+                                if (localFiles.ContainsKey(file))
                                 {
+                                    if (!changed)
+                                    {
+                                        // Log and set progress bar
+                                        Invoke(new Action(() =>
+                                        {
+                                            label1.Text = "Updating game files...";
+                                            progressBar1.Maximum = files.Count * 100;
+                                            progressBar1.Value = val;
+                                            progressBar1.Style = ProgressBarStyle.Continuous;
+                                        }));
+                                        changed = true;
+                                    }
+                                    localFiles.Remove(file);
+                                    if (File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + file))
+                                        File.Delete(Program.GAME_DIRECTORY + "/gamefiles/" + file);
                                     // Set progress bar
                                     Invoke(new Action(() =>
                                     {
+                                        val += 100;
                                         progressBar1.Value = val;
                                     }));
                                 }
-                            }
-                        }
-                        else
-                        {
-                            // Update or download
-                            if (!localFiles.ContainsKey(file) || localFiles[file] != files[file] || !File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + file))
-                            {
-                                if (!changed)
+                                else
                                 {
-                                    // Log and set progress bar
-                                    Invoke(new Action(() =>
+                                    val += 100;
+                                    if (changed)
                                     {
-                                        label1.Text = "Updating game files...";
-                                        progressBar1.Maximum = files.Count * 100;
-                                        progressBar1.Value = val;
-                                        progressBar1.Style = ProgressBarStyle.Continuous;
-                                    }));
-                                    changed = true;
-                                }
-
-                                // Download
-                                long max;
-                                Stream strm = DownloadUtils.Download(game["Game-Files-Endpoint"] + "/downloads/" + files[file], "GET", out max, null, new Dictionary<string, string>()
-                                {
-                                    ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
-                                    ["Product-Key"] = Program.GameProperties["ProductKey"]
-                                });
-                                if (strm == null)
-                                {
-                                    // Failure
-                                    MessageBox.Show("Failed to download game files, current progress has been saved, please try again.", "Download failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    Environment.Exit(1);
-                                    return;
-                                }
-                                double step = 100d / max;
-                                long pos = 0;
-                                int cval = val;
-                                Directory.CreateDirectory(Path.GetDirectoryName(Program.GAME_DIRECTORY + "/gamefiles/" + file));
-                                Stream strmO = File.OpenWrite(Program.GAME_DIRECTORY + "/gamefiles/" + file);
-                                while (pos < max)
-                                {
-                                    try
-                                    {
-                                        byte[] buffer = new byte[(max - pos) > 5000 ? 5000 : (max - pos)];
-                                        int l = strm.Read(buffer, 0, buffer.Length);
-                                        if (l <= 0)
-                                        {
-                                            // Failure
-                                            MessageBox.Show("Failed to download game files, current progress has been saved, please try again.", "Download failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            Environment.Exit(1);
-                                            return;
-                                        }
-
-                                        strmO.Write(buffer, 0, l);
-
-                                        // Update progress
-                                        val = cval + (int)(step * (pos + l));
+                                        // Set progress bar
                                         Invoke(new Action(() =>
                                         {
                                             progressBar1.Value = val;
                                         }));
-                                        pos += l;
                                     }
-                                    catch
+                                }
+                            }
+                            else
+                            {
+                                // Update or download
+                                if (!localFiles.ContainsKey(file) || localFiles[file] != files[file] || !File.Exists(Program.GAME_DIRECTORY + "/gamefiles/" + file))
+                                {
+                                    if (!changed)
+                                    {
+                                        // Log and set progress bar
+                                        Invoke(new Action(() =>
+                                        {
+                                            label1.Text = "Updating game files...";
+                                            progressBar1.Maximum = files.Count * 100;
+                                            progressBar1.Value = val;
+                                            progressBar1.Style = ProgressBarStyle.Continuous;
+                                        }));
+                                        changed = true;
+                                    }
+
+                                    // Download
+                                    long max;
+                                    Stream strm = DownloadUtils.Download(game["Game-Files-Endpoint"] + "/downloads/" + files[file], "GET", out max, null, new Dictionary<string, string>()
+                                    {
+                                        ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
+                                        ["Product-Key"] = Program.GameProperties["ProductKey"]
+                                    });
+                                    if (strm == null)
                                     {
                                         // Failure
                                         MessageBox.Show("Failed to download game files, current progress has been saved, please try again.", "Download failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                         Environment.Exit(1);
                                         return;
                                     }
-                                }
-                                strmO.Close();
-                                pos = max;
-                                val = cval + 100;
-                                Invoke(new Action(() =>
-                                {
-                                    progressBar1.Value = val;
-                                }));
+                                    double step = 100d / max;
+                                    long pos = 0;
+                                    int cval = val;
+                                    Directory.CreateDirectory(Path.GetDirectoryName(Program.GAME_DIRECTORY + "/gamefiles/" + file));
+                                    Stream strmO = File.OpenWrite(Program.GAME_DIRECTORY + "/gamefiles/" + file);
+                                    while (pos < max)
+                                    {
+                                        try
+                                        {
+                                            byte[] buffer = new byte[(max - pos) > 5000 ? 5000 : (max - pos)];
+                                            int l = strm.Read(buffer, 0, buffer.Length);
+                                            if (l <= 0)
+                                            {
+                                                // Failure
+                                                MessageBox.Show("Failed to download game files, current progress has been saved, please try again.", "Download failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                Environment.Exit(1);
+                                                return;
+                                            }
 
-                                // Set value
-                                localFiles[file] = files[file];
-                                strm.Close();
+                                            strmO.Write(buffer, 0, l);
+
+                                            // Update progress
+                                            val = cval + (int)(step * (pos + l));
+                                            Invoke(new Action(() =>
+                                            {
+                                                progressBar1.Value = val;
+                                            }));
+                                            pos += l;
+                                        }
+                                        catch
+                                        {
+                                            // Failure
+                                            MessageBox.Show("Failed to download game files, current progress has been saved, please try again.", "Download failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            Environment.Exit(1);
+                                            return;
+                                        }
+                                    }
+                                    strmO.Close();
+                                    pos = max;
+                                    val = cval + 100;
+                                    Invoke(new Action(() =>
+                                    {
+                                        progressBar1.Value = val;
+                                    }));
+
+                                    // Set value
+                                    localFiles[file] = files[file];
+                                    strm.Close();
+                                }
                             }
+
+                            if (changed)
+                                saveManifest();
+                        }
+
+                        void saveManifest()
+                        {
+                            // Save manifest
+                            StreamWriter writer = new StreamWriter(Program.GAME_DIRECTORY + "/installation.files.info");
+                            foreach (string key in localFiles.Keys)
+                                writer.WriteLine(key + "=" + localFiles[key]);
+                            writer.Close();
+
+                            // Save installation information file
+                            StreamWriter wr = new StreamWriter(Program.INSTALL_INFO_FILE);
+                            wr.WriteLine("TermsVersion=" + game["ToS-Version"]);
+                            wr.WriteLine("InstallationDir=" + Program.GAME_DIRECTORY);
+                            wr.WriteLine("LastGameVersion=" + currentVersion);
+                            wr.Close();
                         }
 
                         if (changed)
-                            saveManifest();
-                    }
-
-                    void saveManifest()
-                    {
-                        // Save manifest
-                        StreamWriter writer = new StreamWriter(Program.GAME_DIRECTORY + "/installation.files.info");
-                        foreach (string key in localFiles.Keys)
-                            writer.WriteLine(key + "=" + localFiles[key]);
-                        writer.Close();
-
-                        // Save installation information file
-                        StreamWriter wr = new StreamWriter(Program.INSTALL_INFO_FILE);
-                        wr.WriteLine("TermsVersion=" + game["ToS-Version"]);
-                        wr.WriteLine("InstallationDir=" + Program.GAME_DIRECTORY);
-                        wr.WriteLine("LastGameVersion=" + currentVersion);
-                        wr.Close();
-                    }
-
-                    if (changed)
-                    {
-                        Invoke(new Action(() =>
                         {
-                            progressBar1.Value = progressBar1.Maximum;
-                        }));
-                        Thread.Sleep(1000);
-                        Invoke(new Action(() =>
-                        {
-                            progressBar1.Maximum = 100;
-                            progressBar1.Value = 0;
-                            progressBar1.Style = ProgressBarStyle.Marquee;
-                        }));
+                            Invoke(new Action(() =>
+                            {
+                                progressBar1.Value = progressBar1.Maximum;
+                            }));
+                            Thread.Sleep(1000);
+                            Invoke(new Action(() =>
+                            {
+                                progressBar1.Maximum = 100;
+                                progressBar1.Value = 0;
+                                progressBar1.Style = ProgressBarStyle.Marquee;
+                            }));
+                        }
                     }
 
                     // Log
@@ -547,6 +551,7 @@ namespace PGL_Launcher
                     {
                         label1.Text = "Retrieving game token...";
                     }));
+
                     // Retrieve new game document
                     downloadGameDoc();
 
