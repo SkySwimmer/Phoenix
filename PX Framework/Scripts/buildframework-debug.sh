@@ -105,8 +105,12 @@ echo Copying unity bindings...
 mkdir Build/Unity
 mkdir Build/Unity/Projects
 mkdir Build/Unity/Complete
-cp -rfv Unity/* Build/Unity/Projects
-cp -rfv Unity/*/* Build/Unity/Complete
+cp -rfv Unity/Phoenix.Unity Build/Unity/Projects
+cp -rfv Unity/Phoenix.Unity.PGL Build/Unity/Projects
+cp -rfv Unity/Phoenix.Unity.SceneReplication Build/Unity/Projects
+cp -rfv Unity/Phoenix.Unity/* Build/Unity/Complete
+cp -rfv Unity/Phoenix.Unity.PGL/* Build/Unity/Complete
+cp -rfv Unity/Phoenix.Unity.SceneReplication/* Build/Unity/Complete
 cp -rfv Build/Assemblies/net472/* Build/Unity/Complete/Assets/Libraries
 rm -v Build/Unity/Complete/Assets/Libraries/Newtonsoft.Json.dll
 
