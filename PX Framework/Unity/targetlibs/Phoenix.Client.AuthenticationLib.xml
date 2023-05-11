@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Client.AuthenticationLib</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredMessage">
+            <summary>
+            Phoenix login deferred message
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredMessage.RetryCallbackHandler">
+            <summary>
+            Handler for the Retry method
+            </summary>
+            <param name="request">New login request</param>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredMessage.Retry(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Retries the request with additional data
+            </summary>
+            <param name="request">New request message (recommended to send the old message with the missing data added to it)</param>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredMessage.DataRequestKey">
+            <summary>
+            Retrieves the ID of what the server requires to be added to the login payload
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredMessage.RawResponseMessage">
+            <summary>
+            Retrieves the raw response message
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureMessage">
+            <summary>
+            Phoenix login failure message
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureMessage.Error">
+            <summary>
+            Retrieves the error code
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureMessage.ErrorMessage">
+            <summary>
+            Retrieves the human-readable error message
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureMessage.RawResponseMessage">
+            <summary>
+            Retrieves the raw response message
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.SessionRefreshFailureHandler">
+            <summary>
+            Handler for session refresh failures
+            </summary>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredHandler">
+            <summary>
+            Handler for when logins are deferred
+            </summary>
+            <param name="deferMessage">Server response message</param>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureHandler">
+            <summary>
+            Handler for when logins fail
+            </summary>
+            <param name="failureMessage">Server response message</param>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginSuccessHandler">
+            <summary>
+            Handler for successful logins
+            </summary>
+            <param name="session">Session instance</param>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager">
+            <summary>
+            Phoenix Login Manager
+            </summary>
+        </member>
+        <member name="E:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.OnSessionRefreshFailure">
+            <summary>
+            Called when the login manager fails to refresh session data and logs out
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.API">
+            <summary>
+            Defines the API used to log into the game
+            </summary>
+        </member>
+        <member name="F:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.LoginToken">
+            <summary>
+            Defines the token used to call the authentication API, null makes it use the token from the Game descriptor
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.IsLoggedIn">
+            <summary>
+            Checks if a user is presently logged in
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.Session">
+            <summary>
+            Retrieves the current session
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.Logout">
+            <summary>
+            Logs out and clears the session
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.LoginManager.Login(System.Collections.Generic.Dictionary{System.String,System.Object},Phoenix.Client.Authenticators.PhoenixAPI.LoginFailureHandler,Phoenix.Client.Authenticators.PhoenixAPI.LoginDeferredHandler,Phoenix.Client.Authenticators.PhoenixAPI.LoginSuccessHandler)">
+            <summary>
+            Logs into the authentication API to retrieve login information
+            </summary>
+            <param name="loginPayload">Login payload message</param>
+            <param name="onFailure">Login failure handler</param>
+            <param name="onDefer">Login deferred handler</param>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession">
+            <summary>
+            Phoenix Game Session - Contains player information needed to log in
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.#ctor(System.String,System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Creates a full login response container
+            </summary>
+            <param name="accountID">Player account ID</param>
+            <param name="displayName">Player display name</param>
+            <param name="token">Game session token</param>
+            <param name="serverResponse">Server response message</param>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Creates a simple login response container
+            </summary>
+            <param name="accountID">Player account ID</param>
+            <param name="displayName">Player display name</param>
+            <param name="token">Game session token</param>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.#ctor(System.String,System.String)">
+            <summary>
+            Creates a simple login response container <b>without token</b> (insecure-mode only)
+            </summary>
+            <param name="accountID">Player account ID</param>
+            <param name="displayName">Player display name</param>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.RawResponseMessage">
+            <summary>
+            Retrieves the raw response message
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.AccountID">
+            <summary>
+            Account ID
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.DisplayName">
+            <summary>
+            Display name
+            </summary>
+        </member>
+        <member name="P:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.GameSessionToken">
+            <summary>
+            Game token
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession.Refresh">
+            <summary>
+            Refreshes the token and updates the display name
+            </summary>
+            <returns>True if successful, false otherwise</returns>
+        </member>
+        <member name="T:Phoenix.Client.Authenticators.PhoenixAuthenticator">
+            <summary>
+            Phoenix Authenticator - Authenticate logins with the basic Phoenix authentication API
+            </summary>
+        </member>
+        <member name="M:Phoenix.Client.Authenticators.PhoenixAuthenticator.#ctor(Phoenix.Client.Authenticators.PhoenixAPI.PhoenixSession,System.String)">
+            <summary>
+            Creates the authenticator
+            </summary>
+            <param name="authData">Authentication data</param>
+            <param name="api">API server</param>
+        </member>
+    </members>
+</doc>

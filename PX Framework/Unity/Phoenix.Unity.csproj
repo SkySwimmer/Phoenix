@@ -33,6 +33,10 @@
       <HintPath>targetlibs\Phoenix.Client.IntegratedServerBootstrapper.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Phoenix.Client.AuthenticationLib">
+      <HintPath>targetlibs\Phoenix.Client.AuthenticationLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Phoenix.Common">
       <HintPath>targetlibs\Phoenix.Common.dll</HintPath>
       <Private>false</Private>
