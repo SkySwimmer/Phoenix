@@ -461,11 +461,11 @@ namespace PGL_Launcher
                                 int cval = val;
                                 Directory.CreateDirectory(Path.GetDirectoryName(Program.GAME_DIRECTORY + "/gamefiles/" + file));
                                 Stream strmO = File.OpenWrite(Program.GAME_DIRECTORY + "/gamefiles/" + file);
-                                while (pos != max)
+                                while (pos < max)
                                 {
                                     try
                                     {
-                                        byte[] buffer = new byte[2500];
+                                        byte[] buffer = new byte[(max - pos) > 5000 ? 5000 : (max - pos)];
                                         int l = strm.Read(buffer, 0, buffer.Length);
                                         if (l <= 0)
                                         {
@@ -476,6 +476,7 @@ namespace PGL_Launcher
                                         }
 
                                         strmO.Write(buffer, 0, l);
+
                                         // Update progress
                                         val = cval + (int)(step * (pos + l));
                                         Invoke(new Action(() =>
@@ -502,6 +503,7 @@ namespace PGL_Launcher
 
                                 // Set value
                                 localFiles[file] = files[file];
+                                strm.Close();
                             }
                         }
 
@@ -596,6 +598,13 @@ namespace PGL_Launcher
 
                     // Build process info
                     ProcessStartInfo info = new ProcessStartInfo();
+                    if (platform == "linux")
+                    {
+                        ProcessStartInfo chmod = new ProcessStartInfo();
+                        chmod.FileName = "chmod";
+                        chmod.Arguments = "+x '" + game["Game-Storage-Path"] + "/" + (platform == "windows" ? game["Game-Executable-Win64"] : (platform == "linux" ? game["Game-Executable-Linux"] : game["Game-Executable-OSX"])) + "'";
+                        Process.Start(chmod).WaitForExit();
+                    }
                     string argsProp = (platform == "windows" ? "Game-Arguments-Win64" : (platform == "linux" ? "Game-Arguments-Linux" : "Game-Arguments-OSX"));
                     info.FileName = game["Game-Storage-Path"] + "/" + (platform == "windows" ? game["Game-Executable-Win64"] : (platform == "linux" ? game["Game-Executable-Linux"] : game["Game-Executable-OSX"]));
                     info.WorkingDirectory = game["Player-Data-Path"];

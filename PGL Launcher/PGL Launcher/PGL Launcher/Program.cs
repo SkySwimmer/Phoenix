@@ -158,19 +158,23 @@ namespace PGL_Launcher
             Console.WriteLine("Finding project files...");
 
             string projFiles = "project";
-            if (!File.Exists(projFiles + "/PGL Launcher.csproj"))
+            if (!File.Exists(projFiles + "/PGL Launcher.sln"))
             {
                 projFiles = ".";
             }
-            if (!File.Exists(projFiles + "/PGL Launcher.csproj"))
+            if (!File.Exists(projFiles + "/PGL Launcher.sln"))
             {
                 projFiles = "..";
             }
-            if (!File.Exists(projFiles + "/PGL Launcher.csproj"))
+            if (!File.Exists(projFiles + "/PGL Launcher.sln"))
             {
                 projFiles = "../..";
             }
-            if (!File.Exists(projFiles + "/PGL Launcher.csproj"))
+            if (!File.Exists(projFiles + "/PGL Launcher.sln"))
+            {
+                projFiles = "../../..";
+            }
+            if (!File.Exists(projFiles + "/PGL Launcher.sln"))
             {
                 Console.Error.WriteLine("Unable to locate the launcher project files!");
                 try
@@ -189,12 +193,12 @@ namespace PGL_Launcher
             Console.WriteLine("Copying project directory...");
             IOUtils.DeleteDirectory("tmp");
             IOUtils.CopyDirectory(projFiles, "tmp", Environment.CurrentDirectory);
-            IOUtils.DeleteDirectory("tmp/bin");
-            IOUtils.DeleteDirectory("tmp/obj");
+            IOUtils.DeleteDirectory("tmp/PGL Launcher/bin");
+            IOUtils.DeleteDirectory("tmp/PGL Launcher/obj");
 
             // Write game.info
             Console.WriteLine("Writing game.info...");
-            File.WriteAllText("tmp/game.info", doc);
+            File.WriteAllText("tmp/PGL Launcher/game.info", doc);
 
             // Compile laucher
             Console.WriteLine("Compiling launcher...");
@@ -236,8 +240,22 @@ namespace PGL_Launcher
             try
             {
                 ProcessStartInfo info = new ProcessStartInfo();
+                info.FileName = "nuget";
+                info.Arguments = "restore";
+                info.WorkingDirectory = Path.GetFullPath("tmp");
+                info.CreateNoWindow = true;
+                info.UseShellExecute = false;
+                Process proc = Process.Start(info);
+                proc.WaitForExit();
+            }
+            catch
+            {
+            }
+            try
+            {
+                ProcessStartInfo info = new ProcessStartInfo();
                 info.FileName = cmd;
-                info.Arguments = "\"PGL Launcher.csproj\" -property:Configuration=RELEASE";
+                info.Arguments = "\"PGL Launcher/PGL Launcher.csproj\" -property:Configuration=RELEASE";
                 info.WorkingDirectory = Path.GetFullPath("tmp");
                 info.CreateNoWindow = true;
                 info.UseShellExecute = false;
@@ -263,7 +281,7 @@ namespace PGL_Launcher
             // Copy result
             Console.WriteLine("Copying files...");
             Directory.CreateDirectory(output);
-            foreach (FileInfo file in new DirectoryInfo("tmp/bin/Release").GetFiles())
+            foreach (FileInfo file in new DirectoryInfo("tmp/PGL Launcher/bin/Release").GetFiles())
             {
                 if (!file.Name.EndsWith(".xml") && !file.Name.EndsWith(".config") && !file.Name.EndsWith(".pdb") && !file.Name.EndsWith(".json"))
                 {

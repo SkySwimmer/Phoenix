@@ -256,9 +256,9 @@ namespace PGL_Launcher
 
                             // Save hash to known files
                             knownFiles.Add(pref + file.Name);
-                            if (!knownHashes.ContainsKey(pref + file.Name) || knownHashes[pref + file.Name].Remove(knownHashes[pref + file.Name].LastIndexOf("-")) != sha256)
+                            if (!knownHashes.ContainsKey(pref + file.Name) || knownHashes[pref + file.Name] != sha256)
                             {
-                                changedFiles[pref + file.Name] = sha256 + "-" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                                changedFiles[pref + file.Name] = sha256;
                                 if (!knownHashes.ContainsKey(pref + file.Name))
                                     Invoke(new Action(() =>
                                     {
@@ -274,7 +274,7 @@ namespace PGL_Launcher
                                         richTextBox1.ScrollToCaret();
                                     }));
                             }
-                            knownHashes[pref + file.Name] = sha256 + "-" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                            knownHashes[pref + file.Name] = sha256;
                             Thread.Sleep(10); // offset
                         }
 

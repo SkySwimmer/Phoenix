@@ -38,9 +38,10 @@ namespace PGL_Launcher
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.ForeColor = System.Drawing.SystemColors.Menu;
-            this.label1.Location = new System.Drawing.Point(0, 214);
+            this.label1.Location = new System.Drawing.Point(0, 216);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(61, 13);
+            this.label1.Font = new System.Drawing.Font("Arial", 10);
             this.label1.TabIndex = 0;
             this.label1.Text = "Preparing...";
             // 
@@ -49,7 +50,7 @@ namespace PGL_Launcher
             this.progressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.progressBar1.Location = new System.Drawing.Point(0, 231);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(604, 14);
+            this.progressBar1.Size = new System.Drawing.Size(604, 12);
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar1.TabIndex = 1;
             // 
@@ -57,7 +58,7 @@ namespace PGL_Launcher
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(604, 245);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label1);
