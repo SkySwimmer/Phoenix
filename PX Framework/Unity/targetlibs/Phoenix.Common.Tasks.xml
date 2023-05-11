@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Phoenix.Common.Tasks</name>
+    </assembly>
+    <members>
+        <member name="T:Phoenix.Common.Tasks.ScheduledTask">
+            <summary>
+            Scheduled task information object
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.TimeRemainingBeforeInvoke">
+            <summary>
+            Checks how many milliseconds are left before the action is invoked
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.HasCompleted">
+            <summary>
+            Checks if the task completed at least once
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.ScheduledTask.Wait">
+            <summary>
+            Blocks the current thread until the task has been run at least once
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.ActionInterval">
+            <summary>
+            Retrieves the action tick interval (how many ticks before the action is run)
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.ActionLimit">
+            <summary>
+            Retrieves how often the action can run
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.TicksRemaining">
+            <summary>
+            Retrieves the amount of remaining ticks before the action stops running
+            </summary>
+        </member>
+        <member name="P:Phoenix.Common.Tasks.ScheduledTask.TickBeforeStart">
+            <summary>
+            Retrieves the amount of ticks that remain before the action is run
+            </summary>
+        </member>
+        <member name="T:Phoenix.Common.Tasks.TaskManager">
+            <summary>
+            Task scheduling service
+            </summary>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.AfterSecs(System.Action,System.Int32)">
+            <summary>
+            Schedules and action that will run after the given amount of seconds have passed
+            </summary>
+            <param name="action">Action to schedule</param>
+            <param name="time">Time delay in seconds</param>
+            <returns>ScheduledTask instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.AfterMs(System.Action,System.Int64)">
+            <summary>
+            Schedules and action that will run after the given amount of milliseconds have passed
+            </summary>
+            <param name="action">Action to schedule</param>
+            <param name="time">Time delay in milliseconds</param>
+            <returns>ScheduledTask instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Oneshot(System.Action)">
+            <summary>
+            Schedules a action that runs only once
+            </summary>
+            <param name="action">Action to schedule</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Delayed(System.Action,System.Int32)">
+            <summary>
+            Schedules a action that runs only once after a specific amount of ticks have passed
+            </summary>
+            <param name="action">Action to schedule</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Interval(System.Action,System.Int32)">
+            <summary>
+            Schedules a action that runs on a interval
+            </summary>
+            <param name="action">Action to schedule</param>
+            <param name="interval">Ticks to wait each time before running the action</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Interval(System.Action,System.Int32,System.Int32)">
+            <summary>
+            Schedules a action that runs on a interval (only a specific amount of times)
+            </summary>
+            <param name="action">Action to schedule</param>
+            <param name="interval">Ticks to wait each time before running the action</param>
+            <param name="limit">The amount of times to run this task</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Repeat(System.Action)">
+            <summary>
+            Schedules a action that runs on every tick
+            </summary>
+            <param name="action">Action to schedule</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Repeat(System.Action,System.Int32)">
+            <summary>
+            Schedules a action that runs on every tick until its limit is reached
+            </summary>
+            <param name="action">Action to schedule</param>
+            <param name="limit">The amount of times to run this task</param>
+            <returns>ActionInfo instance</returns>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Cancel(Phoenix.Common.Tasks.ScheduledTask)">
+            <summary>
+            Cancels a action
+            </summary>
+            <param name="action">Action to cancel</param>
+        </member>
+        <member name="M:Phoenix.Common.Tasks.TaskManager.Tick">
+            <summary>
+            Ticks the schedule, running any pending tasks
+            </summary>
+        </member>
+    </members>
+</doc>
