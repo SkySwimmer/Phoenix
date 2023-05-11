@@ -215,6 +215,16 @@ namespace Phoenix.Server.Components
                     catch
                     {
                         GetLogger().Warn("Failed to authenticate client: " + ev.Client.GetRemoteAddress() + ": failed to retrieve player information from Phoenix.");
+                        
+                        // Connect failure
+                        ev.EventArgs.ClientOutput.WriteBoolean(false);
+
+                        // Write reason
+                        ev.EventArgs.ClientOutput.WriteBoolean(true);
+                        ev.EventArgs.ClientOutput.WriteString("disconnect.loginfailure.phoenixunreachable");
+                        ev.EventArgs.ClientOutput.WriteInt(0);
+                        ev.Client.Close("disconnect.loginfailure.phoenixunreachable");
+
                         return;
                     }
 
