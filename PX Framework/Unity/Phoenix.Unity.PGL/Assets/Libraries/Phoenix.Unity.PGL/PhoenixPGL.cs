@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.IO;
 using Phoenix.Common;
+using Phoenix.Client;
 using Phoenix.Client.Authenticators.PhoenixAPI;
 using Phoenix.Unity.PGL.Internal;
 using System.Net.Http;
@@ -560,6 +561,9 @@ namespace Phoenix.Unity.PGL
                     }
                 }
                 manager.LoadFinish();
+
+                // Bind game client creation
+                // TODO
             }
 
             // Log completion

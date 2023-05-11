@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Client\Phoenix.Client\Phoenix.Client.csproj" />
+    <ProjectReference Include="..\Common\Phoenix.Common.Networking\Phoenix.Common.Networking.csproj" />
+	<PackageReference Include="UnityEngine.Modules" Version="2022.2.0" />
+  </ItemGroup>
+
+</Project>

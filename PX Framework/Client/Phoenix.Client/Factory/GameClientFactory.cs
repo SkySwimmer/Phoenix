@@ -42,6 +42,17 @@ namespace Phoenix.Client
         private List<IComponentPackage> _componentPackages = new List<IComponentPackage>();
 
         /// <summary>
+        /// GameClient creation event handler
+        /// </summary>
+        /// <param name="client">GameClient instance that was just created</param>
+        public delegate void GameClientCreatedHandler(GameClient client);
+
+        /// <summary>
+        /// Called when a game client is created
+        /// </summary>
+        public static event GameClientCreatedHandler? OnCreateClient;
+
+        /// <summary>
         /// Controls if the factory should print a warning message in case there is no authenticator present
         /// </summary>
         public bool WarnMissingAuthenticator = true;
@@ -230,6 +241,9 @@ namespace Phoenix.Client
             foreach (Component comp in _components)
                 client.AddComponent(comp);
             client.AddComponent(new GenericClientConnectionProvider(cl, info));
+
+            // Call client creation
+            OnCreateClient?.Invoke(client);
 
             // Warn if no authenticator is present
             if (WarnMissingAuthenticator && !_components.Any(t => t is AuthenticationComponent) && !_componentPackages.Any(t => t.Components.Any(t2 => t2 is AuthenticationComponent)))

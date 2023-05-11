@@ -61,7 +61,8 @@ namespace Phoenix.Unity.PGL.Mods
         public ModInfo Load(FileStream mod, string dataDir)
         { 
             // TODO: client mod debugging
-            // TODO: adding components to game clients from mods
+            // TODO: server mod loading
+            
             if (locked)
                 throw new ArgumentException("Locked");
             BinaryPackage package = new BinaryPackage(mod, Path.GetFileName(mod.Name), () => File.OpenRead(mod.Name));

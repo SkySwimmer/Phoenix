@@ -20,6 +20,17 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
         // TODO: server mod loading
 
         /// <summary>
+        /// GameServer creation event handler
+        /// </summary>
+        /// <param name="server">GameServer instance that was just created</param>
+        public delegate void GameServerCreatedHandler(GameServer server);
+
+        /// <summary>
+        /// Called when a game server is created
+        /// </summary>
+        public static event GameServerCreatedHandler? OnCreateServer;
+
+        /// <summary>
         /// Creates a integrated client connection
         /// </summary>
         /// <param name="channels">Cannel registry</param>
@@ -90,6 +101,9 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
             srv.AddComponent(new IntegratedServerComponent(server));
             if (!srv.HasConfigManager)
                 srv.AddComponent(new MemoryConfigManagerComponent());
+
+            // Call server creation
+            OnCreateServer?.Invoke(srv);
 
             // Initialize server
             logger.Info("Initializing server...");

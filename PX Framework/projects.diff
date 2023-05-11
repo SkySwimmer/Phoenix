@@ -43,7 +43,7 @@ Common:
 - Phoenix.Common.Weather
 - Phoenix.Common.Worlds
 - Phoenix.Common.Entities
-+ Phoenix.Common.SceneReplication
++++ Phoenix.Common.SceneReplication
 - Phoenix.Common.Language
 
 Debug:
