@@ -12,7 +12,6 @@ namespace Phoenix.Debug.DebugServerRunner
     {
         public static void Run(ProjectManifest project, Logger logger, DebugGameDefLib.DebugGameDef game)
         {
-            // TODO: mass storage format for the assembly binary, individual encryption might be best
             // TODO: persistent key option
 
             // Build
@@ -34,6 +33,8 @@ namespace Phoenix.Debug.DebugServerRunner
                 Directory.Delete("Build/Release/Assets", true);
             if (Directory.Exists("Build/Release/Components"))
                 Directory.Delete("Build/Release/Components", true);
+            if (Directory.Exists("Build/Release/TempAssemblyCache"))
+                Directory.Delete("Build/Release/TempAssemblyCache", true);
 
             // Pull all assets and build
             Dictionary<string, byte[]> keys = new Dictionary<string, byte[]>();
@@ -48,6 +49,7 @@ namespace Phoenix.Debug.DebugServerRunner
             // Build components
             logger.Info("Building server components...");
             logger.Debug("Creating component output directory...");
+            Directory.CreateDirectory("Build/Release/TempAssemblyCache");
             Directory.CreateDirectory("Build/Release/Components");
 
             // Locate component assemblies
@@ -149,55 +151,121 @@ namespace Phoenix.Debug.DebugServerRunner
             }
 
             // Compile other assemblies
+            logger.Info("Compiling assemblies.mpbp...");
             logger.Info("Compiling server assemblies...");
             logger.Debug("Finding assemblies...");
             BinaryPackageBuilder package = new BinaryPackageBuilder();
             List<string> assemblyNames = new List<string>();
+            Dictionary<string, string> assemblyMap = new Dictionary<string, string>();
             foreach (FileInfo file in new DirectoryInfo(project.assembliesDirectory).GetFiles("*.dll"))
             {
                 if (!componentAssemblies.Contains(file.FullName))
                 {
                     assemblyNames.Add(file.Name);
 
-                    // Add entry
-                    logger.Info("Adding " + file.Name + " to assemblies.epbp...");
-                    package.AddEntry(file.Name, file.OpenRead());
+                    // Create component ID
+                    string id = Guid.NewGuid().ToString().ToLower();
+                    while (assemblyMap.ContainsKey(id))
+                        id = Guid.NewGuid().ToString().ToLower();
+                    assemblyMap[id] = file.Name;
+
+                    // Encrypt and write
+                    using (Aes aes = Aes.Create())
+                    {
+                        byte[] key = aes.Key;
+                        byte[] iv = aes.IV;
+                        keys["@ASM-" + id] = key;
+                        ivs["@ASM-" + id] = (byte[])iv.Clone();
+
+                        // Log
+                        logger.Info("Adding " + file.Name + " to assemblies.mpbp...");
+                        logger.Info("  Assembly ID: " + id);
+                        logger.Info("  Assembly Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
+                        logger.Info("  Assembly IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
+                        Stream s = File.OpenRead(file.FullName);
+                        logger.Info("  Assembly Hash: " + string.Concat(hasher.ComputeHash(s).Select(x => x.ToString("x2"))));
+                        
+                                
+                        // Encrypt assembly
+                        logger.Info("  Encrypting and writing assembly...");
+                        Stream outp = File.OpenWrite("Build/Release/TempAssemblyCache/" + id + ".bin");
+                        ICryptoTransform tr = aes.CreateEncryptor(key, iv);
+                        CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
+                        GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Fastest);
+                        s.Position = 0;
+                        s.CopyTo(gzip);
+
+                        // Close stuff
+                        s.Close();
+                        gzip.Close();
+                        cryptStream.Close();
+                        outp.Close();
+
+                        // Add entry
+                        package.AddEntry("Assemblies/" + id + ".bin", File.OpenRead("Build/Release/TempAssemblyCache/" + id + ".bin"));
+                        logger.Info("Added " + file.Name);
+                    }
                 }
             }
 
             // Build package
-            logger.Info("Compiling assemblies.epbp...");
-
-            // Setup encryption
-            logger.Debug("Creating AES encryption Key and IV...");
+            logger.Info("Compiling manifest...");
             using (Aes aes = Aes.Create())
             {
+                // Gen manifest
+                logger.Debug("  Compiling assembly manifest...");
+                MemoryStream strm = new MemoryStream();
+                DataWriter wr = new DataWriter(strm);
+                wr.WriteInt(assemblyMap.Count);
+                foreach ((string id, string file) in assemblyMap)
+                {
+                    wr.WriteString(file);
+                    wr.WriteString(id);
+                    logger.Debug("    Written ID map: " + id + " -> " + file);
+                }
+
+                // Gen keys
+                logger.Debug("  Creating AES encryption Key and IV...");
                 byte[] key = aes.Key;
                 byte[] iv = aes.IV;
-                keys["@ROOT"] = key;
-                ivs["@ROOT"] = (byte[])iv.Clone();
-                logger.Info("  Binary Package Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
-                logger.Info("  Binary Package IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
-
-                // Write component
-                logger.Info("  Encrypting and writing package...");
-                Stream outp = File.OpenWrite("Build/Release/assemblies.epbp");
+                keys["@ASM-@ROOT"] = key;
+                ivs["@ASM-@ROOT"] = (byte[])iv.Clone();
+                logger.Info("  Assembly Manifest Key: " + string.Concat(key.Select(x => x.ToString("x2"))));
+                logger.Info("  Assembly Manifest IV: " + string.Concat(iv.Select(x => x.ToString("x2"))));
+                
+                // Write manifest
+                logger.Info("  Encrypting and writing manifest...");
+                Stream outp = File.OpenWrite("Build/Release/TempAssemblyCache/manifest.bin");
                 ICryptoTransform tr = aes.CreateEncryptor(key, iv);
                 CryptoStream cryptStream = new CryptoStream(outp, tr, CryptoStreamMode.Write);
                 GZipStream gzip = new GZipStream(cryptStream, CompressionLevel.Fastest);
-                package.Write(gzip);
+                gzip.Write(strm.ToArray());
 
                 // Close stuff
+                strm.Close();
                 gzip.Close();
                 cryptStream.Close();
                 outp.Close();
-                Stream s = File.OpenRead("Build/Release/assemblies.epbp");
-                byte[] hash = hasher.ComputeHash(s);
-                hashes["@ROOT"] = hash;
-                logger.Info("  BPHash: " + string.Concat(hash.Select(x => x.ToString("x2"))));
-                s.Close();
-                logger.Info("Written to Build/Release/assemblies.epbp");
+
+                // Add entry
+                package.AddEntry("AssemblyManifest", File.OpenRead("Build/Release/TempAssemblyCache/manifest.bin"));
+                logger.Info("Added AssemblyManifest");
             }
+
+            // Write package
+            logger.Info("Writing assemblies.mpbp...");
+            Stream strO = File.OpenWrite("Build/Release/assemblies.mpbp");
+            package.Write(strO);
+            strO.Close();
+            logger.Info("Hashing assemblies.mpbp...");
+            Stream st = File.OpenRead("Build/Release/assemblies.mpbp");
+            byte[] hashT = hasher.ComputeHash(st);
+            hashes["@ROOT"] = hashT;
+            logger.Info("  BPHash: " + string.Concat(hashT.Select(x => x.ToString("x2"))));
+            st.Close();
+            logger.Info("Cleaning...");
+            Directory.Delete("Build/Release/TempAssemblyCache", true);
+            logger.Info("Written to Build/Release/assemblies.mpbp");
 
             // Build game asset
             logger.Info("Creating game info asset...");

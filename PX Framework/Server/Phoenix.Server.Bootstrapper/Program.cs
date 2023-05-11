@@ -18,7 +18,7 @@ namespace Phoenix.Server.Bootstrapper
 
             Console.WriteLine("Preparing server... Please wait...");
             Environment.CurrentDirectory = Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
-            if (!Directory.Exists("Components") || !File.Exists("assemblies.epbp") || !File.Exists("game.epaf") || !File.Exists("launchinfo.bin"))
+            if (!Directory.Exists("Components") || !File.Exists("assemblies.mpbp") || !File.Exists("game.epaf") || !File.Exists("launchinfo.bin"))
             {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine("Critical Error!");
@@ -58,29 +58,84 @@ namespace Phoenix.Server.Bootstrapper
 
             // Load assemblies
             Dictionary<string, Assembly> knownAssemblies = new Dictionary<string, Assembly>();
-            BinaryPackage assemblies = LoadTypicalPackage(File.OpenRead("assemblies.epbp"), "@ROOT", launchPackage);
+            FileStream asmBp = File.OpenRead("assemblies.mpbp");
+            if (!Program.VerifyHash(asmBp, "@ROOT", launchPackage))
+            {
+                strm.Close();
+                Console.Error.WriteLine();
+                Console.Error.WriteLine("!!!");
+                Console.Error.WriteLine("Server files have been tampered with! Shutting down to protect data!");
+                Console.Error.WriteLine("!!!");
+                Environment.Exit(1);
+                return;
+            }
+            asmBp.Position = 0;
+            BinaryPackage assembliesPk = new BinaryPackage(asmBp, "assemblies.mpbp", () => File.OpenRead("assemblies.mpbp"));
+
+            // Load manifest
+            Dictionary<string, string> assemblyMap = new Dictionary<string, string>();
+            DataReader assemblyMapReader = new DataReader(Decrypt(assembliesPk.GetStream(assembliesPk.GetEntry("AssemblyManifest")), "@ASM-@ROOT", launchPackage));
+            int length = assemblyMapReader.ReadInt();
+            for (int i = 0; i < length; i++)
+                assemblyMap[assemblyMapReader.ReadString()] = assemblyMapReader.ReadString();
+            assemblyMapReader.GetStream().Close();
+
+            // Bind resolution
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
                 string file = new AssemblyName(args.Name).Name;
                 if (knownAssemblies.ContainsKey(file))
-                    return knownAssemblies[file];
-                if (assemblies.GetEntry(file + ".dll") != null)
+                    return knownAssemblies[file];                
+                if (assemblyMap.ContainsKey(file + ".dll"))
                 {
-                    Assembly res = Assembly.Load(ReadBytesFromEntry(assemblies.GetEntry(file + ".dll"), assemblies));
-                    knownAssemblies[file] = res;
-                    return res;
+                    string id = assemblyMap[file + ".dll"];
+
+                    // Load and decrypt assembly
+                    BinaryPackageEntry? ent = assembliesPk.GetEntry("Assemblies/" + id + ".bin");
+                    if (ent != null)
+                    {
+                        // Decrypt it
+                        Stream strm = Decrypt(assembliesPk.GetStream(ent), "@ASM-" + id, launchPackage);
+                        DataReader rd = new DataReader(strm);
+                        Assembly res = Assembly.Load(rd.ReadAllBytes());
+                        knownAssemblies[file] = res;
+                        rd.GetStream().Close();
+                        return res;
+                    }
                 }
-                else if (assemblies.GetEntry(file + ".exe") != null)
+                else if (assemblyMap.ContainsKey(file + ".exe"))
                 {
-                    Assembly res = Assembly.Load(ReadBytesFromEntry(assemblies.GetEntry(file + ".exe"), assemblies));
-                    knownAssemblies[file] = res;
-                    return res;
+                    string id = assemblyMap[file + ".exe"];
+
+                    // Load and decrypt assembly
+                    BinaryPackageEntry? ent = assembliesPk.GetEntry("Assemblies/" + id + ".bin");
+                    if (ent != null)
+                    {
+                        // Decrypt it
+                        Stream strm = Decrypt(assembliesPk.GetStream(ent), "@ASM-" + id, launchPackage);
+                        DataReader rd = new DataReader(strm);
+                        Assembly res = Assembly.Load(rd.ReadAllBytes());
+                        knownAssemblies[file] = res;
+                        rd.GetStream().Close();
+                        return res;
+                    }
                 }
-                else if (assemblies.GetEntry(file) != null)
+                else if (assemblyMap.ContainsKey(file))
                 {
-                    Assembly res = Assembly.Load(ReadBytesFromEntry(assemblies.GetEntry(file), assemblies));
-                    knownAssemblies[file] = res;
-                    return res;
+                    string id = assemblyMap[file];
+
+                    // Load and decrypt assembly
+                    BinaryPackageEntry? ent = assembliesPk.GetEntry("Assemblies/" + id + ".bin");
+                    if (ent != null)
+                    {
+                        // Decrypt it
+                        Stream strm = Decrypt(assembliesPk.GetStream(ent), "@ASM-" + id, launchPackage);
+                        DataReader rd = new DataReader(strm);
+                        Assembly res = Assembly.Load(rd.ReadAllBytes());
+                        knownAssemblies[file] = res;
+                        rd.GetStream().Close();
+                        return res;
+                    }
                 }
                 return null;
             };
