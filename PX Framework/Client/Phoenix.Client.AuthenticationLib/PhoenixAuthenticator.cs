@@ -78,7 +78,7 @@ namespace Phoenix.Client.Authenticators
                     GetLogger().Error("Please make sure the order of loading for components subscribed to the late handshake event is the same on both client and server.");
 
                     // Disconnect
-                    ThrowAuthenticationFailure();
+                    ThrowAuthenticationFailure(null);
                     connection.Close();
                     return;
                 }
@@ -130,14 +130,26 @@ namespace Phoenix.Client.Authenticators
                     catch (Exception e)
                     {
                         GetLogger().Error("Failed to authenticate server login!", e);
-                        ThrowAuthenticationFailure();
+                        ThrowAuthenticationFailure(null);
                         client.Close();
                         return;
                     }
                     if (!args.ClientInput.ReadBoolean())
-                    {
+                    {  
+                        // Read disconnect reason
+                        DisconnectParams? disconnectParams = null;
+                        if (args.ClientInput.ReadBoolean())
+                        {
+                            string reason = args.ClientInput.ReadString();
+                            string[] parameters = new string[args.ClientInput.ReadInt()];
+                            for (int i = 0; i < parameters.Length; i++)
+                                parameters[i] = args.ClientInput.ReadString();
+                            disconnectParams = new DisconnectParams(reason, parameters);
+                        }
+                        
+                        // Error
                         GetLogger().Info("Authentication failure! Server rejected join request!");
-                        ThrowAuthenticationFailure();
+                        ThrowAuthenticationFailure(disconnectParams);
                     }
                     else
                     {
@@ -146,7 +158,7 @@ namespace Phoenix.Client.Authenticators
                 }
                 catch
                 {
-                    ThrowAuthenticationFailure();
+                    ThrowAuthenticationFailure(null);
                 }
             }
             else
@@ -158,9 +170,21 @@ namespace Phoenix.Client.Authenticators
                 try
                 {
                     if (!args.ClientInput.ReadBoolean())
-                    {
+                    {                        
+                        // Read disconnect reason
+                        DisconnectParams? disconnectParams = null;
+                        if (args.ClientInput.ReadBoolean())
+                        {
+                            string reason = args.ClientInput.ReadString();
+                            string[] parameters = new string[args.ClientInput.ReadInt()];
+                            for (int i = 0; i < parameters.Length; i++)
+                                parameters[i] = args.ClientInput.ReadString();
+                            disconnectParams = new DisconnectParams(reason, parameters);
+                        }
+
+                        // Error
                         GetLogger().Info("Authentication failure! Server rejected join request!");
-                        ThrowAuthenticationFailure();
+                        ThrowAuthenticationFailure(disconnectParams);
                     }
                     else
                     {
@@ -170,7 +194,7 @@ namespace Phoenix.Client.Authenticators
                 catch
                 {
                     GetLogger().Info("Authentication failure! Server rejected join request!");
-                    ThrowAuthenticationFailure();
+                    ThrowAuthenticationFailure(null);
                 }
             }
         }

@@ -61,7 +61,7 @@ namespace TestGameClient
             });
             while (true)
             {
-                for (int i2 = 0; i2 < 50; i2++)
+                for (int i2 = 0; i2 < 20; i2++)
                 {
                     GameClientFactory fac = new GameClientFactory();
                     fac.WithAuthenticator(new PhoenixAuthenticator(new PhoenixSession("test-" + i, "test-" + i)));
@@ -80,7 +80,7 @@ namespace TestGameClient
                     fac.WithAutoConnect(true);
 
                     // Build client
-                    GameClientBuildResult res = fac.Build("client-" + i); // TODO: fix disconnect reason getting lost
+                    GameClientBuildResult res = fac.Build("client-" + i);
                     if (!res.IsSuccess)
                     {
                         Console.Error.WriteLine("Error: failed to set up the client");
@@ -93,7 +93,7 @@ namespace TestGameClient
                         StartClient(res.Client, "test-" + i);
                     i++;
                 }
-                Console.WriteLine("Press enter to add 50 more clients");
+                Console.WriteLine("Press enter to add 20 more clients");
                 Console.ReadLine();
             }
             /*GameClient client = res.Client;

@@ -630,6 +630,8 @@ namespace Phoenix.Client
                 // (Late) program handshake
                 Logger.Debug("Late handshake connection: " + conn);
                 OnLateHandshake?.Invoke(conn, args);
+                if (clientConnectionAuthFailure)
+                    conn.Close();
             };
             CustomHandshakeProvider customHandshakeHandler = (conn, args) =>
             {
@@ -992,9 +994,11 @@ namespace Phoenix.Client
         }
 
         private bool clientConnectionAuthFailure = false;
-        internal void FailAuth()
+        internal void FailAuth(DisconnectParams? disconnectParams)
         {
             clientConnectionAuthFailure = true;
+            if (disconnectParams != null)
+                DisconnectReason = disconnectParams;
         }
     }
 }

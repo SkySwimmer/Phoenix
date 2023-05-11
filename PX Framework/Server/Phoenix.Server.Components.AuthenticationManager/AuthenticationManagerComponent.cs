@@ -170,8 +170,25 @@ namespace Phoenix.Server.Components
                     PlayerJoinResult res = manager.AddPlayer(ev.Client, playerID, displayName);
                     if (res.IsSuccess)
                     {
+                        // Connect success
                         ev.KeepConnectionOpen();
-                        ev.EventArgs.ClientOutput.WriteBoolean(true); // Connect success
+                        ev.EventArgs.ClientOutput.WriteBoolean(true);
+                    }
+                    else
+                    {
+                        // Connect failure
+                        ev.EventArgs.ClientOutput.WriteBoolean(false);
+                        ev.EventArgs.ClientOutput.WriteBoolean(res.DisconnectReason != null);
+                        if (res.DisconnectReason != null)
+                        {
+                            ev.EventArgs.ClientOutput.WriteString(res.DisconnectReason.Reason);
+                            ev.EventArgs.ClientOutput.WriteInt(res.DisconnectReason.ReasonParameters.Length);
+                            foreach (string param in res.DisconnectReason.ReasonParameters)
+                                ev.EventArgs.ClientOutput.WriteString(param);
+                            ev.Client.Close(res.DisconnectReason.Reason, res.DisconnectReason.ReasonParameters);
+                        }
+                        else
+                            ev.Client.Close();
                     }
                 }
                 else
@@ -207,7 +224,23 @@ namespace Phoenix.Server.Components
                     {
                         // Connect success
                         ev.KeepConnectionOpen();
-                        ev.EventArgs.ClientOutput.WriteBoolean(true); 
+                        ev.EventArgs.ClientOutput.WriteBoolean(true);
+                    }
+                    else
+                    {
+                        // Connect failure
+                        ev.EventArgs.ClientOutput.WriteBoolean(false);
+                        ev.EventArgs.ClientOutput.WriteBoolean(res.DisconnectReason != null);
+                        if (res.DisconnectReason != null)
+                        {
+                            ev.EventArgs.ClientOutput.WriteString(res.DisconnectReason.Reason);
+                            ev.EventArgs.ClientOutput.WriteInt(res.DisconnectReason.ReasonParameters.Length);
+                            foreach (string param in res.DisconnectReason.ReasonParameters)
+                                ev.EventArgs.ClientOutput.WriteString(param);
+                            ev.Client.Close(res.DisconnectReason.Reason, res.DisconnectReason.ReasonParameters);
+                        }
+                        else
+                            ev.Client.Close();
                     }
                 }
             }

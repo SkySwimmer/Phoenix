@@ -8,7 +8,7 @@ namespace Phoenix.Common.Networking.Connections
         private string reason;
         private string[] args;
 
-        public DisconnectParams(string reason, string[] args)
+        public DisconnectParams(string reason, params string[] args)
         {
             this.reason = reason;
             this.args = args;

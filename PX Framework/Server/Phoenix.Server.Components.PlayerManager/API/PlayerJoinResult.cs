@@ -1,4 +1,6 @@
-﻿namespace Phoenix.Server.Players
+﻿using Phoenix.Common.Networking.Connections;
+
+namespace Phoenix.Server.Players
 {
     /// <summary>
     /// Player join result object
@@ -7,11 +9,24 @@
     {
         private Player _player;
         private PlayerJoinResultStatus _status;
+        private DisconnectParams? _disconnectReason;
 
-        public PlayerJoinResult(Player player, PlayerJoinResultStatus status)
+        public PlayerJoinResult(Player player, PlayerJoinResultStatus status, DisconnectParams? disconnectReason)
         {
             _player = player;
             _status = status;
+            _disconnectReason = disconnectReason;
+        }
+
+        /// <summary>
+        /// Retrieves the disconnect reason if present, null if not present
+        /// </summary>
+        public DisconnectParams? DisconnectReason
+        {
+            get 
+            {
+                return _disconnectReason;
+            }
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace Phoenix.Server.Players
             Logger.GetLogger("player-manager").Info("Player login " + playerID + " from " + client.GetRemoteAddress() + " (logging in as " + displayName + ")");
             _server.ServerEventBus.Dispatch(new PlayerLoginEvent(_server, plr));
             if (!client.IsConnected())
-                return new PlayerJoinResult(plr, PlayerJoinResultStatus.GENERIC_FAILURE);
+                return new PlayerJoinResult(plr, PlayerJoinResultStatus.GENERIC_FAILURE, new DisconnectParams("connection.lost"));
 
             // Check player limit
             if (EnablePlayerLimit && Players.Length >= PlayerLimit)
@@ -67,8 +67,7 @@ namespace Phoenix.Server.Players
                 {
                     // Disconnect
                     Logger.GetLogger("player-manager").Info("Player login failure: " + displayName + " could not log in: server is full.");
-                    plr.Disconnect("disconnect.loginfailure.fullserver");
-                    return new PlayerJoinResult(plr, PlayerJoinResultStatus.SERVER_FULL);
+                    return new PlayerJoinResult(plr, PlayerJoinResultStatus.SERVER_FULL, new DisconnectParams("disconnect.loginfailure.fullserver"));
                 }
             }
 
@@ -85,20 +84,19 @@ namespace Phoenix.Server.Players
                 if (!tempBan)
                 {
                     if (!hasReason)
-                        plr.Disconnect("disconnect.loginfailure.banned.undefined");
+                        return new PlayerJoinResult(plr, PlayerJoinResultStatus.BANNED, new DisconnectParams("disconnect.loginfailure.banned.undefined"));
                     else
-                        plr.Disconnect("disconnect.loginfailure.banned", plr.PlayerData.GetShard("ban").GetString("reason"));
+                        return new PlayerJoinResult(plr, PlayerJoinResultStatus.BANNED, new DisconnectParams("disconnect.loginfailure.banned", plr.PlayerData.GetShard("ban").GetString("reason")));
                 }
                 else
                 {
                     long unban = plr.PlayerData.GetShard("ban").GetLong("unbanat");
                     DateTimeOffset unbanTime = DateTimeOffset.FromUnixTimeSeconds(unban);
                     if (!hasReason)
-                        plr.Disconnect("disconnect.loginfailure.tempbanned.undefined", unbanTime.DateTime.ToLongDateString(), unbanTime.DateTime.ToShortTimeString());
+                        return new PlayerJoinResult(plr, PlayerJoinResultStatus.TEMPBANNED, new DisconnectParams("disconnect.loginfailure.tempbanned.undefined", unbanTime.DateTime.ToLongDateString(), unbanTime.DateTime.ToShortTimeString()));
                     else
-                        plr.Disconnect("disconnect.loginfailure.tempbanned", unbanTime.DateTime.ToLongDateString(), unbanTime.DateTime.ToShortTimeString(), plr.PlayerData.GetShard("ban").GetString("reason"));
+                        return new PlayerJoinResult(plr, PlayerJoinResultStatus.TEMPBANNED, new DisconnectParams("disconnect.loginfailure.tempbanned", unbanTime.DateTime.ToLongDateString(), unbanTime.DateTime.ToShortTimeString(), plr.PlayerData.GetShard("ban").GetString("reason")));
                 }
-                return new PlayerJoinResult(plr, tempBan ? PlayerJoinResultStatus.TEMPBANNED : PlayerJoinResultStatus.BANNED);
             }
 
             // Disconnect already-connected players
@@ -118,7 +116,7 @@ namespace Phoenix.Server.Players
                 _players.Remove(playerID);
             };
             client.AddObject(plr);
-            return new PlayerJoinResult(plr, PlayerJoinResultStatus.SUCCESS);
+            return new PlayerJoinResult(plr, PlayerJoinResultStatus.SUCCESS, null);
         }
 
         /// <summary>
