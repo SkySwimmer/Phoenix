@@ -77,11 +77,16 @@ namespace Phoenix.Unity.PGL
         /// <summary>
         /// Phoenix API server
         /// </summary>
-        public static string? API = null;
+        public static string API = null;
 
         private static bool _setup;
         private static Logger _logger;
         private static List<Action> tickHandlers = new List<Action>();
+
+        /// <summary>
+        /// Command line arguments
+        /// </summary>
+        public static Dictionary<string, string> CommandLineArguments = new Dictionary<string, string>();
 
         /// <summary>
         /// Sets up the runtime environment (requires to be run from Unity, not on a different thread)
@@ -189,6 +194,7 @@ namespace Phoenix.Unity.PGL
             }
 
             // Call init event
+            CommandLineArguments = arguments;
             OnInit?.Invoke();
 
             // Set up ticker
@@ -260,7 +266,7 @@ namespace Phoenix.Unity.PGL
                 game["Mod-Support"] = "False";
             game["Session"] = "OFFLINE";
 
-#if UNITY_STANDALONE
+#if !UNITY_EDITOR
             // Production client, we need to load the game document
 
             // Check arguments
@@ -347,7 +353,7 @@ namespace Phoenix.Unity.PGL
                 return false;
             }
 #endif
-#if !UNITY_STANDALONE
+#if UNITY_EDITOR
             string runPath = "Run";
 
             // Editor mode, check for a editor configuration
@@ -362,6 +368,7 @@ namespace Phoenix.Unity.PGL
                             "  Digital-Seal: W2dhbWVpZDp0ZXN0LHtz....\n" +
                             "  Debug-Folder: Run\n" +
                             "  Log-Level: TRACE");
+                game["Offline-Support"] = "True";
             }
             else
             {
@@ -537,6 +544,10 @@ namespace Phoenix.Unity.PGL
             // Mod support
             if (game["Mod-Support"] == "True")
             {
+                // Prepare
+                _logger.Info("Loading mods...");
+                ModManager manager = new ModManager();
+                
                 // Check if the platform can run mods
                 bool platformSupportsMods = false;
                 switch (Application.platform)
@@ -558,8 +569,53 @@ namespace Phoenix.Unity.PGL
                 // Enable support if posssible
                 if (platformSupportsMods)
                 {
-                    _logger.Info("Loading mods...");
-                    ModManager manager = new ModManager();
+                    // Check integrated server support
+                    try
+                    {
+                        // Check support
+                        bool hasServerAssemblies = false;
+                        bool hasIntegratedServerAssemblies = false;
+                        Type bindingsType = null;
+                        foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                        {
+                            try
+                            {
+                                if (asm.GetType("Phoenix.Server.GameServer") != null)
+                                    hasServerAssemblies = true;
+                                if (asm.GetType("Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer") != null)
+                                    hasIntegratedServerAssemblies = true;
+                            }
+                            catch
+                            {
+                            }
+                        }
+                        if (hasServerAssemblies && hasIntegratedServerAssemblies)
+                        {
+                            // Load bindings
+                            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+                            {
+                                try
+                                {
+                                    bindingsType = asm.GetType("Phoenix.Unity.PGL.Mods.IntegratedServerSupport.ModIntegratedServerSupportBindings");
+                                    if (bindingsType != null)
+                                        break;
+                                }
+                                catch
+                                {
+                                }
+                            }
+
+                            // Bind
+                            if (bindingsType != null)
+                                bindingsType.GetMethod("Bind", BindingFlags.Static | BindingFlags.Public).Invoke(null, new object[] { manager });
+                        }
+                    }
+                    catch
+                    {
+                        // No support
+                    }
+
+                    // Load mods
                     PGL_TickUtil.cleanupAction = () => manager.Unload();
                     Directory.CreateDirectory(Game.SaveData + "/Mods");
                     foreach (FileInfo mod in new DirectoryInfo(Game.SaveData + "/Mods").GetFiles("*.pmbp"))
@@ -595,15 +651,15 @@ namespace Phoenix.Unity.PGL
                             Type[] types = mod.Assembly.GetTypes();
                             foreach (Type t in types)
                             {
-                                if (t.GetCustomAttribute<ModComponent>() != null)
+                                if (t.GetCustomAttribute<Client.ModComponent>() != null)
                                 {
                                     _logger.Debug("Loading component type: " + t.Name + "...");
                                     if (!typeof(Component).IsAssignableFrom(t) && !typeof(IComponentPackage).IsAssignableFrom(t))
                                     {
-                                        _logger.Error("Could not load mod component: " + t.FullName + ", mod: " + mod.Package.Name + ": not a server component or package!");
+                                        _logger.Error("Could not load mod component: " + t.FullName + ", mod: " + mod.Package.Name + ": not a client component or package!");
                                         continue;
                                     }
-                                    ConstructorInfo? constr = t.GetConstructor(new Type[0]);
+                                    ConstructorInfo constr = t.GetConstructor(new Type[0]);
                                     if (constr == null)
                                     {
                                         _logger.Error("Could not load mod component: " + t.FullName + ", mod: " + mod.Package.Name + ": no constructor that takes 0 arguments!");

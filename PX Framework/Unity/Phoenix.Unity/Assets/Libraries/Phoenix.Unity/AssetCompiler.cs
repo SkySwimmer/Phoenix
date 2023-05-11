@@ -13,7 +13,7 @@ namespace Phoenix.Unity.Bindings
         private static Logger Logger = Logger.GetLogger("Asset Compiler");
         private static List<IAssetCompiler> Compilers = new List<IAssetCompiler>()
         {
-#if !UNITY_STANDALONE
+#if UNITY_EDITOR
             new ChartCompiler()
 #endif
         };

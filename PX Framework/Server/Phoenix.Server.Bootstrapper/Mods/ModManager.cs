@@ -52,6 +52,7 @@ namespace Phoenix.Server
             if (i != null)
             {
                 logger.Fatal("Duplicate mod found!\n" +
+                    "Mod id: " + id + "\n\n" +
                     "Mod file: " + i.Package.Name + "\n" +
                     "Version: " + i.Version + "\n\n" +
                     "Mod file: " + mod.Name + "\n"

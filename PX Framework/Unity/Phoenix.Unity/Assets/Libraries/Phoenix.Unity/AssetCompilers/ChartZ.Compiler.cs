@@ -5,7 +5,7 @@
  * 
  */
 
-#if !UNITY_STANDALONE
+#if UNITY_EDITOR
 
 using System;
 using System.Collections.Generic;
@@ -141,7 +141,7 @@ namespace ChartZ.Compiler
         /// Compiles a given file
         /// </summary>
         /// <param name="commands">Commands to run</param>
-        public static bool Compile(string[] commands, string file = null, Stream? outputStream = null)
+        public static bool Compile(string[] commands, string file = null, Stream outputStream = null)
         {
             bool built = false;
 

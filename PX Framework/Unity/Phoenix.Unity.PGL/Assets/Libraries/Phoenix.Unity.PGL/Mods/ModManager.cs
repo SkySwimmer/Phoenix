@@ -22,6 +22,12 @@ namespace Phoenix.Unity.PGL.Mods
         private List<ModInfo> mods = new List<ModInfo>();
         private static Dictionary<string, Assembly> assemblyCache = new Dictionary<string, Assembly>();
         private Logger logger = Logger.GetLogger("Mod Manager");
+        internal delegate void ModLoadInternalHandler(string id, string version, string type, BinaryPackage package, ModInfo mod);
+
+        /// <summary>
+        /// Called when a mod is being loaded (INTERNAL FUNCTIONALITY)
+        /// </summary>
+        internal event ModLoadInternalHandler OnLoadModInternal;
 
         /// <summary>
         /// Unloads all mods
@@ -61,8 +67,10 @@ namespace Phoenix.Unity.PGL.Mods
         /// <param name="dataDir">Data directory</param>
         public ModInfo Load(FileStream mod, string dataDir)
         { 
+            // TODO: client mod loading (to test)
+            // TODO: server mod loading (to test)
             // TODO: client mod debugging
-            // TODO: server mod loading
+            // TODO: server mod debugging
             
             if (locked)
                 throw new ArgumentException("Locked");
@@ -83,6 +91,7 @@ namespace Phoenix.Unity.PGL.Mods
             if (i != null)
             {
                 throw new ArgumentException("Duplicate mod found!\n" +
+                    "Mod id: " + id + "\n\n" +
                     "Mod file: " + i.Package.Name + "\n" +
                     "Version: " + i.Version + "\n\n" +
                     "Mod file: " + mod.Name + "\n"
@@ -113,7 +122,7 @@ namespace Phoenix.Unity.PGL.Mods
                     }
 
                     // Find in package
-                    BinaryPackageEntry? ent = package.GetEntry("ClientDependencies/" + nm.Name + ".dll");
+                    BinaryPackageEntry ent = package.GetEntry("ClientDependencies/" + nm.Name + ".dll");
                     if (ent != null)
                     {
                         // Load assembly
@@ -203,6 +212,10 @@ namespace Phoenix.Unity.PGL.Mods
             }
             logger.Debug("Loading mod instance...");
             modInst.Load();
+
+            // Call loading for extensions
+            OnLoadModInternal?.Invoke(id, version, type, package, info);
+            
             return info;
         }
 

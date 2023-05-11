@@ -14,6 +14,17 @@
             Abstract class for Phoenix integrated servers
             </summary>
         </member>
+        <member name="T:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.GameServerCreatedHandler">
+            <summary>
+            GameServer creation event handler
+            </summary>
+            <param name="server">GameServer instance that was just created</param>
+        </member>
+        <member name="E:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.OnCreateServer">
+            <summary>
+            Called when a game server is created
+            </summary>
+        </member>
         <member name="M:Phoenix.Client.IntegratedServerBootstrapper.PhoenixIntegratedServer.CreateConnection(Phoenix.Common.Networking.Registry.ChannelRegistry)">
             <summary>
             Creates a integrated client connection

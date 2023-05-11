@@ -564,6 +564,11 @@
             Checks if the server is running
             </summary>
         </member>
+        <member name="T:Phoenix.Server.ModComponent">
+            <summary>
+            Marks this type as a mod component
+            </summary>
+        </member>
         <member name="T:Phoenix.Server.ServerComponent">
             <summary>
             Component type more based around the basic game server
