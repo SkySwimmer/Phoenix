@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+﻿#if !UNITY_STANDALONE
 
 using Phoenix.Common.IO;
 using System.IO;

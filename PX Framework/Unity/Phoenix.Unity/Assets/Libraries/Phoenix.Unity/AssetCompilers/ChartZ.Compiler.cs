@@ -5,7 +5,7 @@
  * 
  */
 
-#if UNITY_EDITOR
+#if !UNITY_STANDALONE
 
 using System;
 using System.Collections.Generic;
@@ -463,7 +463,8 @@ namespace ChartZ.Compiler
 
                                         // Write segmetns
                                         WriteInt(added.Count, output);
-                                        output.Write(segments.ToArray());
+                                        byte[] d = segments.ToArray();
+                                        output.Write(d, 0, d.Length);
 
                                         break;
                                     }
@@ -567,7 +568,8 @@ namespace ChartZ.Compiler
                                         outp["tags"] = tags;
                                         outp["entry"] = added.IndexOf(args[2]);
                                         outp["chart"] = segments;
-                                        output.Write(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outp)));
+                                        byte[] d = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(outp));
+                                        output.Write(d, 0, d.Length);
 
                                         break;
                                     }
@@ -1093,14 +1095,14 @@ namespace ChartZ.Compiler
             byte[] d = BitConverter.GetBytes(i);
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(d);
-            strm.Write(d);
+            strm.Write(d, 0, d.Length);
         }
 
         private static void WriteString(string str, Stream strm)
         {
             byte[] d = Encoding.UTF8.GetBytes(str);
             WriteInt(d.Length, strm);
-            strm.Write(d);
+            strm.Write(d, 0, d.Length);
         }
     }
 }

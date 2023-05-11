@@ -23,6 +23,7 @@ using System.Reflection;
 using Phoenix.Unity.PGL.Internal.Packages;
 using Phoenix.Unity.PGL.Mods;
 using System.IO.Compression;
+using Phoenix.Client.Components;
 
 namespace Phoenix.Unity.PGL
 {
@@ -259,7 +260,7 @@ namespace Phoenix.Unity.PGL
                 game["Mod-Support"] = "False";
             game["Session"] = "OFFLINE";
 
-#if !UNITY_EDITOR
+#if UNITY_STANDALONE
             // Production client, we need to load the game document
 
             // Check arguments
@@ -346,7 +347,7 @@ namespace Phoenix.Unity.PGL
                 return false;
             }
 #endif
-#if UNITY_EDITOR
+#if !UNITY_STANDALONE
             string runPath = "Run";
 
             // Editor mode, check for a editor configuration
@@ -451,7 +452,7 @@ namespace Phoenix.Unity.PGL
                             throw new Exception();
                         Dictionary<string, string> data = new Dictionary<string, string>();
                         string successMsg = "Game authenticated:";
-                        foreach (string line in res.Split("\n"))
+                        foreach (string line in res.Split('\n'))
                         {
                             if (line == "")
                                 continue;
@@ -536,34 +537,97 @@ namespace Phoenix.Unity.PGL
             // Mod support
             if (game["Mod-Support"] == "True")
             {
-                _logger.Info("Loading mods...");
-                ModManager manager = new ModManager();
-                PGL_TickUtil.cleanupAction = () => manager.Unload();
-                Directory.CreateDirectory(Game.GameFiles + "/Mods");
-                foreach (FileInfo mod in new DirectoryInfo(Game.GameFiles + "/Mods").GetFiles("*.pmbp"))
+                // Check if the platform can run mods
+                bool platformSupportsMods = false;
+                switch (Application.platform)
                 {
-                    _logger.Info("Loading mod package: " + mod.Name + "...");
-                    Directory.CreateDirectory(Game.GameFiles + "/Mods/" + Path.GetFileNameWithoutExtension(mod.Name));
-                    try
-                    {
-                        // Load mod
-                        FileStream strm = mod.OpenRead();
-                        ModInfo info = manager.Load(strm, Path.GetFullPath(Game.GameFiles + "/Mods/" + Path.GetFileNameWithoutExtension(mod.Name)));
-
-                        // Add tick handler
-                        tickHandlers.Add(() => info.Instance.Tick());
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.Fatal("Mod loading failed: " + mod.Name, e);
-                        OnSetupFailure?.Invoke(InitFailureType.MOD_LOAD_FAILURE);
-                        return false;
-                    }
+                    case UnityEngine.RuntimePlatform.OSXEditor:
+                    case UnityEngine.RuntimePlatform.OSXPlayer:
+                    case UnityEngine.RuntimePlatform.WindowsPlayer:
+                    case UnityEngine.RuntimePlatform.WindowsEditor:
+                    case UnityEngine.RuntimePlatform.Android:
+                    case UnityEngine.RuntimePlatform.LinuxPlayer:
+                    case UnityEngine.RuntimePlatform.LinuxEditor:
+                    case UnityEngine.RuntimePlatform.LinuxServer:
+                    case UnityEngine.RuntimePlatform.WindowsServer:
+                    case UnityEngine.RuntimePlatform.OSXServer:
+                        platformSupportsMods = true;
+                        break;
                 }
-                manager.LoadFinish();
 
-                // Bind game client creation
-                // TODO
+                // Enable support if posssible
+                if (platformSupportsMods)
+                {
+                    _logger.Info("Loading mods...");
+                    ModManager manager = new ModManager();
+                    PGL_TickUtil.cleanupAction = () => manager.Unload();
+                    Directory.CreateDirectory(Game.SaveData + "/Mods");
+                    foreach (FileInfo mod in new DirectoryInfo(Game.SaveData + "/Mods").GetFiles("*.pmbp"))
+                    {
+                        _logger.Info("Loading mod package: " + mod.Name + "...");
+                        Directory.CreateDirectory(Game.SaveData + "/Mods/" + Path.GetFileNameWithoutExtension(mod.Name));
+                        try
+                        {
+                            // Load mod
+                            FileStream strm = mod.OpenRead();
+                            ModInfo info = manager.Load(strm, Path.GetFullPath(Game.SaveData + "/Mods/" + Path.GetFileNameWithoutExtension(mod.Name)));
+
+                            // Add tick handler
+                            tickHandlers.Add(() => info.Instance.Tick());
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Fatal("Mod loading failed: " + mod.Name, e);
+                            OnSetupFailure?.Invoke(InitFailureType.MOD_LOAD_FAILURE);
+                            return false;
+                        }
+                    }
+                    manager.LoadFinish();
+
+                    // Bind game client creation
+                    GameClientFactory.OnCreateClient += (client) =>
+                    {
+                        // Load components
+                        _logger.Debug("Adding mod components to client...");
+                        foreach (ModInfo mod in manager.GetMods())
+                        {
+                            _logger.Info("Loading mod components from " + mod.ID + "...");
+                            Type[] types = mod.Assembly.GetTypes();
+                            foreach (Type t in types)
+                            {
+                                if (t.GetCustomAttribute<ModComponent>() != null)
+                                {
+                                    _logger.Debug("Loading component type: " + t.Name + "...");
+                                    if (!typeof(Component).IsAssignableFrom(t) && !typeof(IComponentPackage).IsAssignableFrom(t))
+                                    {
+                                        _logger.Error("Could not load mod component: " + t.FullName + ", mod: " + mod.Package.Name + ": not a server component or package!");
+                                        continue;
+                                    }
+                                    ConstructorInfo? constr = t.GetConstructor(new Type[0]);
+                                    if (constr == null)
+                                    {
+                                        _logger.Error("Could not load mod component: " + t.FullName + ", mod: " + mod.Package.Name + ": no constructor that takes 0 arguments!");
+                                        continue;
+                                    }
+                                    if (typeof(Component).IsAssignableFrom(t))
+                                    {
+                                        Component comp = (Component)constr.Invoke(new object[0]);
+
+                                        // Add to client
+                                        client.AddComponent(comp);
+                                    }
+                                    else
+                                    {
+                                        IComponentPackage comp = (IComponentPackage)constr.Invoke(new object[0]);
+
+                                        // Add to client
+                                        client.AddComponentPackage(comp);
+                                    }
+                                }
+                            }
+                        }
+                    };
+                }
             }
 
             // Log completion

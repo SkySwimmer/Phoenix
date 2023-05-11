@@ -17,8 +17,6 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
         private bool locked = false;
         private GameServer? srv;
 
-        // TODO: server mod loading
-
         /// <summary>
         /// GameServer creation event handler
         /// </summary>

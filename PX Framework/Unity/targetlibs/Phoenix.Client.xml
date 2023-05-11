@@ -155,6 +155,17 @@
             Game Client Builder
             </summary>
         </member>
+        <member name="T:Phoenix.Client.GameClientFactory.GameClientCreatedHandler">
+            <summary>
+            GameClient creation event handler
+            </summary>
+            <param name="client">GameClient instance that was just created</param>
+        </member>
+        <member name="E:Phoenix.Client.GameClientFactory.OnCreateClient">
+            <summary>
+            Called when a game client is created
+            </summary>
+        </member>
         <member name="F:Phoenix.Client.GameClientFactory.WarnMissingAuthenticator">
             <summary>
             Controls if the factory should print a warning message in case there is no authenticator present
