@@ -483,7 +483,7 @@ namespace Phoenix.Client
         public void ClientTick()
         {
             if (!Connected)
-                throw new InvalidOperationException("Client is not connected");
+                return;
 
             // Tick client
 
