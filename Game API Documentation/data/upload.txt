@@ -19,6 +19,7 @@ Furthermore note that abuse will result in deletion of the game and full ban fro
 The game descriptor file:
 A game descriptor is needed for a Phoenix game to launch outside of debug mode, game descriptors contains important launch information.
 The launcher searches for files named <gameid>.game, eg. soty.game. The Phoenix API servers automatically append important fields for online play.
+The launcher also will search for a file named <gameid>-<majorversion>.game if a version is specified in the launcher binary, you can use this to archive older versions.
 
 The format of a game descriptor file is like this:
    Key: Value
