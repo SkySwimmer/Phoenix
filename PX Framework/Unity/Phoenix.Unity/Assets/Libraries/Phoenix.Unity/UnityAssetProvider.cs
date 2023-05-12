@@ -40,8 +40,14 @@ namespace Phoenix.Unity.Bindings
         {
             if (Directory.Exists("Assets/Resources/PhoenixRemapped"))
             {
-                Debug.LogError("Found a folder named PhoenixRemapped in Resources, unable to continue due to a conflict with the asset remapper.");
-                throw new BuildFailedException("Conflicting asset folder detected: Assets/Resources/PhoenixRemapped, Phoenix uses this folder internally, please delete it.");
+                try
+                {
+                    Directory.Delete("Assets/Resources/PhoenixRemapped", true);
+                }
+                catch
+                {
+                    Directory.Delete("Assets/Resources/PhoenixRemapped");
+                }
             }
 
             // Compile a list of all resources

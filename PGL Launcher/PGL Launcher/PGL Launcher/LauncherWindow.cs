@@ -90,7 +90,7 @@ namespace PGL_Launcher
             }
 
             // Retrieve game information document
-            string url = Program.PX_SERVER + "/api/data/files/" + Program.GameProperties["GameID"] + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp + "/" + Program.DIGITAL_SEAL.gameid + ".game";
+            string url = Program.PX_SERVER + "/api/data/files/" + Program.GameProperties["GameID"] + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp;
 
             // Attempt to download the game document
             bool connected = true;
@@ -98,7 +98,7 @@ namespace PGL_Launcher
             string gameDoc = null;
             void downloadGameDoc()
             {
-                gameDoc = DownloadUtils.DownloadString(url, "GET", headers: new Dictionary<string, string>()
+                gameDoc = DownloadUtils.DownloadString(url + "/" + Program.DIGITAL_SEAL.gameid + ".game", "GET", headers: new Dictionary<string, string>()
                 {
                     ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
                     ["Product-Key"] = Program.GameProperties["ProductKey"]
@@ -125,6 +125,35 @@ namespace PGL_Launcher
                             game[key] = value;
                         }
                     }
+
+                    // Attempt to find version-specific data
+                    try
+                    {
+                        if (Program.GameProperties.ContainsKey("GameVersion"))
+                        {
+                            string gameDocVerSpecific = DownloadUtils.DownloadString(url + "/" + Program.DIGITAL_SEAL.gameid + "-" + Program.GameProperties["GameVersion"] + ".game", "GET", headers: new Dictionary<string, string>()
+                            {
+                                ["Digital-Seal"] = Program.GameProperties["DigitalSeal"],
+                                ["Product-Key"] = Program.GameProperties["ProductKey"]
+                            });
+
+                            if (gameDocVerSpecific != null)
+                            {
+                                // Parse game document
+                                foreach (string line in gameDocVerSpecific.Replace("\r", "").Split('\n'))
+                                {
+                                    if (!line.StartsWith("#") && line.Contains(": "))
+                                    {
+                                        string key = line.Remove(line.IndexOf(": "));
+                                        string value = line.Substring(line.IndexOf(": ") + 2);
+                                        game[key] = value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {}
 
                     // Save document (without tokens)
                     string doc = "";

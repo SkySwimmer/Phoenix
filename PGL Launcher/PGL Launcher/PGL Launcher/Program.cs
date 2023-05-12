@@ -20,7 +20,7 @@ namespace PGL_Launcher
         /// <summary>
         /// API endpoint
         /// </summary>
-        public const string PX_SERVER = "https://aerialworks.ddns.net/";
+        public static string PX_SERVER = "https://aerialworks.ddns.net/";
 
         /// <summary>
         /// Game data path
@@ -83,6 +83,14 @@ namespace PGL_Launcher
                 // Open editor
                 Application.Run(new LauncherEditor());
                 return;
+            }
+
+            // Set server if present
+            if (GameProperties.ContainsKey("PhoenixServer"))
+            {
+                PX_SERVER = GameProperties["PhoenixServer"];
+                if (!PX_SERVER.EndsWith("/"))
+                    PX_SERVER += "/";
             }
 
             // Preparation
