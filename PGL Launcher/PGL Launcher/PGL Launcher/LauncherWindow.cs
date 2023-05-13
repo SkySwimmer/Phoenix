@@ -90,7 +90,7 @@ namespace PGL_Launcher
             }
 
             // Retrieve game information document
-            string url = Program.PX_SERVER + "/api/data/files/" + Program.GameProperties["GameID"] + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp;
+            string url = Program.PX_SERVER + "/data/files/" + Program.GameProperties["GameID"] + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp;
 
             // Attempt to download the game document
             bool connected = true;
@@ -595,10 +595,10 @@ namespace PGL_Launcher
                     game["Game-Storage-Path"] = Program.GAME_DIRECTORY + "/gamefiles";
                     game["Player-Data-Path"] = Program.GAME_DIRECTORY + "/playerdata";
                     game["Save-Data-Path"] = Program.GAME_DIRECTORY + "/savedata";
-                    game["Data-Download-Base-Url"] = Program.PX_SERVER + "/api/data/files/" + Program.DIGITAL_SEAL.gameid + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp;
+                    game["Data-Download-Base-Url"] = Program.PX_SERVER + "/data/files/" + Program.DIGITAL_SEAL.gameid + "/" + Program.DIGITAL_SEAL.producthash + "/" + Program.DIGITAL_SEAL.timestamp;
                     game["Product-Key"] = Program.GameProperties["ProductKey"];
                     game["Digital-Seal"] = Program.GameProperties["DigitalSeal"];
-                    game["Refresh-Endpoint"] = Program.PX_SERVER + "/api/tokens/refresh";
+                    game["Refresh-Endpoint"] = Program.PX_SERVER + "/tokens/refresh";
 
                     // Start a TCP server for data handoff
                     Random rnd = new Random();

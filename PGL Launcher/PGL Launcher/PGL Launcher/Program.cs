@@ -20,7 +20,7 @@ namespace PGL_Launcher
         /// <summary>
         /// API endpoint
         /// </summary>
-        public static string PX_SERVER = "https://aerialworks.ddns.net/";
+        public static string PX_SERVER = "https://aerialworks.ddns.net/api/";
 
         /// <summary>
         /// Game data path

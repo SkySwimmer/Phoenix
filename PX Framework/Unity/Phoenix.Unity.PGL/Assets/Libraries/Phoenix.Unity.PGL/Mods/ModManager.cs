@@ -67,8 +67,8 @@ namespace Phoenix.Unity.PGL.Mods
         /// <param name="dataDir">Data directory</param>
         public ModInfo Load(FileStream mod, string dataDir)
         { 
-            // TODO: client mod loading (to test)
-            // TODO: server mod loading (to test)
+            // TODO: client mod components (to test)
+            // TODO: server mod components (to test)
             // TODO: client mod debugging
             // TODO: server mod debugging
             
