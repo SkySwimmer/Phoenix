@@ -9,7 +9,7 @@
         /// Handler for the Retry method
         /// </summary>
         /// <param name="request">New login request</param>
-        public delegate void RetryCallbackHandler(Dictionary<string, object> request);
+        public delegate bool RetryCallbackHandler(Dictionary<string, object> request);
 
         private RetryCallbackHandler _retryCallbackHandler;
         private Dictionary<string, object> _serverResponse;
@@ -26,9 +26,9 @@
         /// Retries the request with additional data
         /// </summary>
         /// <param name="request">New request message (recommended to send the old message with the missing data added to it)</param>
-        public void Retry(Dictionary<string, object> request)
+        public bool Retry(Dictionary<string, object> request)
         {
-            _retryCallbackHandler(request);
+            return _retryCallbackHandler(request);
         }
 
         /// <summary>
