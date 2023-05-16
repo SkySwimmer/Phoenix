@@ -48,23 +48,20 @@
                 if (!threads.Any(t => t.IsAvailable))
                 {
                     // Start new thread
-                    lock (_threads)
+                    AsyncTaskThread th = new AsyncTaskThread();
+                    _threads.Add(th);
+                    Thread thI = new Thread(() =>
                     {
-                        AsyncTaskThread th = new AsyncTaskThread();
-                        _threads.Add(th);
-                        Thread thI = new Thread(() =>
-                        {
-                            // Start
-                            th.Run();
+                        // Start
+                        th.Run();
 
-                            // End
-                            lock (_threads)
-                                _threads.Remove(th);
-                        });
-                        thI.Name = "Async Task Thread";
-                        thI.IsBackground = true;
-                        thI.Start();
-                    }
+                        // End
+                        lock (_threads)
+                            _threads.Remove(th);
+                    });
+                    thI.Name = "Async Task Thread";
+                    thI.IsBackground = true;
+                    thI.Start();
                 }
             }
 
