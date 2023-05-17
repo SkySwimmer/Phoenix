@@ -160,7 +160,9 @@ namespace Phoenix.Client.ServerList
                                 buffer = new MemoryStream();
 
                                 // Verify
-                                if (data != null && data.id != null && data.ownerId != null && data.protocol != null && data.version != null)
+                                if (data != null && data.id != null && data.ownerId != null && data.protocol != null && data.version != null
+                                    && (!FilterIncompatiblePhoenixProtocolVersions || data.protocol.phoenixVersion == Connections.PhoenixProtocolVersion)
+                                    && (!FilterIncompatibleProgramProtocolVersions || data.protocol.version == ProgramProtocolVersion))
                                 {
                                     // Ping on another thread
                                     Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
