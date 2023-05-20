@@ -203,13 +203,13 @@ namespace Phoenix.Common.Networking.Impl
                                 throw new PhoenixConnectException("Connection failed: invalid server certificate", ErrorType.INVALID_CERTIFICATE);
                             }
                             logger.Debug("Verifying certificate generation timestamp...");
-                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < certificate.GenerationTimestamp || certificate.GenerationTimestamp != _clientCertificate.GenerationTimestamp)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < (certificate.GenerationTimestamp - 120000) || certificate.GenerationTimestamp != _clientCertificate.GenerationTimestamp)
                             {
                                 logger.Trace("Certificate verification failure!");
                                 throw new PhoenixConnectException("Connection failed: invalid server certificate", ErrorType.INVALID_CERTIFICATE);
                             }
                             logger.Debug("Verifying current server timestamp...");
-                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < certificate.ServerTime || DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() > certificate.ServerTime + 60000)
+                            if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < (certificate.ServerTime - 120000) || DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() > certificate.ServerTime + 120000)
                             {
                                 logger.Trace("Certificate verification failure!");
                                 throw new PhoenixConnectException("Connection failed: invalid server certificate", ErrorType.INVALID_CERTIFICATE);
