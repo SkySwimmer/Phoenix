@@ -99,18 +99,15 @@ namespace Phoenix.Tests.Server
             Scene? sc = ev.Player.GetObject<SceneReplicator>()?.LoadScene("Scenes/WorldScene");
             if (sc != null)
             {
-                ServiceManager.GetService<TaskManager>().Oneshot(() =>
+                SceneObject obj = sc.SpawnPrefab("TestReplicationPrefab");
+                obj.Name = "Player-" + ev.Player.PlayerID;
+                ev.Player.AddObject(new TestPlayerCharacterContainer()
                 {
-                    SceneObject obj = sc.SpawnPrefab("TestReplicationPrefab");
-                    obj.Name = "Player-" + ev.Player.PlayerID;
-                    ev.Player.AddObject(new TestPlayerCharacterContainer()
-                    {
-                        Character = obj
-                    });
-                    obj.OwningConnection = ev.Player.Client;
-                    obj.AddComponent<TestObjectComponent>();
-                    GetLogger().Info(obj.Name + ": " + obj.ID);
+                    Character = obj
                 });
+                obj.OwningConnection = ev.Player.Client;
+                obj.AddComponent<TestObjectComponent>();
+                GetLogger().Info(obj.Name + ": " + obj.ID);
             }
         }
 

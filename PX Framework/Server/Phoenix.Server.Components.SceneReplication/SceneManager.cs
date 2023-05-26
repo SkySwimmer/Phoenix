@@ -13,7 +13,6 @@ namespace Phoenix.Server.SceneReplication
     /// </summary>
     public class SceneManager : IService
     {
-        // TODO: fix problems with sync and fix lag issue due to the task manager being overwhelmed easily with this code
         private GameServer _server;
 
         public SceneManager(GameServer server)

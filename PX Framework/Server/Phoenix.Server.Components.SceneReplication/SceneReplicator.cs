@@ -342,6 +342,14 @@ namespace Phoenix.Server.SceneReplication
         {
             Scene sc = _manager.GetScene(scene, room);
 
+            // Check method
+            if (loadMethod == SceneLoadMethod.SINGLE)
+            {
+                // Desub from other scenes
+                foreach (string scN in SubscribedScenes)
+                    DesubscribeFromScene(scN);
+            }
+
             // Send load command
             SceneReplicationChannel channel;
             try

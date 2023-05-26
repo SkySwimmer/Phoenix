@@ -11,6 +11,7 @@ using Phoenix.Client.SceneReplicatorLib.Messages;
 using Phoenix.Common;
 using System.Linq;
 using Component = UnityEngine.Component;
+using Phoenix.Unity.PGL.Internal;
 
 namespace Phoenix.Unity.SceneReplication
 {
@@ -195,8 +196,9 @@ namespace Phoenix.Unity.SceneReplication
 
         public override void RunOnNextFrameUpdate(Action action)
         {
-            component.ServiceManager.GetService<TaskManager>().Oneshot(action);
+            PGL_TickUtil.Schedule(action);
         }
+
         public override void LoadScene(string scenePath, bool additive)
         {
             // Begin loading
