@@ -81,8 +81,7 @@ namespace Phoenix.Common.Logging.Impl
                     // Error log messages
                     Console.Error.WriteLine(GlobalMessagePrefix + message);
                     Console.Error.WriteLine("Exception: " + exception.GetType().FullName + (exception.Message != null ? ": " + exception.Message : ""));
-                    if (Debugger.IsAttached || Game.DebugMode)
-                        Console.Error.WriteLine(exception.StackTrace);
+                    Console.Error.WriteLine(exception.StackTrace);
                 }
                 else
                 {
@@ -95,8 +94,7 @@ namespace Phoenix.Common.Logging.Impl
                         Console.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
                         e = e.InnerException;
                     }
-                    if (Debugger.IsAttached || Game.DebugMode)
-                        Console.WriteLine(exception.StackTrace);
+                    Console.WriteLine(exception.StackTrace);
                 }
                 Console.ResetColor();
                 writing = false;

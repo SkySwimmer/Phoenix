@@ -53,8 +53,7 @@ namespace Phoenix.Common.Logging.Impl
                     FileWriter.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
                     e = e.InnerException;
                 }
-                if (Debugger.IsAttached || Game.DebugMode)
-                    FileWriter.WriteLine(exception.StackTrace);
+                FileWriter.WriteLine(exception.StackTrace);
                 FileWriter.Flush();
             }
         }

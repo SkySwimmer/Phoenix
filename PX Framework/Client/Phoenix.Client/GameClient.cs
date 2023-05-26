@@ -615,7 +615,7 @@ namespace Phoenix.Client
             Connection conn = provider.Provide();
             if (conn.IsConnected())
             {
-                Logger.Error("Connection already open!");
+                Logger.Error("Connection failure! Connection already open!");
                 DisconnectReason = new DisconnectParams("connect.error.alreadyopen", new string[0]);
                 OnStartFailure?.Invoke(conn, ClientStartFailureType.CONNECTION_ALREADY_OPEN);
                 throw new InvalidOperationException("Connection already open");
@@ -639,7 +639,7 @@ namespace Phoenix.Client
                 if (args.HasFailed())
                 {
                     // Uhhhh problem
-                    Logger.Error("Unexpected handshake traffic!");
+                    Logger.Error("Handshake failure! Unexpected handshake traffic!");
                     handledHandshakeFailure = true;
                     DisconnectReason = new DisconnectParams("connect.error.connectfailure.unexpectedtraffic", new string[0]);
                     OnStartFailure?.Invoke(conn, ClientStartFailureType.HANDSHAKE_FAILURE_UNEXPECTED_TRAFFIC);
@@ -675,7 +675,7 @@ namespace Phoenix.Client
                 if (_gameID != rGID)
                 {
                     // Fail
-                    Logger.Error("Game ID mismatch!");
+                    Logger.Error("Handshake failure! Game ID mismatch!");
                     args.FailHandshake();
                     handledHandshakeFailure = true;
                     DisconnectReason = new DisconnectParams("connect.error.connectfailure.gamemismatch", new string[] { rGID, _gameID });
@@ -686,7 +686,7 @@ namespace Phoenix.Client
                 else if (_protocol != rProtocol)
                 {
                     // Fail
-                    Logger.Error("Game version mismatch!");
+                    Logger.Error("Handshake failure! Game version mismatch!");
                     args.FailHandshake();
                     handledHandshakeFailure = true;
                     DisconnectReason = new DisconnectParams("connect.error.connectfailure.versionmismatch", new string[] { rVer, _gameVersion });
@@ -765,7 +765,7 @@ namespace Phoenix.Client
                 // Handle specific exception
                 if (clientConnectionAuthFailure)
                 {
-                    Logger.Error("Authentication failure!");
+                    Logger.Error("Handshake failure! Authentication failure!");
 
                     // De-init components
                     Logger.Info("De-initializing components...");
@@ -865,7 +865,7 @@ namespace Phoenix.Client
                 // Authentication failure
                 if (clientConnectionAuthFailure)
                 {
-                    Logger.Error("Authentication failure!");
+                    Logger.Error("Handshake failure! Authentication failure!");
 
                     // De-init components
                     Logger.Info("De-initializing components...");
@@ -886,7 +886,7 @@ namespace Phoenix.Client
                 }
 
                 // Log error
-                Logger.Error("Server closed the connection too early!");
+                Logger.Error("Handshake failure! Server closed the connection too early!");
 
                 // De-init components
                 Logger.Info("De-initializing components...");
