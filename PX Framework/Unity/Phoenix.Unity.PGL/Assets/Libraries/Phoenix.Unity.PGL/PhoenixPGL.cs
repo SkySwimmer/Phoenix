@@ -782,7 +782,7 @@ namespace Phoenix.Unity.PGL
                                 cl.DefaultRequestHeaders.Add("Authorization", "Bearer " + Game.SessionToken);
                                 string res = cl.GetAsync(game["Refresh-Endpoint"]).GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
                                 if (res != null && res != "")
-                                    impl.RefreshToken(res.Trim());
+                                    impl.RefreshToken(res.Trim()); // Success
                                 else
                                     throw new Exception();
                             }

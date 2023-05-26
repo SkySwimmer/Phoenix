@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Phoenix.Common;
 using Phoenix.Common.Certificates;
 using Phoenix.Common.Networking.Connections;
@@ -124,7 +125,7 @@ namespace Phoenix.Server.Components
                                             RefreshResponse? response = JsonConvert.DeserializeObject<RefreshResponse>(result);
                                             if (response == null)
                                                 throw new IOException();
-
+                                            
                                             // Update token
                                             token = response.token;
                                             Configuration.SetString("token", token);

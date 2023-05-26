@@ -270,12 +270,17 @@ namespace Phoenix.Common.Networking.Impl
                         CipherKeyGenerator gen = GeneratorUtilities.GetKeyGenerator("AES256");
                         byte[] key = gen.GenerateKey();
 
+                        // Generate IV
+                        logger.Trace("Generating AES encryption IV...");
+                        byte[] iv = new SecureRandom().GenerateSeed(16);
+
                         // Encrypt the key and some data to make it more random
                         long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         int rnd1 = rnd.Next();
                         int rnd2 = rnd.Next();
                         logger.Debug("Creating key exchange payload...");
                         logger.Debug("    " + time);
+                        logger.Debug("    [REDACTED]");
                         logger.Debug("    [REDACTED]");
                         logger.Debug("    " + certificate.ServerTime);
                         logger.Debug("    " + rnd1);
@@ -284,6 +289,7 @@ namespace Phoenix.Common.Networking.Impl
                         DataWriter wr = new DataWriter(strm);
                         wr.WriteLong(time);
                         wr.WriteBytes(key);
+                        wr.WriteBytes(iv);
                         wr.WriteLong(certificate.ServerTime);
                         wr.WriteInt(rnd1);
                         wr.WriteInt(rnd2);
@@ -314,10 +320,11 @@ namespace Phoenix.Common.Networking.Impl
                         // Assign parameters
                         logger.Debug("Building AES ciphers...");
                         KeyParameter aesKey = new KeyParameter(key);
+                        ParametersWithIV ivParams = new ParametersWithIV(aesKey, iv);
                         IBufferedCipher cipherEncrypt = CipherUtilities.GetCipher("AES/CFB8/NoPadding");
                         IBufferedCipher cipherDecrypt = CipherUtilities.GetCipher("AES/CFB8/NoPadding");
-                        cipherEncrypt.Init(true, aesKey);
-                        cipherDecrypt.Init(false, aesKey);
+                        cipherEncrypt.Init(true, ivParams);
+                        cipherDecrypt.Init(false, ivParams);
                         logger.Debug("Building AES cryptostream...");
                         Stream = new CipherStream(Client.GetStream(), cipherDecrypt, cipherEncrypt);
                         logger.Debug("Assigning output writer...");
@@ -420,6 +427,8 @@ namespace Phoenix.Common.Networking.Impl
                         }
                         byte[] key = rd.ReadBytes();
                         logger.Debug("  Key: [REDACTED]");
+                        byte[] iv = rd.ReadBytes();
+                        logger.Debug("  IV: [REDACTED]");
                         long lServerTime = rd.ReadLong();
                         logger.Debug("  Last server time: " + lServerTime);
                         if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() > lServerTime + 60000)
@@ -443,10 +452,11 @@ namespace Phoenix.Common.Networking.Impl
                         logger.Trace("Encrypting connection...");
                         logger.Debug("Building AES ciphers...");
                         KeyParameter aesKey = new KeyParameter(key);
+                        ParametersWithIV ivParams = new ParametersWithIV(aesKey, iv);
                         IBufferedCipher cipherEncrypt = CipherUtilities.GetCipher("AES/CFB8/NoPadding");
                         IBufferedCipher cipherDecrypt = CipherUtilities.GetCipher("AES/CFB8/NoPadding");
-                        cipherEncrypt.Init(true, aesKey);
-                        cipherDecrypt.Init(false, aesKey);
+                        cipherEncrypt.Init(true, ivParams);
+                        cipherDecrypt.Init(false, ivParams);
                         logger.Debug("Building AES cryptostream...");
                         Stream = new CipherStream(Client.GetStream(), cipherDecrypt, cipherEncrypt);
                         logger.Debug("Assigning output writer...");

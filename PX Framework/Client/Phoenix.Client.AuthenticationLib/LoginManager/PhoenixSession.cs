@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Text;
 
 namespace Phoenix.Client.Authenticators.PhoenixAPI
 {
@@ -126,7 +127,6 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                     _token = result.Trim();
 
                     // Pull user info
-
                     // Create url
                     url = LoginManager.API;
                     if (!url.EndsWith("/"))
@@ -166,6 +166,43 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
             {
             }
             return false;
+        }
+
+        private static class Base64Url
+        {
+            public static string Encode(byte[] arg)
+            {
+                if (arg == null)
+                {
+                    throw new ArgumentNullException("arg");
+                }
+
+                var s = Convert.ToBase64String(arg);
+                return s
+                    .Replace("=", "")
+                    .Replace("/", "_")
+                    .Replace("+", "-");
+            }
+
+            public static string ToBase64(string arg)
+            {
+                if (arg == null)
+                {
+                    throw new ArgumentNullException("arg");
+                }
+
+                var s = arg
+                        .PadRight(arg.Length + (4 - arg.Length % 4) % 4, '=')
+                        .Replace("_", "/")
+                        .Replace("-", "+");
+
+                return s;
+            }
+
+            public static byte[] Decode(string arg)
+            {
+                return Convert.FromBase64String(ToBase64(arg));
+            }
         }
     }
 }

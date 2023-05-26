@@ -69,7 +69,7 @@ namespace TestGameClient
                     fac.WithComponent(new SceneReplicationComponent());
                     fac.WithChannelRegistry(registry);
                     fac.WithProtocolVersion(1);
-                    fac.WithNetworkClient("127.0.0.1", 16719);
+                    fac.WithNetworkClient("127.0.0.1", 12345);
                     fac.WithAllowInsecureMode(true, () =>
                     {
                         // Some method that is called in case the server is in insecure mode

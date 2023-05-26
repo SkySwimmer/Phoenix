@@ -39,6 +39,9 @@ namespace Phoenix.Tests.Server
             testServer.AddComponent(new AuthenticationManagerComponent());
             testServer.AddComponent(new SceneReplicationComponent());
 
+            // Add network server component
+            testServer.AddComponent(new NetworkServerComponent());
+
             // Protocol version and registry
             testServer.ProtocolVersion = 1;
             testServer.ChannelRegistry = registry;
