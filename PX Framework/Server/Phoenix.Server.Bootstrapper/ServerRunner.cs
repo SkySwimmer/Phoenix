@@ -235,10 +235,8 @@ namespace Phoenix.Server.Bootstrapper
             foreach (GameServer srv in hooks.GetServers())
             {
                 logger.Info("Adding components to server " + serverID + "...");
-                if (!srv.IsComponentLoaded("network-server-provider"))
-                    srv.AddComponent(new NetworkServerComponent());
-                if (!srv.IsComponentLoaded("certificate-refresher"))
-                    srv.AddComponent(new CertificateRefresherComponent());
+                srv.AddComponent(new NetworkServerComponent());
+                srv.AddComponent(new CertificateRefresherComponent());
                 serverID++;
             }
             if (loadMods)
