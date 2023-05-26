@@ -15,8 +15,11 @@
         /// <returns>Detail value or null</returns>
         public string? GetOrNull(string key)
         {
-            if (_data.ContainsKey(key))
-                return _data[key];
+            lock (_data)
+            {
+                if (_data.ContainsKey(key))
+                    return _data[key];
+            }
             return null;
         }
 
@@ -27,8 +30,11 @@
         /// <returns>Detail value</returns>
         public string Get(string key)
         {
-            if (_data.ContainsKey(key))
-                return _data[key];
+            lock (_data)
+            {
+                if (_data.ContainsKey(key))
+                    return _data[key];
+            }
             throw new ArgumentException("Key not present");
         }
 
@@ -41,7 +47,8 @@
         {
             if (Has(key) && Get(key) == value)
                 return;
-            _data[key] = value;
+            lock (_data)
+                _data[key] = value;
             changed = true;
         }
 
@@ -87,7 +94,8 @@
         {
             get
             {
-                return _data.Keys.ToArray();
+                lock (_data)
+                    return _data.Keys.ToArray();
             }
         }
     }

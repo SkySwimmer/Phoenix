@@ -4,6 +4,6 @@
   "serverAssembly": "Phoenix.Tests.Server.dll",
   "manifestFile": "game.json",
   "debugConfig": "debug.json",
-  "assembliesDirectory": "bin/Debug/net7.0",
+  "assembliesDirectory": "bin/Release/net7.0",
   "preserveKeys": true
 }
