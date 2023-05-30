@@ -16,7 +16,7 @@ Client:
 - Phoenix.Client.InteractionLib
 - Phoenix.Client.InventoryLib
 + Phoenix.Client.NetworkClientLib
-+ Phoenix.Client.SceneReplicatorLib
++++ Phoenix.Client.SceneReplicatorLib
 - Phoenix.Client.SeasonLib
 + Phoenix.Client.ServerListScannerLib
 - Phoenix.Client.StatLib
@@ -65,7 +65,7 @@ Server:
 - Phoenix.Server.Components.InventoryManager
 + Phoenix.Server.Components.PlayerManager
 - Phoenix.Server.Components.PlayerSync
-+ Phoenix.Server.Components.SceneReplication
++++ Phoenix.Server.Components.SceneReplication
 - Phoenix.Server.Components.SeasonManager
 - Phoenix.Server.Components.StatManager
 - Phoenix.Server.Components.TimeManager

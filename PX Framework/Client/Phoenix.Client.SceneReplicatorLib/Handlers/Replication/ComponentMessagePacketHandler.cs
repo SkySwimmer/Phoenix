@@ -27,6 +27,8 @@ namespace Phoenix.Client.SceneReplicatorLib.Handlers.Replication
                 SceneReplicationComponent comp = client.GetComponent<SceneReplicationComponent>();
                 if (comp.IsSubscribedToScene(packet.ScenePath) && comp.IsSubscribedToRoom(packet.Room) && comp.Bindings != null)
                 {
+                    // FIXME: make sure its synced to the engine
+                    
                     // Find object
                     IReplicatingSceneObject? obj = comp.Bindings.GetObjectByIDInScene(packet.Room, packet.ScenePath, packet.ObjectID);
                     if (obj != null)
