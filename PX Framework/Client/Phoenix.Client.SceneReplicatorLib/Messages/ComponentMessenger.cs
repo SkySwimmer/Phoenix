@@ -1,4 +1,5 @@
-﻿using Phoenix.Common;
+﻿using Phoenix.Client.Components;
+using Phoenix.Common;
 using Phoenix.Common.Logging;
 using Phoenix.Common.Networking.Connections;
 using Phoenix.Common.SceneReplication;
@@ -60,7 +61,7 @@ namespace Phoenix.Client.SceneReplicatorLib.Messages
             _room = room;
         }
 
-        internal bool HandleMessagePacket(ComponentMessagePacket packet)
+        internal bool HandleMessagePacket(ComponentMessagePacket packet, SceneReplicationComponent comp)
         {
             // Handle debug headers
             if (packet.HasDebugHeaders)
@@ -107,51 +108,55 @@ namespace Phoenix.Client.SceneReplicatorLib.Messages
                 IComponentMessage msg = _messageRegistry[packet.MessageID].CreateInstance();
                 msg.Deserialize(packet.MessagePayload);
 
-                // Find handler
-                foreach (MethodInfo meth in _comp.GetType().GetMethods())
+                // Handle on frame update
+                comp.Bindings?.RunOnNextFrameUpdate(() =>
                 {
-                    if (!meth.IsStatic && !meth.IsAbstract)
+                    // Find handler
+                    foreach (MethodInfo meth in _comp.GetType().GetMethods())
                     {
-                        MessageHandlerAttribute? attr = meth.GetCustomAttribute<MessageHandlerAttribute>();
-                        if (attr != null)
+                        if (!meth.IsStatic && !meth.IsAbstract)
                         {
-                            // Verify parameters
-                            var parameters = meth.GetParameters();
-                            if (parameters.Length == 2 && parameters[0].ParameterType.IsAssignableFrom(msg.GetType()) && parameters[1].ParameterType.IsAssignableFrom(typeof(ComponentMessageSender)))
+                            MessageHandlerAttribute? attr = meth.GetCustomAttribute<MessageHandlerAttribute>();
+                            if (attr != null)
                             {
-                                // Call handler
-                                meth.Invoke(_comp, new object[] {
+                                // Verify parameters
+                                var parameters = meth.GetParameters();
+                                if (parameters.Length == 2 && parameters[0].ParameterType.IsAssignableFrom(msg.GetType()) && parameters[1].ParameterType.IsAssignableFrom(typeof(ComponentMessageSender)))
+                                {
+                                    // Call handler
+                                    meth.Invoke(_comp, new object[] {
                                     msg, new ComponentMessageSender(msg => SendMessage(msg))
                                 });
-                            }
-                            else if (parameters.Length == 2 && parameters[0].ParameterType.IsAssignableFrom(msg.GetType()) && parameters[1].ParameterType.IsAssignableFrom(typeof(ComponentMessenger)))
-                            {
-                                // Call handler
-                                meth.Invoke(_comp, new object[] {
+                                }
+                                else if (parameters.Length == 2 && parameters[0].ParameterType.IsAssignableFrom(msg.GetType()) && parameters[1].ParameterType.IsAssignableFrom(typeof(ComponentMessenger)))
+                                {
+                                    // Call handler
+                                    meth.Invoke(_comp, new object[] {
                                     msg, this
                                 });
+                                }
                             }
                         }
                     }
-                }
 
-                // Default handler
-                _comp.HandleMessage(msg, this);
+                    // Default handler
+                    _comp.HandleMessage(msg, this);
 
-                // Handle single-time handlers
-                Func<IComponentMessage, bool>[] handlers;
-                lock (_responseHandlers)
-                    handlers = _responseHandlers.ToArray();
-                foreach (Func<IComponentMessage, bool> handler in handlers)
-                {
-                    // Attempt to handle
-                    if (handler(msg))
+                    // Handle single-time handlers
+                    Func<IComponentMessage, bool>[] handlers;
+                    lock (_responseHandlers)
+                        handlers = _responseHandlers.ToArray();
+                    foreach (Func<IComponentMessage, bool> handler in handlers)
                     {
-                        // Remove handler as it succeeded running the response handling code
-                        lock (_responseHandlers)
-                            _responseHandlers.Remove(handler);
+                        // Attempt to handle
+                        if (handler(msg))
+                        {
+                            // Remove handler as it succeeded running the response handling code
+                            lock (_responseHandlers)
+                                _responseHandlers.Remove(handler);
+                        }
                     }
-                }
+                });
             }
             else if (Game.DebugMode)
             {
