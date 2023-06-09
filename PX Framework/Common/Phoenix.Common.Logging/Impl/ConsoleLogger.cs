@@ -82,19 +82,27 @@ namespace Phoenix.Common.Logging.Impl
                     Console.Error.WriteLine(GlobalMessagePrefix + message);
                     Console.Error.WriteLine("Exception: " + exception.GetType().FullName + (exception.Message != null ? ": " + exception.Message : ""));
                     Console.Error.WriteLine(exception.StackTrace);
+                    Exception? e = exception.InnerException;
+                    while (e != null)
+                    {
+                        Console.Error.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
+                        Console.Error.WriteLine(e.StackTrace);
+                        e = e.InnerException;
+                    }
                 }
                 else
                 {
                     // Normal log messages
                     Console.WriteLine(GlobalMessagePrefix + message);
                     Console.WriteLine("Exception: " + exception.GetType().FullName + (exception.Message != null ? ": " + exception.Message : ""));
+                    Console.WriteLine(exception.StackTrace);
                     Exception? e = exception.InnerException;
                     while (e != null)
                     {
                         Console.WriteLine("Caused by: " + exception.GetType().FullName + (e.Message != null ? ": " + e.Message : ""));
+                        Console.WriteLine(e.StackTrace);
                         e = e.InnerException;
                     }
-                    Console.WriteLine(exception.StackTrace);
                 }
                 Console.ResetColor();
                 writing = false;
