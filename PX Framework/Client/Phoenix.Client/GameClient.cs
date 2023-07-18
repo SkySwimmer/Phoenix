@@ -349,7 +349,7 @@ namespace Phoenix.Client
                 throw new InvalidOperationException("Registry locked");
             if (Components.Any(t => t.GetType().IsAssignableFrom(component.GetType())))
             {
-                Logger.Fatal("Attempted to register " + component.ID + " twice!");
+                Logger.Error("Attempted to register " + component.ID + " twice!");
                 throw new ArgumentException("Component already registered");
             }
             Logger.Info("Registering component: " + component.ID);
@@ -373,7 +373,7 @@ namespace Phoenix.Client
                 Logger.GlobalMessagePrefix += "  ";
                 if (Components.Any(t => t.GetType().IsAssignableFrom(component.GetType())))
                 {
-                    Logger.Fatal("Attempted to register " + component.ID + " twice!");
+                    Logger.Error("Attempted to register " + component.ID + " twice!");
                     Logger.GlobalMessagePrefix = Logger.GlobalMessagePrefix.Substring(2);
                     throw new ArgumentException("Component already registered");
                 }
@@ -529,7 +529,7 @@ namespace Phoenix.Client
                 {
                     // Fatal error
                     Logger.GlobalMessagePrefix += "  ";
-                    Logger.Fatal("Conflict! Component " + component.ID + " conflicts with " + rule.Target + "! Unable to continue!");
+                    Logger.Error("Conflict! Component " + component.ID + " conflicts with " + rule.Target + "! Unable to continue!");
                     Logger.GlobalMessagePrefix = Logger.GlobalMessagePrefix.Substring(2);
                     throw new ArgumentException("Component conflict: " + component.ID + " conflicts with " + rule.Target);
                 }
@@ -543,7 +543,7 @@ namespace Phoenix.Client
                 {
                     // Fatal error
                     Logger.GlobalMessagePrefix += "  ";
-                    Logger.Fatal("Missing dependencies!\nComponent " + component.ID + " requires component " + rule.Target + " to be registered.");
+                    Logger.Error("Missing dependencies!\nComponent " + component.ID + " requires component " + rule.Target + " to be registered.");
                     Logger.GlobalMessagePrefix = Logger.GlobalMessagePrefix.Substring(2);
                     throw new ArgumentException("Missing dependency: " + component.ID + " requires " + rule.Target);
                 }
@@ -607,7 +607,7 @@ namespace Phoenix.Client
                 }
             if (provider == null)
             {
-                Logger.Fatal("Cannot start the client! Missing a client connection component!");
+                Logger.Error("Cannot start the client! Missing a client connection component!");
                 throw new ArgumentException("No client connection provider component");
             }
             EventBus.Dispatch(new ClientStartupPrepareEvent(this));
@@ -972,7 +972,7 @@ namespace Phoenix.Client
                 }
             if (provider == null)
             {
-                Logger.Fatal("Cannot start the client! Missing a client connection component!");
+                Logger.Error("Cannot start the client! Missing a client connection component!");
                 throw new ArgumentException("No client connection provider component");
             }
             provider.StopGameClient();

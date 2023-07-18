@@ -38,11 +38,14 @@ namespace Phoenix.Common.IO
         /// <returns></returns>
         public byte[] ReadNBytes(int count) {
             byte[] data = new byte[count];
-            for (int i = 0; i < count; i++) {
-                int ib = Input.ReadByte();
-                if (ib == -1)
+            int total = 0;
+            while (true) {
+                int r = Input.Read(data, total, data.Length - total);
+                total += r;
+                if (r <= 0)
                     throw new IOException("Stream closed");
-                data[i] = (byte)ib;
+                else if (total >= count)
+                    break;
             }
             return data;
         }
@@ -52,14 +55,15 @@ namespace Phoenix.Common.IO
         /// </summary>
         /// <returns></returns>
         public byte[] ReadAllBytes() {
-            List<byte> data = new List<byte>();
+            MemoryStream buffer = new MemoryStream();
             while (true)            {
-                int ib = Input.ReadByte();
-                if (ib == -1)
+                byte[] buf = new byte[20480000];
+                int r = Input.Read(buf, 0, buf.Length);
+                if (r <= 0)
                     break;
-                data.Add((byte)ib);
+                buffer.Write(buf, 0, r);
             }
-            return data.ToArray();
+            return buffer.ToArray();
         }
 
         /// <summary>

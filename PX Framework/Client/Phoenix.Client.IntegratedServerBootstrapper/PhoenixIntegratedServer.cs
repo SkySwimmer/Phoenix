@@ -86,7 +86,7 @@ namespace Phoenix.Client.IntegratedServerBootstrapper
             srv = SetupServer();
             if (srv.ChannelRegistry == null)
             {
-                logger.Fatal("Missing server channel registry!");
+                logger.Error("Missing server channel registry!");
                 throw new ArgumentException("No channel registry");
             }
 
