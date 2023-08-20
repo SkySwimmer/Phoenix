@@ -16,7 +16,7 @@ namespace Phoenix.Common.Networking.Connections
         /// <summary>
         /// The basic low-level protocol version of Phoenix itself
         /// </summary>
-        public const int PhoenixProtocolVersion = 3;
+        public const int PhoenixProtocolVersion = 4;
 
         /// <summary>
         /// Creates a integrated connection bundle
@@ -69,8 +69,8 @@ namespace Phoenix.Common.Networking.Connections
             TcpClient client = new TcpClient(ip, port);
 
             // Send hello
-            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
-            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
+            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion + "/");
+            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion + "/");
             client.GetStream().Write(hello);
             
             int i2 = 0;
@@ -90,6 +90,11 @@ namespace Phoenix.Common.Networking.Connections
                     throw new IOException("Connection failed: invalid server response during HELLO");
                 }
             }
+
+            // Send endpoint
+            DataWriter wr = new DataWriter(client.GetStream());
+            wr.WriteString(ip);
+            wr.WriteInt(port);
 
             // Set mode to info
             client.GetStream().WriteByte(0);
@@ -117,8 +122,8 @@ namespace Phoenix.Common.Networking.Connections
             TcpClient client = new TcpClient(ip, port);
 
             // Send hello
-            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
-            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
+            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion + "/");
+            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion + "/");
             client.GetStream().Write(hello);
             int i2 = 0;
             foreach (byte b in helloSrv)
@@ -137,6 +142,11 @@ namespace Phoenix.Common.Networking.Connections
                     throw new IOException("Connection failed: invalid server response during HELLO");
                 }
             }
+
+            // Send endpoint
+            DataWriter wr = new DataWriter(client.GetStream());
+            wr.WriteString(ip);
+            wr.WriteInt(port);
 
             // Set mode to info
             client.GetStream().WriteByte(0);
@@ -161,8 +171,8 @@ namespace Phoenix.Common.Networking.Connections
             TcpClient client = new TcpClient(ip, port);
 
             // Send hello
-            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
-            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
+            byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion + "/");
+            byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion + "/");
             client.GetStream().Write(hello);
             int i2 = 0;
             foreach (byte b in helloSrv)
@@ -181,6 +191,11 @@ namespace Phoenix.Common.Networking.Connections
                     throw new IOException("Connection failed: invalid server response during HELLO");
                 }
             }
+
+            // Send endpoint
+            DataWriter wr = new DataWriter(client.GetStream());
+            wr.WriteString(ip);
+            wr.WriteInt(port);
 
             // Set mode to info
             client.GetStream().WriteByte(0);

@@ -68,8 +68,8 @@ namespace Phoenix.Common.Networking.Connections
                     {
                         // Send hello
                         logger.Trace("Attempting Phoenix networking handshake with protocol version " + Connections.PhoenixProtocolVersion + "...");
-                        byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.PhoenixProtocolVersion);
-                        byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.PhoenixProtocolVersion);
+                        byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.PhoenixProtocolVersion + "/");
+                        byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.PhoenixProtocolVersion + "/");
                         logger.Debug("Sending HELLO messsage...");
                         client.GetStream().Write(helloSrv);
                         int i2 = 0;
@@ -91,6 +91,12 @@ namespace Phoenix.Common.Networking.Connections
                                 throw new IOException("Connection failed: invalid client response during HELLO");
                             }
                         }
+
+                        // Read endpoint
+                        logger.Debug("Reading connection endpoint....");
+                        DataReader rd = new DataReader(client.GetStream());
+                        logger.Debug("  Host: " + rd.ReadString());
+                        logger.Debug("  Port: " + rd.ReadInt());
 
                         // Read mode
                         logger.Debug("Reading client mode...");

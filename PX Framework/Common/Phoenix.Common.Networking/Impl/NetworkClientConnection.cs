@@ -121,8 +121,6 @@ namespace Phoenix.Common.Networking.Impl
                 }
                 Client = new TcpClient(_ip, _port);
                 str = "Network Client: " + Client.Client.RemoteEndPoint;
-                _ip = null;
-                _port = 0;
             }
 
             // Open the connection
@@ -134,12 +132,12 @@ namespace Phoenix.Common.Networking.Impl
             // Handshake
             try
             {
-                if (_side == ConnectionSide.CLIENT)
+                if (_side == ConnectionSide.CLIENT && _ip != null)
                 {
                     // Send hello
                     logger.Trace("Attempting Phoenix networking handshake with protocol version " + Connections.Connections.PhoenixProtocolVersion + "...");
-                    byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.Connections.PhoenixProtocolVersion);
-                    byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.Connections.PhoenixProtocolVersion);
+                    byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + Connections.Connections.PhoenixProtocolVersion + "/");
+                    byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + Connections.Connections.PhoenixProtocolVersion + "/");
                     logger.Debug("Sending HELLO messsage...");
                     Client.GetStream().Write(hello);
                     int i2 = 0;
@@ -153,6 +151,8 @@ namespace Phoenix.Common.Networking.Impl
                             _clientCertificate = null;
                             Client.GetStream().WriteByte(0);
                             Client.Close();
+                            _ip = null;
+                            _port = 0;
                             throw new PhoenixConnectException("Connection failed: connection lost during HELLO", ErrorType.NONPHOENIX);
                         }
                         if (helloSrv[i2++] != i)
@@ -162,9 +162,19 @@ namespace Phoenix.Common.Networking.Impl
                             _clientCertificate = null;
                             Client.GetStream().WriteByte(0);
                             Client.Close();
+                            _ip = null;
+                            _port = 0;
                             throw new PhoenixConnectException("Connection failed: invalid server response during HELLO", ErrorType.NONPHOENIX);
                         }
                     }
+
+                    // Send endpoint
+                    logger.Debug("Sending connection endpoint....");
+                    DataWriter wr = new DataWriter(Client.GetStream());
+                    wr.WriteString(_ip);
+                    wr.WriteInt(_port);
+                    _ip = null;
+                    _port = 0;
 
                     // Set mode to connect
                     logger.Debug("Sending MODE packet: CONNECT...");

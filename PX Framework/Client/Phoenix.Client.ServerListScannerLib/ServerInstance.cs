@@ -190,8 +190,8 @@ namespace Phoenix.Client.ServerList
                         long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
                         // Send hello
-                        byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
-                        byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
+                        byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion + "/");
+                        byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion + "/");
                         client.GetStream().Write(hello);
 
                         // Check response
@@ -215,6 +215,11 @@ namespace Phoenix.Client.ServerList
 
                         // Get ping time
                         long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - start;
+
+                        // Send endpoint
+                        DataWriter wr = new DataWriter(client.GetStream());
+                        wr.WriteString(address);
+                        wr.WriteInt(_port);
 
                         // Set mode to info
                         client.GetStream().WriteByte(0);
@@ -268,8 +273,8 @@ namespace Phoenix.Client.ServerList
                 long start = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
                 // Send hello
-                byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion);
-                byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion);
+                byte[] hello = Encoding.UTF8.GetBytes("PHOENIX/HELLO/" + PhoenixProtocolVersion + "/");
+                byte[] helloSrv = Encoding.UTF8.GetBytes("PHOENIX/HELLO/SERVER/" + PhoenixProtocolVersion + "/");
                 client.GetStream().Write(hello);
 
                 // Check response
@@ -293,6 +298,11 @@ namespace Phoenix.Client.ServerList
 
                 // Get ping time
                 long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - start;
+
+                // Send endpoint
+                DataWriter wr = new DataWriter(client.GetStream());
+                wr.WriteString(_bestAddress);
+                wr.WriteInt(_port);
 
                 // Set mode to info
                 client.GetStream().WriteByte(0);
