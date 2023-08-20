@@ -31,6 +31,8 @@ namespace Phoenix.Common.Networking.Impl
         private string _ip;
         private string? _serverID;
 
+        private long timeSinceLastPacketSent;
+
         public string RemoteServerID
         {
             get
@@ -716,6 +718,10 @@ namespace Phoenix.Common.Networking.Impl
                                         DisconnectInternal(reason, args);
                                     }
                                 }
+                                else if (pId == 1) 
+                                {
+                                    // Ping
+                                }
                             }
                             else
                             {
@@ -764,6 +770,55 @@ namespace Phoenix.Common.Networking.Impl
                         else
                             DisconnectInternal("connection.lost", new string[0]);
                     }
+                }
+            });
+
+            // Start pinger
+            timeSinceLastPacketSent = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
+            {
+                while (IsConnected())
+                {
+                    if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - timeSinceLastPacketSent) > 20000)
+                    {
+                        // Send ping
+                        try
+                        {
+                            // Send disconnect packet
+                            MemoryStream strm = new MemoryStream();
+                            DataWriter writer = new DataWriter(strm);
+                            writer.WriteLong(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                            byte[] packet = strm.ToArray();
+                            strm.Close();
+
+                            // Send ping
+                            lock (_locker)
+                            {
+                                // Backup in case the lock somehow fails
+                                // THIS FUCKING HAPPENED
+                                while (_sending) ;
+                                _sending = true;
+
+                                try
+                                {
+                                    Writer.WriteInt(-1);
+                                    Writer.WriteInt(1);
+                                    Writer.WriteBytes(packet);
+                                }
+                                finally
+                                {
+                                    // Unlock
+                                    _sending = false;
+                                }
+                            }
+                            timeSinceLastPacketSent = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    Thread.Sleep(100);
                 }
             });
 
@@ -823,6 +878,7 @@ namespace Phoenix.Common.Networking.Impl
                         _sending = false;
                     }
                 }
+                timeSinceLastPacketSent = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
             catch { }
 
@@ -933,6 +989,7 @@ namespace Phoenix.Common.Networking.Impl
                     }
                 }
             }
+            timeSinceLastPacketSent = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         public override bool IsConnected()
