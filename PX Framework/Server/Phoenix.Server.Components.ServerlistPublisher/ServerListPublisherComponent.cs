@@ -8,8 +8,10 @@ using Phoenix.Server.Events;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
+using System.Web;
 
 namespace Phoenix.Server.Components
 {
@@ -222,30 +224,68 @@ namespace Phoenix.Server.Components
                                 data.phoenixProtocol = Connections.PhoenixProtocolVersion;
 
                                 // Send request
-                                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
-                                req.Method = "POST";
-                                req.Headers.Add("X-Request-ID", Guid.NewGuid().ToString());
-                                req.Headers.Add("X-Request-RNDID", Guid.NewGuid().ToString());
-                                req.Headers.Add("Authorization", "Bearer " + Server.GetConfiguration("server").GetString("token"));
-                                req.GetRequestStream().Write(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)));
-                                HttpWebResponse resp = null;
-                                try
+                                Uri u = new Uri(url);
+                                TcpClient client = new TcpClient(u.Host, u.Port);
+                                Stream strm = client.GetStream();
+
+                                // Check https
+                                if (u.Scheme == "https")
                                 {
-                                    resp = (HttpWebResponse)req.GetResponseAsync().GetAwaiter().GetResult(); 
+                                    SslStream st = new SslStream(strm);
+                                    st.AuthenticateAsClient(u.Host);
+                                    strm = st;
                                 }
-                                catch (WebException ex)
+
+                                // Write request
+                                byte[] d = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+                                strm.Write(Encoding.UTF8.GetBytes("POST " + WebUtility.UrlEncode(u.PathAndQuery) + " HTTP/1.1\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("X-Request-ID: " + Guid.NewGuid().ToString() + "\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("X-Request-RNDID: " + Guid.NewGuid().ToString() + "\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("Upgrade: PHOENIXSERVERLISTCLIENT\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("Authorization: Bearer " + Server.GetConfiguration("server").GetString("token") + "\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("Content-Length: " + d.Length + "\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("\r\n"));
+                                strm.Write(d);
+
+                                // Check response
+                                string line = ReadStreamLine(strm);
+                                string statusLine = line;
+                                if (!line.StartsWith("HTTP/1.1 "))
                                 {
-                                    resp = (HttpWebResponse)ex.Response;
-                                    if (resp == null)
-                                        throw new IOException("API Unreachable");
+                                    client.Close();
+                                    throw new IOException("Server returned invalid protocol");
                                 }
-                                if (resp.StatusCode != HttpStatusCode.OK)
+
+                                // Read headers
+                                Dictionary<string, string> respHeaders = new Dictionary<string, string>();
+                                while (true)
                                 {
-                                    string err = (int)resp.StatusCode + ": " + resp.StatusDescription;
-                                    byte[] rData = new byte[(int)resp.ContentLength];
-                                    resp.GetResponseStream().Read(rData);
+                                    line = ReadStreamLine(strm);
+                                    if (line == "")
+                                        break;
+                                    String key = line.Substring(0, line.IndexOf(": "));
+                                    String value = line.Substring(line.IndexOf(": ") + 2);
+                                    respHeaders[key.ToLower()] = value;
+                                }
+
+                                // Read body if present
+                                byte[] rData = new byte[0];
+                                if (respHeaders.ContainsKey("content-length"))
+                                {
+                                    // Read
+                                    rData = new byte[int.Parse(respHeaders["content-length"])];
+                                    strm.Read(rData);
+                                }
+
+                                // Check status
+                                int status = int.Parse(statusLine.Split(' ')[1]);
+                                if (status != 101)
+                                {
+                                    strm.Close();
+                                    client.Close();
+
+                                    string err = statusLine.Substring("HTTP/1.1 ".Length);
                                     string error = Encoding.UTF8.GetString(rData);
-                                    resp.Close();
 
                                     if (!warned || lastError != error)
                                     {
@@ -269,7 +309,7 @@ namespace Phoenix.Server.Components
                                     MemoryStream buffer = new MemoryStream();
                                     while (Server.IsRunning())
                                     {
-                                        int b = resp.GetResponseStream().ReadByte();
+                                        int b = strm.ReadByte();
                                         if (b == -1)
                                             break;
                                         if (b == 0)
@@ -289,8 +329,8 @@ namespace Phoenix.Server.Components
                                                     {
                                                         if (msg["success"] != "true")
                                                         {
-                                                            resp.GetResponseStream().Close();
-                                                            resp.Close();
+                                                            strm.Close();
+                                                            client.Close();
                                                             GetLogger().Warn("An error occurred publishing the server.");
                                                             GetLogger().Warn("Established a connection with the list however the response was unexpected.");
                                                             GetLogger().Warn("Error: " + msg["error"]);
@@ -310,8 +350,8 @@ namespace Phoenix.Server.Components
                                                     }
                                                 default:
                                                     {
-                                                        resp.GetResponseStream().Close();
-                                                        resp.Close();
+                                                        strm.Close();
+                                                        client.Close();
                                                         GetLogger().Warn("An error occurred publishing the server.");
                                                         GetLogger().Warn("Established a connection with the list however the response was unexpected.");
                                                         GetLogger().Warn("Unhandled packet: " + packet);
@@ -326,8 +366,8 @@ namespace Phoenix.Server.Components
                                         }
                                     }
                                 }
-                                resp.GetResponseStream().Close();
-                                resp.Close();
+                                strm.Close();
+                                client.Close();
                             }
                             catch
                             {
@@ -364,7 +404,8 @@ namespace Phoenix.Server.Components
             {
                 // Lan discovery
                 GetLogger().Info("Enabled lan discovery!");
-                Thread th = new Thread(() => { 
+                Thread th = new Thread(() =>
+                {
                     while (Server.IsRunning())
                     {
                         try
@@ -374,7 +415,7 @@ namespace Phoenix.Server.Components
                             client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                             client.Client.Bind(new IPEndPoint(IPAddress.Any, 16719));
                             client.Client.ReceiveTimeout = -1;
-                         
+
                             while (true)
                             {
                                 IPEndPoint op = new IPEndPoint(IPAddress.Any, 16719);
@@ -453,7 +494,7 @@ namespace Phoenix.Server.Components
                 th.IsBackground = true;
                 th.Start();
             }
-            
+
             // Update system
             if (_lanDiscoveryEnabled || _listEnabled)
             {
@@ -471,6 +512,23 @@ namespace Phoenix.Server.Components
                 th.IsBackground = true;
                 th.Start();
             }
+        }
+
+        private string ReadStreamLine(Stream strm)
+        {
+            string buffer = "";
+            while (true)
+            {
+                int b = strm.ReadByte();
+                if (b == -1)
+                    break;
+                char ch = (char)b;
+                if (ch == '\n')
+                    return buffer;
+                else if (ch != '\r')
+                    buffer += ch;
+            }
+            return buffer;
         }
 
         public override void StopServer()
