@@ -61,6 +61,15 @@ namespace Phoenix.Client.SceneReplicatorLib.Binding
         public abstract void SpawnPrefab(SpawnPrefabPacket packet);
 
         /// <summary>
+        /// Called to spawn empty objects
+        /// <br/>
+        /// <br/>
+        /// Typically called from the engine's engine update.
+        /// </summary>
+        /// <param name="packet">Prefab information packet</param>
+        public abstract void CreateObject(CreateObjectPacket packet);
+
+        /// <summary>
         /// Called to load a scene
         /// <br/>
         /// <br/>
