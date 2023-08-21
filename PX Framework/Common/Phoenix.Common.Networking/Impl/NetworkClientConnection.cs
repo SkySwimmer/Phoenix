@@ -378,7 +378,7 @@ namespace Phoenix.Common.Networking.Impl
 
                         // Final handshake     
                         logger.Trace("Attempting program handshake...");
-                        if (!AttemptCustomHandshake(this, Writer, Reader) || Client.GetStream().ReadByte() != 102)
+                        if (!AttemptCustomHandshake(this, Writer, Reader) || Reader.ReadRawByte() != 102)
                         {
                             logger.Trace("Handshake failure!");
                             _serverCertificate = null;
@@ -524,7 +524,7 @@ namespace Phoenix.Common.Networking.Impl
                         }
 
                         // Final success
-                        Client.GetStream().WriteByte(102);
+                        Writer.WriteRawByte(102);
 
                         // Log connection
                         logger.Trace("Client connected: " + GetRemoteAddress());
