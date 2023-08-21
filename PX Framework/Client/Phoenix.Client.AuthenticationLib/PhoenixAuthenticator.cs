@@ -148,7 +148,7 @@ namespace Phoenix.Client.Authenticators
                         }
                         
                         // Error
-                        GetLogger().Info("Authentication failure! Server rejected join request!");
+                        GetLogger().Warn("Authentication failure! Server rejected join request!");
                         ThrowAuthenticationFailure(disconnectParams);
                     }
                     else
@@ -183,17 +183,17 @@ namespace Phoenix.Client.Authenticators
                         }
 
                         // Error
-                        GetLogger().Info("Authentication failure! Server rejected join request!");
+                        GetLogger().Warn("Authentication failure! Server rejected join request!");
                         ThrowAuthenticationFailure(disconnectParams);
                     }
                     else
                     {
-                        GetLogger().Info("Authentication success! Joined as " + auth.DisplayName + "!");
+                        GetLogger().Warn("Authentication success! Joined as " + auth.DisplayName + "!");
                     }
                 }
                 catch
                 {
-                    GetLogger().Info("Authentication failure! Server rejected join request!");
+                    GetLogger().Warn("Authentication failure! Server rejected join request!");
                     ThrowAuthenticationFailure(null);
                 }
             }
