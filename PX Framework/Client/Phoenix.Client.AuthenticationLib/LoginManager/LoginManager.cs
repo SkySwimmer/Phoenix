@@ -149,7 +149,7 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                                                 break;
 
                                             // Parse token
-                                            string[] parts = tkn.Split('.');
+                                            string[] parts = ses.Split('.');
                                             string payloadJson = Encoding.UTF8.GetString(Base64Url.Decode(parts[1]));
                                             JObject payload = JsonConvert.DeserializeObject<JObject>(payloadJson);
                                             if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (15 * 60) >= payload.GetValue("exp").ToObject<long>())
