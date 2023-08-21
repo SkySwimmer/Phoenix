@@ -116,7 +116,7 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                 string url = LoginManager.API;
                 if (!url.EndsWith("/"))
                     url += "/";
-                url += "api/tokens/refresh";
+                url += "tokens/refresh";
 
                 // Refresh token
                 HttpClient cl = new HttpClient();
@@ -131,7 +131,7 @@ namespace Phoenix.Client.Authenticators.PhoenixAPI
                     url = LoginManager.API;
                     if (!url.EndsWith("/"))
                         url += "/";
-                    url += "api/identities/pullcurrent";
+                    url += "identities/pullcurrent";
 
                     // Download info
                     result = cl.GetAsync(url).GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
