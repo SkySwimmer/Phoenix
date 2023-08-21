@@ -13,7 +13,7 @@
 
     internal class JsonServerListEntryProtocol
     {
-        public int version;
+        public int programVersion;
         public int phoenixVersion;
     }
 }

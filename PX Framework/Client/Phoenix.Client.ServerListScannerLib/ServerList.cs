@@ -103,6 +103,7 @@ namespace Phoenix.Client.ServerList
             // Find servers
             string gameID = GameID == null ? Game.GameID : GameID;
             List<ServerInstance> servers = new List<ServerInstance>();
+            List<ServerInstance> instances = new List<ServerInstance>();
             bool ended = false;
             try
             {
@@ -162,19 +163,10 @@ namespace Phoenix.Client.ServerList
                                 // Verify
                                 if (data != null && data.id != null && data.ownerId != null && data.protocol != null && data.version != null
                                     && (!FilterIncompatiblePhoenixProtocolVersions || data.protocol.phoenixVersion == Connections.PhoenixProtocolVersion)
-                                    && (!FilterIncompatibleProgramProtocolVersions || data.protocol.version == ProgramProtocolVersion))
+                                    && (!FilterIncompatibleProgramProtocolVersions || data.protocol.programVersion == ProgramProtocolVersion))
                                 {
-                                    // Ping on another thread
-                                    Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
-                                    {
-                                        // Call event
-                                        ServerInstance inst = new ServerInstance(gameID, true, data.id, data.version, data.protocol.phoenixVersion, data.protocol.version, data.addresses, data.port, data.details);
-                                        if (inst.IsReachable && !ended)
-                                        {
-                                            servers.Add(inst);
-                                            OnDetectServer?.Invoke(inst);
-                                        }
-                                    });
+                                    ServerInstance inst = new ServerInstance(gameID, true, data.id, data.version, data.protocol.phoenixVersion, data.protocol.programVersion, data.addresses, data.port, data.details);
+                                    servers.Add(inst);
                                 }
                             }
                             else
@@ -190,9 +182,24 @@ namespace Phoenix.Client.ServerList
                     resp.GetResponseStream().Close();
                     resp.Close();
 
+                    // Add all
+                    foreach (ServerInstance inst in servers)
+                    {
+                        // Ping on another thread
+                        Phoenix.Common.AsyncTasks.AsyncTaskManager.RunAsync(() =>
+                        {
+                            // Call event
+                            if (inst.IsReachable && !ended)
+                            {
+                                servers.Add(inst);
+                                OnDetectServer?.Invoke(inst);
+                            }
+                        });
+                    }
+
                     // Wait
-                    if ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - time) < timeout)
-                        Thread.Sleep(timeout - (int)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - time));
+                    while ((DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - time) < timeout && instances.Count != servers.Count)
+                        Thread.Sleep(100);
                 }
             }
             catch
