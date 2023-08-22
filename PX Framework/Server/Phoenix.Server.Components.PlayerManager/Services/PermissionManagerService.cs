@@ -24,6 +24,23 @@ namespace Phoenix.Server.Players
             }
         }
 
+        private bool _grantOperatorToOwner = true;
+
+        /// <summary>
+        /// Defines whether or not the permission manager grants operator permissions to the server owner
+        /// </summary>
+        public bool ShouldGrantOperatorPermissionsToOwner
+        {
+            get
+            {
+                return _grantOperatorToOwner;
+            }
+            set
+            {
+                _grantOperatorToOwner = value;
+            }
+        }
+
         private GameServer _server;
         public PermissionManagerService(GameServer server)
         {
@@ -337,7 +354,7 @@ namespace Phoenix.Server.Players
             if (!Enabled)
                 return level == PermissionLevel.DEFAULT;
             Components.PlayerManagerComponent comp = _server.GetComponent<Components.PlayerManagerComponent>();
-            if (comp.OwnerPlayerID != null && data.PlayerID == comp.ID)
+            if (comp.OwnerPlayerID != null && ShouldGrantOperatorPermissionsToOwner && data.PlayerID == comp.ID)
                 return true;
             string[] pRaw = key.Split('.');
             string[] parts = new string[pRaw.Length];

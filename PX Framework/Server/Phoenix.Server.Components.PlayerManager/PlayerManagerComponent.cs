@@ -142,7 +142,7 @@ namespace Phoenix.Server.Components
                                 if (data.ContainsKey("owner"))
                                 {
                                     _ownerPlayerID = data["owner"].ToString();
-                                    if (ServiceManager.GetService<PermissionManagerService>().Enabled)
+                                    if (ServiceManager.GetService<PermissionManagerService>().Enabled && ServiceManager.GetService<PermissionManagerService>().ShouldGrantOperatorPermissionsToOwner)
                                         GetLogger().Info("Granted server operator permissions to " + _ownerPlayerID);
                                 }
                             }

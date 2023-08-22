@@ -36,10 +36,13 @@ namespace Phoenix.Server.Players
                 config.SetInteger("playerlimit", _gameMaxPlayers);
             if (!_overrideMaxPlayers)
                 _maxPlayers = config.GetInteger("playerlimit");
-            if (_maxPlayers <= 0 || (_enableGameMaxPlayers && _maxPlayers > _gameMaxPlayers))
+            if (EnablePlayerLimit)
             {
-                config.SetInteger("playerlimit", _gameMaxPlayers);
-                Logger.GetLogger("player-manager").Warn("Invalid player limit: " + _maxPlayers + ", resetted to " + _gameMaxPlayers);
+                if (_maxPlayers <= 0 || (_enableGameMaxPlayers && _maxPlayers > _gameMaxPlayers))
+                {
+                    config.SetInteger("playerlimit", _gameMaxPlayers);
+                    Logger.GetLogger("player-manager").Warn("Invalid player limit: " + _maxPlayers + ", resetted to " + _gameMaxPlayers);
+                }
             }
         }
 
