@@ -46,6 +46,11 @@
             Component message packet
             </summary>
         </member>
+        <member name="T:Phoenix.Common.SceneReplication.Packets.CreateObjectPacket">
+            <summary>
+            Create Object Packet - Called when a empty object is spawned
+            </summary>
+        </member>
         <member name="T:Phoenix.Common.SceneReplication.Packets.DestroyObjectPacket">
             <summary>
             Object Destroy Packet

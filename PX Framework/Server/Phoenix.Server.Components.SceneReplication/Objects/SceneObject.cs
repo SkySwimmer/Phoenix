@@ -126,6 +126,14 @@ namespace Phoenix.Server.SceneReplication
         };
 
         /// <summary>
+        /// Active handler for the FromJson method
+        /// </summary>
+        protected static NewObjectHandler CreateNewHandler = (string name, Transform transform, bool active, ReplicationDataMap data) =>
+        {
+            return CreatedSceneObject.CreateFrom(name, transform, active, data);
+        };
+
+        /// <summary>
         /// Creates a reflecting scene object
         /// </summary>
         /// <param name="original">Original object</param>
@@ -144,13 +152,36 @@ namespace Phoenix.Server.SceneReplication
         protected delegate SceneObject FromJsonHandler(string json);
 
         /// <summary>
+        /// Handler for loading scene objects from scratch
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
+        /// <returns>SceneObject instance</returns>
+        protected delegate SceneObject NewObjectHandler(string name, Transform transform, bool active, ReplicationDataMap data);
+
+        /// <summary>
         /// De-serializes Scene Objects
         /// </summary>
         /// <param name="json">Serialized scene object</param>
-        /// <returns>SceneObject instances</returns>
+        /// <returns>SceneObject instance</returns>
         public static SceneObject FromJson(string json)
         {
             return CreateFromJsonHandler(json);
+        }
+
+        /// <summary>
+        /// Creates scene objects
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
+        /// <returns>SceneObject instance</returns>
+        public static SceneObject CreateNew(string name, Transform transform, bool active, ReplicationDataMap data)
+        {
+            return CreateNewHandler(name, transform, active, data);
         }
 
         #region Fields
@@ -457,8 +488,11 @@ namespace Phoenix.Server.SceneReplication
         /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
         /// </summary>
         /// <param name="filePath">Prefab path (without .prpm)</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
         /// <returns>SceneObject instance</returns>
-        public SceneObject SpawnPrefab(string filePath)
+        public SceneObject SpawnPrefab(string filePath, Transform transform = null, bool? active = null, ReplicationDataMap data = null)
         {
             string assetPath = "SceneReplication/" + filePath + ".prpm";
             string prefabData;
@@ -471,8 +505,42 @@ namespace Phoenix.Server.SceneReplication
                 throw new ArgumentException("Prefab not found: " + filePath);
             }
             SceneObject obj = SceneObject.FromJson(prefabData);
+            if (transform != null)
+            {
+                obj.Transform.Position = transform.Position;
+                obj.Transform.Scale = transform.Scale;
+                obj.Transform.Rotation = transform.Rotation;
+            }
+            if (active != null)
+                obj.Active = active.Value;
+            if (data != null)
+            {
+                foreach (string key in data.Keys)
+                    obj.ReplicationData.data[key] = data.data[key];
+            }
             if (Scene != null)
                 Scene.HandleSpawnPrefab(filePath, obj, this);
+            obj.Parent = this;
+            return obj;
+        }
+
+        /// <summary>
+        /// Creates a empty game object
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
+        /// <returns>SceneObject instance</returns>
+        public SceneObject SpawnEmpty(string name, Transform transform = null, bool active = false, ReplicationDataMap data = null)
+        {
+            if (transform == null)
+                transform = new Transform();
+            if (data == null)
+                data = new ReplicationDataMap();
+            SceneObject obj = SceneObject.CreateNew(name, transform, active, data);
+            if (Scene != null)
+                Scene.HandleSpawnEmpty(obj, this);
             obj.Parent = this;
             return obj;
         }

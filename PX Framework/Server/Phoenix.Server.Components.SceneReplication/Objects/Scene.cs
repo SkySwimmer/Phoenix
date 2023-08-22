@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Phoenix.Server.SceneReplication.Coordinates;
+using Phoenix.Server.SceneReplication.Data;
 
 namespace Phoenix.Server.SceneReplication
 {
@@ -11,6 +13,14 @@ namespace Phoenix.Server.SceneReplication
     /// <param name="prefab">Prefab object</param>
     /// <param name="parent">Parent object</param>
     public delegate void SpawnPrefabHandler(string filePath, Scene scene, SceneObject prefab, SceneObject? parent);
+
+    /// <summary>
+    /// Event handler for spawning of empty objects
+    /// </summary>
+    /// <param name="scene">Scene the prefab was spawned in</param>
+    /// <param name="obj">Object that was spawned</param>
+    /// <param name="parent">Parent object</param>
+    public delegate void SpawnEmptyHandler(Scene scene, SceneObject obj, SceneObject? parent);
 
     /// <summary>
     /// Replicated scene object
@@ -75,8 +85,11 @@ namespace Phoenix.Server.SceneReplication
         /// Reads a PRISM prefab file and adds it to the scene (uses the asset manager)
         /// </summary>
         /// <param name="filePath">Prefab path (without .prpm)</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
         /// <returns>SceneObject instance</returns>
-        public SceneObject SpawnPrefab(string filePath)
+        public SceneObject SpawnPrefab(string filePath, Transform transform = null, bool? active = null, ReplicationDataMap data = null)
         {
             string assetPath = "SceneReplication/" + filePath + ".prpm";
             string prefabData;
@@ -89,8 +102,41 @@ namespace Phoenix.Server.SceneReplication
                 throw new ArgumentException("Prefab not found: " + filePath);
             }
             SceneObject obj = SceneObject.FromJson(prefabData);
+            if (transform != null)
+            {
+                obj.Transform.Position = transform.Position;
+                obj.Transform.Scale = transform.Scale;
+                obj.Transform.Rotation = transform.Rotation;
+            }
+            if (active != null)
+                obj.Active = active.Value;
+            if (data != null)
+            {
+                foreach (string key in data.Keys)
+                    obj.ReplicationData.data[key] = data.data[key];
+            }
             obj.Scene = this;
             HandleSpawnPrefab(filePath, obj, null);
+            return obj;
+        }
+
+        /// <summary>
+        /// Creates a empty game object
+        /// </summary>
+        /// <param name="name">Object name</param>
+        /// <param name="transform">Object transform</param>
+        /// <param name="active">Object active status</param>
+        /// <param name="data">Object data map</param>
+        /// <returns>SceneObject instance</returns>
+        public SceneObject SpawnEmpty(string name, Transform transform = null, bool active = false, ReplicationDataMap data = null)
+        {
+            if (transform == null)
+                transform = new Transform();
+            if (data == null)
+                data = new ReplicationDataMap();
+            SceneObject obj = SceneObject.CreateNew(name, transform, active, data);
+            obj.Scene = this;
+            HandleSpawnEmpty(obj, null);
             return obj;
         }
 
@@ -246,6 +292,11 @@ namespace Phoenix.Server.SceneReplication
         /// </summary>
         public event SpawnPrefabHandler? OnSpawnPrefab;
 
+        /// <summary>
+        /// Called when a empty object is spawned in the scene
+        /// </summary>
+        public event SpawnEmptyHandler? OnSpawnEmpty;
+
         public override string ToString()
         {
             return "Scene " + Name;
@@ -290,6 +341,11 @@ namespace Phoenix.Server.SceneReplication
         internal void HandleSpawnPrefab(string filePath, SceneObject prefab, SceneObject? parent)
         {
             OnSpawnPrefab?.Invoke(filePath, this, prefab, parent);
+        }
+
+        internal void HandleSpawnEmpty(SceneObject obj, SceneObject? parent)
+        {
+            OnSpawnEmpty?.Invoke(this, obj, parent);
         }
     }
 }

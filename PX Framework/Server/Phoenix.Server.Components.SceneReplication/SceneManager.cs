@@ -28,6 +28,7 @@ namespace Phoenix.Server.SceneReplication
             public DestroyHandler DestroyHandler;
             public ChangeSceneHandler ChangeSceneHandler;
             public SpawnPrefabHandler PrefabSpawnHandler;
+            public SpawnEmptyHandler EmptyObjectSpawnHandler;
         }
 
         private Dictionary<string, Scene> _sceneMemory = new Dictionary<string, Scene>();
@@ -37,6 +38,7 @@ namespace Phoenix.Server.SceneReplication
         // Replication memory
         internal Dictionary<Scene, List<string>> _destroyedObjects = new Dictionary<Scene, List<string>>();
         internal Dictionary<Scene, Dictionary<SceneObject, string>> _spawnedPrefabs = new Dictionary<Scene, Dictionary<SceneObject, string>>();
+        internal Dictionary<Scene, List<SceneObject>> _spawnedEmptyObjects = new Dictionary<Scene, List<SceneObject>>();
         internal Dictionary<Scene, List<SceneObject>> _reparentedObjects = new Dictionary<Scene, List<SceneObject>>();
         internal Dictionary<Scene, List<SceneObject>> _sceneSwitchedObjects = new Dictionary<Scene, List<SceneObject>>();
         internal Dictionary<Scene, List<SceneObject>> _editedSceneObjets = new Dictionary<Scene, List<SceneObject>>();
@@ -132,6 +134,7 @@ namespace Phoenix.Server.SceneReplication
                         scene.Scene.OnChangeScene -= scene.ChangeSceneHandler;
                         scene.Scene.OnDestroy -= scene.DestroyHandler;
                         scene.Scene.OnSpawnPrefab -= scene.PrefabSpawnHandler;
+                        scene.Scene.OnSpawnEmpty -= scene.EmptyObjectSpawnHandler;
                         lock (_sceneObjectMaps)
                             _sceneObjectMaps.Remove(scene.Scene);
                         lock (_destroyedObjects)
@@ -144,6 +147,8 @@ namespace Phoenix.Server.SceneReplication
                             _editedSceneObjets.Remove(scene.Scene);
                         lock (_spawnedPrefabs)
                             _spawnedPrefabs.Remove(scene.Scene);
+                        lock(_spawnedEmptyObjects)
+                            _spawnedEmptyObjects.Remove(scene.Scene);
                     }
                 }
 
@@ -299,6 +304,8 @@ namespace Phoenix.Server.SceneReplication
                             _editedSceneObjets[scene.Scene] = new List<SceneObject>();
                         lock (_spawnedPrefabs)
                             _spawnedPrefabs[scene.Scene] = new Dictionary<SceneObject, string>();
+                        lock(_spawnedEmptyObjects)
+                            _spawnedEmptyObjects[scene.Scene] = new List<SceneObject>();
                         scene.PrefabSpawnHandler = (path, sceneInst, prefab, parent) =>
                         {
                             // Add to prefab memory
@@ -321,7 +328,52 @@ namespace Phoenix.Server.SceneReplication
 
                                             ObjectID = prefab.ID,
                                             PrefabPath = path,
-                                            ParentObjectID = parent == null ? null : parent.ID
+                                            ParentObjectID = parent == null ? null : parent.ID,
+                                        
+                                            Active = prefab.Active,
+                                            Transform = prefab.Transform.ToPacketTransform(),
+                                            Data = prefab.ReplicationData.data 
+                                        });
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    if (e is IOException || e is SocketException)
+                                    {
+                                        if (!conn.IsConnected())
+                                            return;
+                                    }
+                                    Logger.GetLogger("scene-manager").Error("Failed to run sync for " + conn, e);
+                                }
+                            }
+                        };
+                        scene.EmptyObjectSpawnHandler = (sceneInst, obj, parent) =>
+                        {
+                            // Add to object memory
+                            lock (_spawnedEmptyObjects)
+                                if (!_spawnedEmptyObjects[scene.Scene].Contains(obj))
+                                    _spawnedEmptyObjects[scene.Scene].Add(obj);
+
+                            // Replicate
+                            foreach (Connection conn in _server.ServerConnection.GetClients())
+                            {
+                                try
+                                {
+                                    SceneReplicator? repl = conn.GetObject<SceneReplicator>();
+                                    if (repl != null && repl.IsSubscribedToScene(scenePath) && repl.IsSubscribedToRoom(room))
+                                    {
+                                        repl.SendReplicationPacket(new CreateObjectPacket()
+                                        {
+                                            Room = room,
+                                            ScenePath = scenePath,
+
+                                            ObjectID = obj.ID,
+                                            ObjectName = obj.Name,
+                                            ParentObjectID = parent == null ? null : parent.ID,
+                                        
+                                            Active = obj.Active,
+                                            Transform = obj.Transform.ToPacketTransform(),
+                                            Data = obj.ReplicationData.data 
                                         });
                                     }
                                 }
@@ -348,6 +400,9 @@ namespace Phoenix.Server.SceneReplication
                             lock (_spawnedPrefabs)
                                 if (_spawnedPrefabs[scene.Scene].ContainsKey(obj))
                                     _spawnedPrefabs[scene.Scene].Remove(obj);
+                            lock (_spawnedEmptyObjects)
+                                if (_spawnedEmptyObjects[scene.Scene].Contains(obj))
+                                    _spawnedEmptyObjects[scene.Scene].Remove(obj);
 
                             // Replicate
                             foreach (Connection conn in _server.ServerConnection.GetClients())
@@ -394,6 +449,13 @@ namespace Phoenix.Server.SceneReplication
                                         if (newScene != null && _spawnedPrefabs.ContainsKey(newScene))                                
                                             _spawnedPrefabs[newScene][obj] = _spawnedPrefabs[scene.Scene][obj];
                                         _spawnedPrefabs[scene.Scene].Remove(obj);
+                                    }
+                                lock (_spawnedEmptyObjects)
+                                    if (_spawnedEmptyObjects[scene.Scene].Contains(obj))
+                                    {
+                                        if (newScene != null && _spawnedEmptyObjects.ContainsKey(newScene))
+                                            _spawnedEmptyObjects[newScene].Add(obj);
+                                        _spawnedEmptyObjects[scene.Scene].Remove(obj);
                                     }
                             }
 
@@ -483,6 +545,13 @@ namespace Phoenix.Server.SceneReplication
                                             if (!_editedSceneObjets[scene.Scene].Contains(obj))
                                                 _editedSceneObjets[scene.Scene].Add(obj);
                                     }
+                                lock (_spawnedEmptyObjects)
+                                    if (_spawnedEmptyObjects[scene.Scene].Contains(obj))
+                                    {
+                                        lock (_editedSceneObjets)
+                                            if (!_editedSceneObjets[scene.Scene].Contains(obj))
+                                                _editedSceneObjets[scene.Scene].Add(obj);
+                                    }
                             }
 
                             // Replicate
@@ -566,6 +635,7 @@ namespace Phoenix.Server.SceneReplication
                         };
 
                         scene.Scene.OnSpawnPrefab += scene.PrefabSpawnHandler;
+                        scene.Scene.OnSpawnEmpty += scene.EmptyObjectSpawnHandler;
                         scene.Scene.OnReparent += scene.ReParentHandler;
                         scene.Scene.OnReplicate += scene.ReplicationHandler;
                         scene.Scene.OnChangeScene += scene.ChangeSceneHandler;

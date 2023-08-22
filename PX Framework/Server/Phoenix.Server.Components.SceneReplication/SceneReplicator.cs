@@ -496,12 +496,53 @@ namespace Phoenix.Server.SceneReplication
                     
                     PrefabPath = prefabs[prefab],
                     ObjectID = prefab.ID,
-                    ParentObjectID = prefab.Parent == null ? null : prefab.Parent.ID
+                    ParentObjectID = prefab.Parent == null ? null : prefab.Parent.ID,
+
+                    Active = prefab.Active,
+                    Transform = prefab.Transform.ToPacketTransform(),
+                    Data = prefab.ReplicationData.data
                 });
             }
             foreach (SceneObject prefab in prefabs.Keys)
             {
                 replicatePrefab(prefab);
+            }
+
+            // Send spawned empty objects
+            List<SceneObject> eObjs;
+            lock (_manager._spawnedEmptyObjects)
+                eObjs = _manager._spawnedEmptyObjects[sc];
+            List<string> replicatingObjs = new List<string>();
+            void replicateObj(SceneObject obj)
+            {
+                if (replicatingObjs.Contains(obj.ID))
+                    return;
+                replicatingObjs.Add(obj.ID);
+
+                // Replicate parent object first if its a prefab
+                if (obj.Parent != null)
+                    replicateObj(obj.Parent);
+                if (!eObjs.Contains(obj))
+                    return; // Not a object, prob a parent object
+
+                // Replicate object
+                channel.SendPacket(new CreateObjectPacket()
+                {
+                    ScenePath = sc.Path,
+                    Room = room,
+                    
+                    ObjectName = obj.Name,
+                    ObjectID = obj.ID,
+                    ParentObjectID = obj.Parent == null ? null : obj.Parent.ID,
+
+                    Active = obj.Active,
+                    Transform = obj.Transform.ToPacketTransform(),
+                    Data = obj.ReplicationData.data
+                });
+            }
+            foreach (SceneObject obj in eObjs)
+            {
+                replicateObj(obj);
             }
 
             // Replicate fields

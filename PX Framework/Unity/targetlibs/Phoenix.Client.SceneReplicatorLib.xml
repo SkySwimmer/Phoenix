@@ -100,6 +100,15 @@
             </summary>
             <param name="packet">Prefab information packet</param>
         </member>
+        <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.CreateObject(Phoenix.Common.SceneReplication.Packets.CreateObjectPacket)">
+            <summary>
+            Called to spawn empty objects
+            <br/>
+            <br/>
+            Typically called from the engine's engine update.
+            </summary>
+            <param name="packet">Prefab information packet</param>
+        </member>
         <member name="M:Phoenix.Client.SceneReplicatorLib.Binding.SceneReplicationBindings.LoadScene(System.String,System.Boolean)">
             <summary>
             Called to load a scene

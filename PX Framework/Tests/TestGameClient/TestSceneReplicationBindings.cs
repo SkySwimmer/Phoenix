@@ -23,6 +23,14 @@ namespace TestGameClient
             inst = this;
         }
 
+        public override void CreateObject(CreateObjectPacket packet)
+        {
+            DummySceneObject obj = new DummySceneObject(this);
+            obj.ID = packet.ObjectID;
+            obj.Path = packet.ParentObjectID == null ? packet.ObjectName : objects[packet.ParentObjectID].Path + "/" + Path.GetFileNameWithoutExtension(packet.ObjectName);
+            objects[obj.ID] = obj;
+        }
+
         public override string GetName()
         {
             return "TestGameClient";

@@ -303,6 +303,55 @@ namespace Phoenix.Unity.SceneReplication
             OnInitialSyncFinish?.Invoke(room, scenePath);
         }
 
+        public override void CreateObject(CreateObjectPacket packet)
+        {
+            try
+            {
+                Scene scene = SceneManager.GetSceneByPath("Assets/" + packet.ScenePath + ".unity");
+                try
+                {
+                    GameObject obj = new GameObject();
+                    obj.name = packet.ObjectName;
+                    obj.AddComponent<ReplicatedObject>();                    
+                    SceneManager.MoveGameObjectToScene(obj, scene);
+                    GameObject parent = null;
+                    if (packet.ParentObjectID != null)
+                        lock (_objects)
+                            if (_objects.ContainsKey(packet.ParentObjectID))
+                                parent = _objects[packet.ParentObjectID];
+                    if (parent != null)
+                        obj.transform.parent = parent.transform;
+
+                    // Apply fields
+                    obj.SetActive(packet.Active);
+                    if (obj.transform.localPosition != packet.Transform.Position.ToUnityVector3())
+                        obj.transform.localPosition = packet.Transform.Position.ToUnityVector3();
+                    if (obj.transform.localEulerAngles != packet.Transform.Rotation.ToUnityVector3())
+                        obj.transform.localEulerAngles = packet.Transform.Rotation.ToUnityVector3();
+                    if (obj.transform.localScale != packet.Transform.Scale.ToUnityVector3())
+                        obj.transform.localScale = packet.Transform.Scale.ToUnityVector3();
+                    obj.GetComponent<ReplicatedObject>().DeserializeFrom(packet.Data);
+
+                    // Save the object to memory
+                    lock (_objects)
+                        _objects[packet.ObjectID] = obj;
+
+                    // Make sure its removed on destroy
+                    PhoenixReplicationCleanup c = obj.GetComponents<PhoenixReplicationCleanup>().Where(t => t.Room == packet.Room).FirstOrDefault();
+                    if (c == null)
+                        c = obj.AddComponent<PhoenixReplicationCleanup>();
+                    c.Bindings = this;
+                    c.ID = packet.ObjectID;
+                }
+                catch
+                {
+                }
+            }
+            catch
+            {
+            }
+        }
+
         public override void SpawnPrefab(SpawnPrefabPacket packet)
         {
             try
@@ -320,6 +369,16 @@ namespace Phoenix.Unity.SceneReplication
                                 parent = _objects[packet.ParentObjectID];
                     if (parent != null)
                         prefab.transform.parent = parent.transform;
+
+                    // Apply fields
+                    prefab.SetActive(packet.Active);
+                    if (prefab.transform.localPosition != packet.Transform.Position.ToUnityVector3())
+                        prefab.transform.localPosition = packet.Transform.Position.ToUnityVector3();
+                    if (prefab.transform.localEulerAngles != packet.Transform.Rotation.ToUnityVector3())
+                        prefab.transform.localEulerAngles = packet.Transform.Rotation.ToUnityVector3();
+                    if (prefab.transform.localScale != packet.Transform.Scale.ToUnityVector3())
+                        prefab.transform.localScale = packet.Transform.Scale.ToUnityVector3();
+                    prefab.GetComponent<ReplicatedObject>().DeserializeFrom(packet.Data);
 
                     // Save the object to memory
                     lock (_objects)
