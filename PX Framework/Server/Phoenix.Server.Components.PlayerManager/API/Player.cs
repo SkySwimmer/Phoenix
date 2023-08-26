@@ -171,6 +171,17 @@ namespace Phoenix.Server.Players
         }
 
         /// <summary>
+        /// Checks if the player is connected
+        /// </summary>
+        public bool IsConnected
+        {
+            get
+            {
+                return _client.IsConnected();
+            }
+        }
+
+        /// <summary>
         /// Unbans the player
         /// </summary>
         public void Unban()
