@@ -583,7 +583,7 @@ namespace Phoenix.Server.Components
                 }
                 catch (Exception e)
                 {
-                    GetLogger().Debug("Server list update failure", e);
+                    GetLogger().Debug("Server list update failure!", e);
                 }
             }
         }
