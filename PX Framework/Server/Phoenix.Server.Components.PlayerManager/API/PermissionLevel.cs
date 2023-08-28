@@ -16,6 +16,11 @@
         TRUSTED,
 
         /// <summary>
+        /// Trial moderator permission level
+        /// </summary>
+        TRIAL_MODERATOR,
+
+        /// <summary>
         /// Moderator permission level
         /// </summary>
         MODERATOR,
