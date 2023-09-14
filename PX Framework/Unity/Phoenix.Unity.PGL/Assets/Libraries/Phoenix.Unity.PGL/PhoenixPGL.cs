@@ -336,6 +336,8 @@ namespace Phoenix.Unity.PGL
                 game["Mod-Support"] = "False";
             game["Session"] = "OFFLINE";
 
+            // Check support for configurations without a functional API server
+            bool canRunWithoutAPI = (game.ContainsKey("Fallback-To-Embedded-Descriptor") && game["Fallback-To-Embedded-Descriptor"].ToLower() == "true");
 #if !UNITY_EDITOR
             // Production client, we need to load the game document
 
@@ -466,7 +468,7 @@ namespace Phoenix.Unity.PGL
                         if (r.ReasonPhrase == "Bad DRM key")
                         {
                             // Invalid DRM
-                            _logger.Fatal("Failed to authenticate the game! Product key was invalid!");
+                            _logger.Fatal("Failed to activate product! Product key was invalid!");
                             Application.Quit(1);
                             return false;
                         }
@@ -488,7 +490,7 @@ namespace Phoenix.Unity.PGL
                 }
                 catch
                 {
-                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server and the product key!");
+                    _logger.Fatal("Failed to activate product! Please verify the connection with the server and the product key!");
                     Application.Quit(1);
                     return false;
                 }
@@ -578,10 +580,13 @@ namespace Phoenix.Unity.PGL
                 // Check existing game descriptor file
                 if (!File.Exists(localDocPath))
                 {
-                    // Error
-                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server!");
-                    OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
-                    return false;
+                    if (!canRunWithoutAPI)
+                    {
+                        // Error
+                        _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server!");
+                        OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
+                        return false;
+                    }
                 }
                 else
                 {
@@ -612,10 +617,13 @@ namespace Phoenix.Unity.PGL
                     }
                     catch
                     {
-                        // Error
-                        _logger.Fatal("Failed to authenticate the game and local data was not available! Please verify the connection with the server!");
-                        OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
-                        return false;
+                        if (!canRunWithoutAPI)
+                        {
+                            // Error
+                            _logger.Fatal("Failed to authenticate the game and local data was not available! Please verify the connection with the server!");
+                            OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
+                            return false;
+                        }
                     }
                 }
             }

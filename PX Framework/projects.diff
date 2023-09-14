@@ -81,7 +81,7 @@ Server:
 
 Unity:
 + Phoenix.Unity
-+++ Phoenix.Unity.PGL
++ Phoenix.Unity.PGL
 - Phoenix.Unity.ModManager
 +++ Phoenix.Unity.SceneReplication
 

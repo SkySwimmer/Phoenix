@@ -357,6 +357,9 @@ namespace Phoenix.Tests.Server
                 game["Mod-Support"] = "False";
             game["Session"] = "OFFLINE";
 
+            // Check support for configurations without a functional API server
+            bool canRunWithoutAPI = (game.ContainsKey("Fallback-To-Embedded-Descriptor") && game["Fallback-To-Embedded-Descriptor"].ToLower() == "true");
+
             // Production client, we need to load the game document
 
             // Check arguments
@@ -481,7 +484,7 @@ namespace Phoenix.Tests.Server
                         if (r.ReasonPhrase == "Bad DRM key")
                         {
                             // Invalid DRM
-                            _logger.Fatal("Failed to authenticate the game! Product key was invalid!");
+                            _logger.Fatal("Failed to activate product! Product key was invalid!");
                             return;
                         }
                     }
@@ -502,7 +505,7 @@ namespace Phoenix.Tests.Server
                 }
                 catch
                 {
-                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server and the product key!");
+                    _logger.Fatal("Failed to activate product! Please verify the connection with the server and the product key!");
                     return;
                 }
             }
@@ -585,9 +588,12 @@ namespace Phoenix.Tests.Server
                 // Check existing game descriptor file
                 if (!File.Exists(localDocPath))
                 {
-                    // Error
-                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server!");
-                    return;
+                    if (!canRunWithoutAPI)
+                    {
+                        // Error
+                        _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server!");
+                        return;
+                    }
                 }
                 else
                 {
@@ -618,9 +624,12 @@ namespace Phoenix.Tests.Server
                     }
                     catch
                     {
-                        // Error
-                        _logger.Fatal("Failed to authenticate the game and local data was not available! Please verify the connection with the server!");
-                        return;
+                        if (!canRunWithoutAPI)
+                        {
+                            // Error
+                            _logger.Fatal("Failed to authenticate the game and local data was not available! Please verify the connection with the server!");
+                            return;
+                        }
                     }
                 }
             }

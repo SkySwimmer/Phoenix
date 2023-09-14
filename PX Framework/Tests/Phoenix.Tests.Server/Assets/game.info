@@ -1,3 +1,4 @@
 Game-ID: test
 Game-Title: Test Project
 Offline-Support: True
+Fallback-To-Embedded-Descriptor: True
