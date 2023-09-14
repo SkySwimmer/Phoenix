@@ -79,5 +79,37 @@ Server:
 + Phoenix.Server.NetworkServerLib
 + Phoenix.Server.Bootstrapper
 
+Unity:
++ Phoenix.Unity
++++ Phoenix.Unity.PGL
+- Phoenix.Unity.ModManager
++++ Phoenix.Unity.SceneReplication
+
+Godot:
+- Phoenix.Godot
+- Phoenix.Godot.PGL
+- Phoenix.Godot.ModManager
+- Phoenix.Godot.SceneReplication
+
+Pegasus Runtime (Godot-only):
+- Pegasus.Runtime.PGS (Pegasus Game Packages)
+- Pegasus.Runtime.Preloader (Pegasus Preloader API)
+- Pegasus.Runtime.Preloader.PlayerPreloader (Pegasus Phoenix Player Preloader)
+- Pegasus.Runtime.Preloader.EmbeddedPreloader (Pegasus Embedded Player Preloader)
+- Pegasus.Runtime.GameLoader (Pegasus Game Loader)
+- Pegasus.Runtime.PhoenixLoader (Pegasus Phoenix Bindings)
+- Pegasus.Runtime.WyvernBindings (Pegasus Bindings for Wyvern GDK)
+
+Wyvern GDK (Godot-only):
+- Wyvern.GDK.ContentManager (Wyvern Advanced Asset Manager, namespace Phoenix.Wyvern.AdvanceContentManagerdAssetManager)
+- Wyvern.GDK.LoadingScreens (Wyvern Loading Screen Utilities, namespace Phoenix.Wyvern.LoadingScreens)
+- Wyvern.GDK.WindowManager (Wyvern Window Manager, namespace Phoenix.Wyvern.WindowManager)
+- Wyvern.GDK.Stats (Wyvern Stat Manager, namespace Phoenix.Wyvern.Stats)
+- Wyvern.GDK.Entities (Wyvern Entity System, namespace Phoenix.Wyvern.Entities)
+- Wyvern.GDK.SoundManager (Wyvern Sound Manager, namespace Phoenix.Wyvern.SoundManager)
+- Wyvern.GDK.UI.ProgressBars (Progress bar utility, base assets for creating progress bars)
+- Wyvern.GDK.Template (Base template for Wyvern-based Phoenix games)
+
+
 Tests:
 +++ Phoenix.Tests.Server

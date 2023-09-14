@@ -50,7 +50,7 @@ namespace Phoenix.Unity.PGL.Mods
         /// </summary>
         internal void LoadFinish()
         {
-            locked = true;
+            Lock();
             logger.Info("Post-initializing mods...");
             foreach (ModInfo mod in mods)
             {

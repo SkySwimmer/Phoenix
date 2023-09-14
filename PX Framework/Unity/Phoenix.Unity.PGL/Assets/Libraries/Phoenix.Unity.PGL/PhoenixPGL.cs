@@ -1,6 +1,8 @@
 using Phoenix.Common.Logging;
 using GameObject = UnityEngine.GameObject;
 using Application = UnityEngine.Application;
+using PlayerPrefs = UnityEngine.PlayerPrefs;
+using RuntimePlatform = UnityEngine.RuntimePlatform;
 using Debug = UnityEngine.Debug;
 using Phoenix.Server;
 using System.Collections;
@@ -24,6 +26,10 @@ using Phoenix.Unity.PGL.Internal.Packages;
 using Phoenix.Unity.PGL.Mods;
 using System.IO.Compression;
 using Phoenix.Client.Components;
+using System.Security.Cryptography;
+using System.Linq;
+using Phoenix.Common.IO;
+using System.Net;
 
 namespace Phoenix.Unity.PGL
 {
@@ -31,9 +37,10 @@ namespace Phoenix.Unity.PGL
     {
         CRITICAL_ERROR,
         INVALID_ARGUMENTS,
-        MISSING_LAUNCHER_ARGUMENTS,
-        LAUNCHER_DATA_PARSING_FAILURE,
-        LAUNCHER_CONNECTION_FAILURE,
+        MISSING_DRM,
+        INVALID_DRM,
+        INVALID_DRM_ACTIVATION_ARGUMENTS,
+        CORE_DOWNLOAD_FAILURE,
         MOD_LOAD_FAILURE,
         OFFLINE
     }
@@ -83,6 +90,42 @@ namespace Phoenix.Unity.PGL
         private static Logger _logger;
         private static List<Action> tickHandlers = new List<Action>();
 
+        private static byte[] pglSecKey;
+        private static byte[] pglSecIV;
+
+        /// <summary>
+        /// Checks if toplevel content security is enabled
+        /// </summary>
+        public static bool HasTopLevelDataSecurity
+        {
+            get
+            {
+                return pglSecKey != null;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the toplevel content security encryption key
+        /// </summary>
+        public static byte[] TopLevelDataKey
+        {
+            get
+            {
+                return pglSecKey;
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the toplevel content security encryption IV
+        /// </summary>
+        public static byte[] TopLevelDataIV
+        {
+            get
+            {
+                return pglSecIV;
+            }
+        }
+
         /// <summary>
         /// Command line arguments
         /// </summary>
@@ -126,9 +169,14 @@ namespace Phoenix.Unity.PGL
                     }
                     else
                     {
-                        if (argS == "play")
+                        if (argS == "activate")
                         {
-                            arguments["play"] = "true";
+                            arguments["activate"] = "true";
+                            continue;
+                        }
+                        if (argS == "deactivate")
+                        {
+                            arguments["deactivate"] = "true";
                             continue;
                         }
                         if (i + 1 < args.Length)
@@ -254,12 +302,34 @@ namespace Phoenix.Unity.PGL
                 Application.Quit(1);
                 return false;
             }
+            bool hasVersion = game.ContainsKey("Game-Version");
             if (!game.ContainsKey("Game-Version"))
+            {
+#if UNITY_EDITOR
                 game["Game-Version"] = "DEVELOPMENT";
+#endif
+#if !UNITY_EDITOR
+                game["Game-Version"] = "PROD-DEFAULT";
+#endif
+            }
             if (!game.ContainsKey("Game-Channel"))
+            {
+#if UNITY_EDITOR
                 game["Game-Channel"] = "DEVELOPMENT";
+#endif
+#if !UNITY_EDITOR
+                game["Game-Channel"] = "PROD-DEFAULT";
+#endif
+            }
             if (!game.ContainsKey("Asset-Identifier"))
+            {
+#if UNITY_EDITOR
                 game["Asset-Identifier"] = game["Game-ID"] + "/devbuild";
+#endif
+#if !UNITY_EDITOR
+                game["Asset-Identifier"] = game["Game-ID"] + "/proddefault";
+#endif
+            }
             if (!game.ContainsKey("Offline-Support"))
                 game["Offline-Support"] = "False";
             if (!game.ContainsKey("Mod-Support"))
@@ -271,86 +341,391 @@ namespace Phoenix.Unity.PGL
 
             // Check arguments
             _logger.Trace("Verifying arguments...");
-            if (!arguments.ContainsKey("play") || !arguments.ContainsKey("gamedoc"))
+            if (arguments.ContainsKey("activate") && !arguments.ContainsKey("productkey"))
             {
-                _logger.Fatal("Unable to start with missing arguments, please use the launcher.");
-                OnSetupFailure?.Invoke(InitFailureType.MISSING_LAUNCHER_ARGUMENTS);
+                _logger.Fatal("Missing 'productkey' argument, unable to activate product.");
+                OnSetupFailure?.Invoke(InitFailureType.INVALID_DRM_ACTIVATION_ARGUMENTS);
                 return false;
             }
 
-            // Contact launcher
-            _logger.Info("Contacting launcher...");
+            // Prepare folders
+            _logger.Trace("Preparing folders...");
+            string phoenixRoot = Application.persistentDataPath;
+            Directory.CreateDirectory(phoenixRoot);
+            Directory.CreateDirectory(phoenixRoot + "/corefiles");
 
-            try
+            // Prepare symmetric encryption layer via playerprefs
+            _logger.Trace("Processing data...");
+            bool regenerateCoreRsa = false;
+            RSACryptoServiceProvider provRsa = null;
+            if (!PlayerPrefs.HasKey("phoenix-core-sec-key"))
+                regenerateCoreRsa = true;
+            else
             {
-                // Download
-                TcpClient cl = new TcpClient("127.0.0.1", int.Parse(arguments["gamedoc"]));
-
-                string str = cl.Client.RemoteEndPoint.ToString();
-                _logger.Trace("Connected to " + str);
-                _logger.Trace("Downloading game descriptor...");
-                MemoryStream strm = new MemoryStream();
-                while (true)
-                {
-                    try
-                    {
-                        int i = cl.GetStream().ReadByte();
-                        if (i == -1)
-                            break;
-                        strm.WriteByte((byte)i);
-                    }
-                    catch
-                    {
-                        break;
-                    }
-                }
                 try
                 {
-                    cl.Close();
+                    // Load
+                    RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+                    rsa.ImportCspBlob(Convert.FromBase64String(PlayerPrefs.GetString("phoenix-core-sec-key")));
+                    provRsa = rsa;
                 }
                 catch
                 {
+                    regenerateCoreRsa = true;
                 }
-                _logger.Trace("Disconnected from " + str);
-                byte[] data = strm.ToArray();
+            }
+            if (regenerateCoreRsa)
+            {
+                RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(2048);
+                byte[] keyD = rsa.ExportCspBlob(true);
+                PlayerPrefs.SetString("phoenix-core-sec-key", Convert.ToBase64String(keyD));
+                provRsa = rsa;
+            }
 
+            // Prepare key
+            bool regenerateKey = false;
+            string keyFile = phoenixRoot + "/corefiles/" + Sha512Hash("sec-" + game["Game-ID"] + ".pdk") + ".pa";
+            if (!File.Exists(keyFile))
+                regenerateKey = true;
+            else
+            {
+                // Load
                 try
                 {
-                    _logger.Trace("Processing game descriptor...");
+                    // Open file
+                    MemoryStream fI = new MemoryStream(provRsa.Decrypt(File.ReadAllBytes(keyFile), RSAEncryptionPadding.Pkcs1));
 
-                    // Decode
-                    string gameData = Encoding.UTF8.GetString(data);
-                    foreach (string line in gameData.Split('\n'))
+                    // Read data
+                    DataReader rd = new DataReader(fI);
+                    pglSecKey = rd.ReadBytes();
+                    pglSecIV = rd.ReadBytes();
+
+                    // Close
+                    fI.Close();
+                }
+                catch
+                {
+                    regenerateKey = true;
+                }
+            }
+
+            // Regenerate if needed
+            if (regenerateKey)
+            {
+                // Generate
+                using (Aes aes = Aes.Create())
+                {
+                    pglSecKey = aes.Key;
+                    pglSecIV = aes.IV;
+                }
+
+                // Open output
+                MemoryStream fO = new MemoryStream();
+
+                // Write data
+                DataWriter wr = new DataWriter(fO);
+                wr.WriteBytes(pglSecKey);
+                wr.WriteBytes(pglSecIV);
+
+                // Save
+                File.WriteAllBytes(keyFile, provRsa.Encrypt(fO.ToArray(), RSAEncryptionPadding.Pkcs1));
+
+                // Close
+                fO.Close();
+            }
+
+            // Activate if needed
+            string drmDataPath = phoenixRoot + "/corefiles/" + Sha512Hash("drm-" + game["Game-ID"] + ".pdi") + ".pa";
+            if (arguments.ContainsKey("activate"))
+            {
+                // Activate
+                string product = arguments["productkey"];
+                _logger.Info("Activating product...");
+                try
+                {
+                    // Contact Phoenix
+                    HttpClient cl = new HttpClient();
+                    cl.DefaultRequestHeaders.Add("With-Phoenix-DRM", "true");
+                    cl.DefaultRequestHeaders.Add("With-Phoenix-Product-Key", Sha512Hash(product.ToUpper().Replace("-", "")));
+
+                    // Build URL
+                    string url;
+                    if (API == null)
+                        url = PhoenixEnvironment.DefaultAPIServer;
+                    else
+                        url = API;
+                    if (!url.EndsWith("/"))
+                        url += "/";
+
+                    // Send request
+                    var r = cl.GetAsync(url + "data/files/" + game["Game-ID"] + "/" + game["Game-ID"] + (hasVersion ? "-" + game["Game-Version"] : "") + ".game").GetAwaiter().GetResult();
+
+                    // Handle errors
+                    if (r.StatusCode == HttpStatusCode.Forbidden)
                     {
-                        if (line == "")
-                            continue;
-                        string key = line.Remove(line.IndexOf(": "));
-                        string value = line.Substring(line.IndexOf(": ") + 2);
-                        if (key != "Game-ID" && key != "Mod-Support")
-                            game[key] = value;
-                        else if (key == "Game-ID")
+                        if (r.ReasonPhrase == "Bad DRM key")
                         {
-                            if (value != game["Game-ID"])
-                            {
-                                _logger.Fatal("Failed to communicate with the launcher: launcher sent data related to a different game.");
-                                OnSetupFailure?.Invoke(InitFailureType.LAUNCHER_DATA_PARSING_FAILURE);
-                                return false;
-                            }
+                            // Invalid DRM
+                            _logger.Fatal("Failed to authenticate the game! Product key was invalid!");
+                            Application.Quit(1);
+                            return false;
                         }
                     }
+                    string res = r.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    if (res == null || res == "")
+                        throw new Exception();
+
+                    // Save
+                    _logger.Info("Saving DRM information...");
+
+                    // Write encrypted
+                    Stream fO = File.OpenWrite(drmDataPath);
+                    EncryptTransfer(new MemoryStream(Encoding.UTF8.GetBytes(Sha512Hash(product.ToUpper().Replace("-", "")))), fO);
+                    fO.Close();
+
+                    // DRM verified
+                    _logger.Info("Product activated successfully!");
                 }
                 catch
                 {
-                    _logger.Fatal("Failed to communicate with the launcher: launcher sent invalid data.");
-                    OnSetupFailure?.Invoke(InitFailureType.LAUNCHER_DATA_PARSING_FAILURE);
+                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server and the product key!");
+                    Application.Quit(1);
                     return false;
                 }
             }
+            else if (arguments.ContainsKey("deactivate"))
+            {
+                if (File.Exists(drmDataPath))
+                {
+                    _logger.Info("Deactivating product...");
+                    File.Delete(drmDataPath);
+                    _logger.Info("DRM data wiped!");
+                }
+            }
+
+            // Perform game authentication
+            _logger.Info("Authenticating game...");
+            string localDocPath = phoenixRoot + "/corefiles/" + Sha512Hash("gd-" + game["Game-ID"] + "-" + game["Game-Version"] + "-" + game["Game-Channel"] + ".pgd") + ".pa";
+            try
+            {
+                // Contact Phoenix
+                HttpClient cl = new HttpClient();
+                cl.DefaultRequestHeaders.Add("With-Phoenix-DRM", File.Exists(drmDataPath) ? "true" : "false");
+
+                // Add DRM headers
+                if (File.Exists(drmDataPath))
+                {
+                    // Load key
+                    Stream kIn = File.OpenRead(drmDataPath);
+                    MemoryStream kO = new MemoryStream();
+                    DecryptTransfer(kIn, kO);
+                    kIn.Close();
+                    string keyStr = Encoding.UTF8.GetString(kO.ToArray());
+                    cl.DefaultRequestHeaders.Add("With-Phoenix-Product-Key", keyStr);
+                }
+
+                // Build url
+                string url;
+                if (API == null)
+                    url = PhoenixEnvironment.DefaultAPIServer;
+                else
+                    url = API;
+                if (!url.EndsWith("/"))
+                    url += "/";
+
+                // Send request
+                var r = cl.GetAsync(url + "data/files/" + game["Game-ID"] + "/" + game["Game-ID"] + (hasVersion ? "-" + game["Game-Version"] : "") + ".game").GetAwaiter().GetResult();
+
+                // Handle errors
+                if (r.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    if (r.ReasonPhrase == "Bad DRM key")
+                    {
+                        // Invalid DRM
+                        _logger.Fatal("Failed to authenticate the game! DRM invalid!");
+                        OnSetupFailure?.Invoke(InitFailureType.INVALID_DRM);
+                        return false;
+                    }
+                    else if (r.ReasonPhrase == "Missing DRM")
+                    {
+                        // Invalid DRM
+                        _logger.Fatal("Failed to authenticate the game! Missing DRM!");
+                        OnSetupFailure?.Invoke(InitFailureType.MISSING_DRM);
+                        return false;
+                    }
+                }
+                string res = r.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                if (res == null || res == "")
+                    throw new Exception();
+
+                // Handle response
+                string successMsg = "Game authenticated:";
+                foreach (string line in res.Split('\n'))
+                {
+                    if (line == "")
+                        continue;
+                    string key = line.Remove(line.IndexOf(": "));
+                    string value = line.Substring(line.IndexOf(": ") + 2);
+                    game[key] = value;
+                    successMsg += "\n  " + key + ": " + value;
+                }
+                _logger.Info(successMsg);
+            }
             catch
             {
-                _logger.Fatal("Failed to communicate with the launcher.");
-                OnSetupFailure?.Invoke(InitFailureType.LAUNCHER_CONNECTION_FAILURE);
-                return false;
+                // Authentication failure
+
+                // Check existing game descriptor file
+                if (!File.Exists(localDocPath))
+                {
+                    // Error
+                    _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server!");
+                    OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
+                    return false;
+                }
+                else
+                {
+                    try
+                    {
+                        // Load offline document
+                        _logger.Info("Failed to contact game servers, loading locally-stored data...");
+                        MemoryStream lPgdO = new MemoryStream();
+                        Stream lPgdI = File.OpenRead(localDocPath);
+                        DecryptTransfer(lPgdI, lPgdO);
+                        lPgdI.Close();
+
+                        // Load data from document
+                        string successMsg = "Game data loaded:";
+                        lPgdO = new MemoryStream(lPgdO.ToArray());
+                        DataReader rd = new DataReader(lPgdO);
+                        int l = rd.ReadInt();
+                        for (int i = 0; i < l; i++)
+                        {
+                            string key = rd.ReadString();
+                            string val = rd.ReadString();
+
+                            // Add
+                            game[key] = val;
+                            successMsg += "\n  " + key + ": " + val;
+                        }
+                        _logger.Info(successMsg);
+                    }
+                    catch
+                    {
+                        // Error
+                        _logger.Fatal("Failed to authenticate the game and local data was not available! Please verify the connection with the server!");
+                        OnSetupFailure?.Invoke(InitFailureType.CORE_DOWNLOAD_FAILURE);
+                        return false;
+                    }
+                }
+            }
+
+            // Build offline doc
+            Dictionary<string, string> gameInfoCurrent = new Dictionary<string, string>();
+            foreach (string key in game.Keys)
+                if (key != "Session" && key != "Product-Key")
+                    gameInfoCurrent[key] = game[key];
+            gameInfoCurrent["Session"] = "OFFLINE";
+
+            // Save doc
+            _logger.Info("Saving game information for offline play...");
+            MemoryStream fPgdI = new MemoryStream();
+            DataWriter pgdO = new DataWriter(fPgdI);
+            pgdO.WriteInt(gameInfoCurrent.Count);
+            foreach (string key in gameInfoCurrent.Keys)
+            {
+                pgdO.WriteString(key);
+                pgdO.WriteString(gameInfoCurrent[key]);
+            }
+
+            // Write encrypted
+            Stream fPgdO = File.OpenWrite(localDocPath);
+            EncryptTransfer(new MemoryStream(fPgdI.ToArray()), fPgdO);
+            fPgdO.Close();
+
+            // Parse root
+            string gameRoot = Application.dataPath;
+            if (Application.platform != RuntimePlatform.Android) 
+                gameRoot = Path.GetDirectoryName(gameRoot);
+
+            // Set up environment
+            _logger.Info("Setting up Phoenix environment...");
+            game["Assets-Path"] = phoenixRoot + "/assets/" + game["Game-Channel"] + "/" + game["Game-Version"] + "/" + game["Asset-Identifier"];
+            game["Game-Storage-Path"] = gameRoot;
+            game["Player-Data-Path"] = phoenixRoot + "/playerdata/" + game["Game-ID"];
+            game["Save-Data-Path"] = phoenixRoot + "/savedata/" + game["Game-ID"];
+            if (!game.ContainsKey("Refresh-Endpoint")) {
+                string urlA;
+                if (API == null)
+                    urlA = PhoenixEnvironment.DefaultAPIServer;
+                else
+                    urlA = API;
+                if (!urlA.EndsWith("/"))
+                    urlA += "/";
+                game["Refresh-Endpoint"] = urlA + "tokens/refresh";
+            }
+
+            // If DRM was present, use the product hash for other core assets
+            if (File.Exists(drmDataPath))
+            {
+                // Load key
+                Stream kIn = File.OpenRead(drmDataPath);
+                MemoryStream kO = new MemoryStream();
+                DecryptTransfer(kIn, kO);
+                kIn.Close();
+                string keyStr = Encoding.UTF8.GetString(kO.ToArray());
+                
+                // Load new key
+                regenerateKey = false;
+                string assetEncryptionKeyFile = phoenixRoot + "/corefiles/" + Sha512Hash("sec-assets-" + game["Game-ID"] + ".pdk") + ".pa";
+                if (!File.Exists(assetEncryptionKeyFile))
+                    regenerateKey = true;
+                else
+                {
+                    // Load
+                    try
+                    {
+                        // Open file
+                        MemoryStream fI = new MemoryStream(provRsa.Decrypt(File.ReadAllBytes(assetEncryptionKeyFile), RSAEncryptionPadding.Pkcs1));
+
+                        // Read data
+                        DataReader rd = new DataReader(fI);
+                        pglSecKey = rd.ReadBytes();
+                        pglSecIV = rd.ReadBytes();
+
+                        // Close
+                        fI.Close();
+                    }
+                    catch
+                    {
+                        regenerateKey = true;
+                    }
+                }
+
+                // Regenerate if needed
+                if (regenerateKey)
+                {
+                    // Generate
+                    using (Aes aes = Aes.Create())
+                    {
+                        pglSecKey = aes.Key;
+                        pglSecIV = aes.IV;
+                    }
+
+                    // Open output
+                    MemoryStream fO = new MemoryStream();
+
+                    // Write data
+                    DataWriter wr = new DataWriter(fO);
+                    wr.WriteBytes(pglSecKey);
+                    wr.WriteBytes(pglSecIV);
+
+                    // Save
+                    File.WriteAllBytes(assetEncryptionKeyFile, provRsa.Encrypt(fO.ToArray(), RSAEncryptionPadding.Pkcs1));
+
+                    // Close
+                    fO.Close();
+                }
             }
 #endif
 #if UNITY_EDITOR
@@ -365,7 +740,6 @@ namespace Phoenix.Unity.PGL
                 _logger.Warn("Please create the file 'Assets/Editor/phoenixdebug.txt' to configure the debug environment.");
                 _logger.Warn("Example configuration content:\n" +
                             "  Product-Key: 12345-ABCDE-67890-FGHIJ\n" +
-                            "  Digital-Seal: W2dhbWVpZDp0ZXN0LHtz....\n" +
                             "  Debug-Folder: Run\n" +
                             "  Log-Level: TRACE");
                 game["Offline-Support"] = "True";
@@ -428,25 +802,19 @@ namespace Phoenix.Unity.PGL
                 }
 
                 // Product information
-                if (debugConfig.ContainsKey("Product-Key") && debugConfig.ContainsKey("Digital-Seal"))
+                if (debugConfig.ContainsKey("Product-Key"))
                 {
                     _logger.Info("Authenticating game...");
                     game["Product-Key"] = debugConfig["Product-Key"];
-                    game["Digital-Seal"] = debugConfig["Digital-Seal"];
+                    
                     try
                     {
-                        // Decode seal
-                        JObject[] seal = JsonConvert.DeserializeObject<JObject[]>(Encoding.UTF8.GetString(Base64Url.Decode(game["Digital-Seal"])));
-                        JObject payload = seal[0];
-                        string productHash = payload.GetValue("producthash").ToObject<string>();
-                        long timestamp = payload.GetValue("timestamp").ToObject<long>();
-
                         // Contact Phoenix
                         HttpClient cl = new HttpClient();
-                        cl.DefaultRequestHeaders.Add("Authorization", "Bearer " + Game.SessionToken);
-                        cl.DefaultRequestHeaders.Add("Product-Key", game["Product-Key"]);
-                        cl.DefaultRequestHeaders.Add("Digital-Seal", game["Digital-Seal"]);
+                        cl.DefaultRequestHeaders.Add("With-Phoenix-DRM", "true");
+                        cl.DefaultRequestHeaders.Add("With-Phoenix-Product-Key", Sha512Hash(game["Product-Key"].ToUpper().Replace("-", "")));
 
+                        // Build url
                         string url;
                         if (API == null)
                             url = PhoenixEnvironment.DefaultAPIServer;
@@ -454,7 +822,7 @@ namespace Phoenix.Unity.PGL
                             url = API;
                         if (!url.EndsWith("/"))
                             url += "/";
-                        string res = cl.GetAsync(url + "data/files/" + game["Game-ID"] + "/" + productHash + "/" + timestamp + "/" + game["Game-ID"] + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        string res = cl.GetAsync(url + "data/files/" + game["Game-ID"] + "/" + game["Game-ID"] + (hasVersion ? "-" + game["Game-Version"] : "") + ".game").GetAwaiter().GetResult().Content.ReadAsStringAsync().GetAwaiter().GetResult();
                         if (res == null || res == "")
                             throw new Exception();
                         Dictionary<string, string> data = new Dictionary<string, string>();
@@ -473,18 +841,23 @@ namespace Phoenix.Unity.PGL
                     }
                     catch
                     {
-                        _logger.Fatal("Failed to authenticate the game!");
+                        _logger.Fatal("Failed to authenticate the game! Please verify the connection with the server and the product key!");
                         Application.Quit(1);
                         return false;
                     }
                 }
             }
 
+            // Parse root
+            string gameRoot = Application.dataPath;
+            if (Application.platform != RuntimePlatform.Android) 
+                gameRoot = Path.GetDirectoryName(gameRoot);
+
             // Set fields
             Directory.CreateDirectory(runPath);
             _logger.Info("Setting up debug environment fields...");
             game["Assets-Path"] = runPath + "/assets/" + game["Game-Channel"] + "/" + game["Game-Version"] + "/" + game["Asset-Identifier"];
-            game["Game-Storage-Path"] = runPath + "/gamefiles";
+            game["Game-Storage-Path"] = gameRoot;
             game["Player-Data-Path"] = runPath + "/playerdata";
             game["Save-Data-Path"] = runPath + "/savedata";
 
@@ -501,7 +874,7 @@ namespace Phoenix.Unity.PGL
             // Log final game descriptor
             string msg = "Final game descriptor:";
             foreach (string key in game.Keys)
-                if (key != "Session" && key != "Product-Key" && key != "Digital-Seal")
+                if (key != "Session" && key != "Product-Key")
                     msg += "\n  " + key + " = " + game[key];
             _logger.Trace(msg);
 
@@ -547,7 +920,7 @@ namespace Phoenix.Unity.PGL
                 // Prepare
                 _logger.Info("Loading mods...");
                 ModManager manager = new ModManager();
-                
+
                 // Check if the platform can run mods
                 bool platformSupportsMods = false;
                 switch (Application.platform)
@@ -686,6 +1059,9 @@ namespace Phoenix.Unity.PGL
                 }
             }
 
+            // Lock asset manager
+            AssetManager.Lock();
+
             // Log completion
             if (Game.IsOffline)
             {
@@ -721,7 +1097,8 @@ namespace Phoenix.Unity.PGL
             if (!Game.IsOffline)
             {
                 // Start refresher
-                Thread th = new Thread(() => {
+                Thread th = new Thread(() =>
+                {
                     int connectCheck = 30;
                     while (!Game.IsOffline)
                     {
@@ -731,7 +1108,7 @@ namespace Phoenix.Unity.PGL
                             connectCheck = 30;
 
                             // Test connection with phoenix
-                            try 
+                            try
                             {
                                 HttpClient cl = new HttpClient();
 
@@ -794,7 +1171,6 @@ namespace Phoenix.Unity.PGL
                                 {
                                     OnConnectionLoss?.Invoke();
                                 });
-                                impl.RefreshFailure();
                                 break;
                             }
                         }
@@ -842,6 +1218,46 @@ namespace Phoenix.Unity.PGL
                     _logger.Error("Exception thrown during client tick", e);
                 }
             }
+        }
+
+        private static void EncryptTransfer(Stream source, Stream output)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                // Load key
+                aes.Key = pglSecKey;
+                aes.IV = pglSecIV;
+
+                // Create stream
+                CryptoStream strm = new CryptoStream(output, aes.CreateEncryptor(), CryptoStreamMode.Write);
+                source.CopyTo(strm);
+                strm.Close();
+            }
+        }
+
+        private static void DecryptTransfer(Stream source, Stream output)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                // Load key
+                aes.Key = pglSecKey;
+                aes.IV = pglSecIV;
+
+                // Create stream
+                CryptoStream strm = new CryptoStream(source, aes.CreateDecryptor(), CryptoStreamMode.Read);
+                strm.CopyTo(output);
+                strm.Close();
+            }
+        }
+
+        private static string Sha512Hash(string input)
+        {
+            return string.Concat(SHA512.Create().ComputeHash(Encoding.UTF8.GetBytes(input)).Select(x => x.ToString("x2")));
+        }
+
+        private static string Sha256Hash(string input)
+        {
+            return string.Concat(SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(input)).Select(x => x.ToString("x2")));
         }
 
         private static class Base64Url

@@ -8,13 +8,6 @@ using Phoenix.Common.Logging.Impl;
 
 namespace Phoenix.Unity.Bindings
 {
-    public class NewSplitLogger : SplitLoggerImpl
-    {
-        public static void SetImpl(ILoggerImplementationProvider provider)
-        {
-            ImplProvider1 = provider;
-        }
-    }
 
     public class PhoenixUnityLogBridge : Logger, ILoggerImplementationProvider
     {
@@ -29,7 +22,7 @@ namespace Phoenix.Unity.Bindings
 
         public static void Register()
         {
-            NewSplitLogger.SetImpl(new PhoenixUnityLogBridge(null));
+            Logger.provider = new PhoenixUnityLogBridge(null);
         }
 
         public Logger CreateInstance(string name)
