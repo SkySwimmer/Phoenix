@@ -214,7 +214,10 @@ namespace Phoenix.Server
                 IAssetProvider provider = providers[i];
                 Stream? strm = provider.GetAssetStream(asset);
                 if (strm != null)
+                {
+                    strm.Close();
                     return true;
+                }
             }
             return false;
         }
