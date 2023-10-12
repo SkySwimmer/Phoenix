@@ -804,6 +804,7 @@ namespace Phoenix.Common.Networking.Impl
                                     Writer.WriteInt(-1);
                                     Writer.WriteInt(1);
                                     Writer.WriteBytes(packet);
+                                    Writer.GetStream().Flush();
                                 }
                                 finally
                                 {
@@ -871,6 +872,7 @@ namespace Phoenix.Common.Networking.Impl
                         Writer.WriteInt(-1);
                         Writer.WriteInt(0);
                         Writer.WriteBytes(packet);
+                        Writer.GetStream().Flush();
                     }
                     finally
                     {
