@@ -25,6 +25,7 @@ namespace Phoenix.Server.Players
         private int _maxPlayers = 0;
         private bool _enableGameMaxPlayers = false;
         private int _gameMaxPlayers = 50;
+        private bool configLoaded;
 
         internal void Configure(AbstractConfigurationSegment config)
         {
@@ -44,6 +45,7 @@ namespace Phoenix.Server.Players
                     Logger.GetLogger("player-manager").Warn("Invalid player limit: " + _maxPlayers + ", resetted to " + _gameMaxPlayers);
                 }
             }
+            configLoaded = true;
         }
 
         /// <summary>
@@ -155,6 +157,22 @@ namespace Phoenix.Server.Players
         }
 
         /// <summary>
+        /// Defines whether or not the player limit is enabled
+        /// </summary>
+        public bool DefaultEnablePlayerLimit
+        {
+            get
+            {
+                return _enablePlayerLimit;
+            }
+            set
+            {
+                if (!configLoaded)
+                    _enablePlayerLimit = value;
+            }
+        }
+
+        /// <summary>
         /// Defines the server player limit
         /// </summary>
         public int PlayerLimit
@@ -169,6 +187,23 @@ namespace Phoenix.Server.Players
                 _overrideMaxPlayers = true;
             }
         }
+
+        /// <summary>
+        /// Defines the default server player limit
+        /// </summary>
+        public int DefaultPlayerLimit
+        {
+            get
+            {
+                return _maxPlayers;
+            }
+            set
+            {
+                if (!configLoaded)
+                    _maxPlayers = value;
+            }
+        }
+       
 
         /// <summary>
         /// Retrieves an array of all connected players
