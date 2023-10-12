@@ -247,6 +247,17 @@ namespace Phoenix.Server.Components
                         {
                             try
                             {
+                                if (!(v is T) && typeof(System.Collections.ICollection).IsAssignableFrom(typeof(T)) && typeof(System.Collections.ICollection).IsAssignableFrom(v.GetType()))
+                                {
+                                    // Convert
+                                    System.Collections.IList i = (System.Collections.IList)typeof(T).GetConstructor(new Type[0]).Invoke(new object[0]);
+                                    System.Collections.IList obA = (System.Collections.IList)v;
+                                    foreach (object o in obA)
+                                    {
+                                        i.Add(o);
+                                    }
+                                    v = i;
+                                }
                                 return (T)v;
                             }
                             catch
