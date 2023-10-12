@@ -238,7 +238,7 @@ namespace Phoenix.Server.Components
 
                                 // Write request
                                 byte[] d = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
-                                strm.Write(Encoding.UTF8.GetBytes("POST " + WebUtility.UrlEncode(u.PathAndQuery) + " HTTP/1.1\r\n"));
+                                strm.Write(Encoding.UTF8.GetBytes("POST " + u.PathAndQuery + " HTTP/1.1\r\n"));
                                 strm.Write(Encoding.UTF8.GetBytes("X-Request-ID: " + Guid.NewGuid().ToString() + "\r\n"));
                                 strm.Write(Encoding.UTF8.GetBytes("X-Request-RNDID: " + Guid.NewGuid().ToString() + "\r\n"));
                                 strm.Write(Encoding.UTF8.GetBytes("Upgrade: PHOENIXSERVERLISTCLIENT\r\n"));
