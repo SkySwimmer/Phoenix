@@ -18,6 +18,14 @@ namespace Phoenix.Common.IO
         }
 
         /// <summary>
+        /// Retrieves the target output byte stream
+        /// </summary>
+        /// <returns>Stream instance</returns>
+        public Stream GetStream() {
+            return Output;
+        }
+
+        /// <summary>
         /// Writes a single byte
         /// </summary>
         /// <param name="value">Byte to write</param>

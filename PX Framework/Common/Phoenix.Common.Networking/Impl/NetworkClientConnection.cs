@@ -941,6 +941,7 @@ namespace Phoenix.Common.Networking.Impl
                             Writer.WriteInt(cId);
                             Writer.WriteInt(id);
                             Writer.WriteBytes(packetData);
+                            Writer.GetStream().Flush();
                         }
                         catch
                         {
@@ -974,6 +975,7 @@ namespace Phoenix.Common.Networking.Impl
                             Writer.WriteInt(cId);
                             Writer.WriteInt(id);
                             packet.Write(Writer);
+                            Writer.GetStream().Flush();
                         }
                         catch
                         {
